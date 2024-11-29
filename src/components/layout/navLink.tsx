@@ -1,17 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { type LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { buttonVariants } from "../ui/button";
+import { IconType } from "react-icons/lib";
+import { LucideIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { cn } from "~/lib/utils";
 
 interface NavProps {
   title: string;
   href?: string;
   disabled?: boolean;
   label?: string;
-  icon?: LucideIcon;
-  close?: () => void;
+  icon?: IconType | LucideIcon;
+  close?: Function;
 }
 
 export function NavLink(props: NavProps) {
@@ -22,10 +24,10 @@ export function NavLink(props: NavProps) {
     <Link
       href={props.disabled ? "#" : (props.href ?? "#")}
       className={cn(
-        "mr-4 w-full rounded-sm text-left text-muted-foreground",
+        buttonVariants({ variant: "ghost", size: "sm" }),
+        "w-full justify-start rounded-sm",
         props.disabled && "cursor-not-allowed",
-        active ? "text-lg font-bold text-primary" : "text-sm",
-        props.href === "/dashboard" ? "sm:ml-8" : "ml-0",
+        active && "bg-muted text-primary",
       )}
       onClick={() => {
         if (props.close) props.close();

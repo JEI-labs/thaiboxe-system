@@ -1,12 +1,14 @@
-import "~/styles/globals.css";
+import "@/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 import { ThemeProvider } from "next-themes";
-import { QueryProvider } from "~/components/reactquery/query-provider";
-import { Toaster } from "~/components/ui/toaster";
-import { TooltipProvider } from "~/components/ui/tooltip";
-import { TRPCReactProvider } from "~/trpc/react";
+import { QueryProvider } from "@/components/reactquery/query-provider";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { TRPCReactProvider } from "@/trpc/react";
+import { BreadcrumbProvider } from "@/contexts/breadcrumb";
+import { NextAuthProvider } from "@/server/auth/sessionprovider";
 
 export const metadata: Metadata = {
   title: "Delta Gym",
@@ -19,22 +21,26 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
-      <body className="h-screen">
-        <TRPCReactProvider>
-          <QueryProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <TooltipProvider>
-                {children}
-                <Toaster />
-              </TooltipProvider>
-            </ThemeProvider>
-          </QueryProvider>
-        </TRPCReactProvider>
+      <body>
+        <NextAuthProvider>
+          <TRPCReactProvider>
+            <QueryProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="dark"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <BreadcrumbProvider>
+                  <TooltipProvider>
+                    {children}
+                    <Toaster />
+                  </TooltipProvider>
+                </BreadcrumbProvider>
+              </ThemeProvider>
+            </QueryProvider>
+          </TRPCReactProvider>
+        </NextAuthProvider>
       </body>
     </html>
   );
