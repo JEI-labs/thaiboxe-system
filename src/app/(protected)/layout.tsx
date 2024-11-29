@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Sidebar } from "@/components/layout/sidebar";
 import { BreadcrumbContainer } from "@/components/layout/BreadcrumbContainer";
+import { UserProfileContainer } from "@/components/layout/UserProfileContainer";
 
 export default async function DashboardLayout({
   children,
@@ -27,10 +28,9 @@ export default async function DashboardLayout({
               <BreadcrumbContainer />
             </div>
             <div className="flex items-center">
-              {/* <AccountBalance />
-            <Separator orientation="vertical" className="mx-4 h-6" />
-            <UserProfileContainer /> */}
-              teste
+              {/* <AccountBalance /> */}
+              {/* <Separator orientation="vertical" className="mx-4 h-6" /> */}
+              <UserProfileContainer />
             </div>
           </div>
           <div className="flex justify-center px-4 py-6 lg:px-6">

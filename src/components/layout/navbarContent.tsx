@@ -18,14 +18,14 @@ export function NavbarContent({ close }: { close?: Function }) {
             close={close}
           />
           <NavLink
-            title="Extrato"
-            href="/extrato"
+            title="Financeiro"
+            href="/financial"
             icon={ReceiptText}
             close={close}
           />
           <NavLink
-            title="Cartões"
-            href="/cards"
+            title="Alunos"
+            href="/students"
             icon={CreditCard}
             close={close}
           />
