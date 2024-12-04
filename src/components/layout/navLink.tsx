@@ -24,16 +24,17 @@ export function NavLink(props: NavProps) {
     <Link
       href={props.disabled ? "#" : (props.href ?? "#")}
       className={cn(
-        buttonVariants({ variant: "ghost", size: "lg" }),
+        buttonVariants({ variant: "ghost", size: "xl" }),
         "w-full justify-start rounded-sm",
         props.disabled && "cursor-not-allowed",
         active && "bg-muted text-primary",
+        "gap-4 transition-all duration-200 hover:gap-3 hover:text-primary",
       )}
       onClick={() => {
         if (props.close) props.close();
       }}
     >
-      {props.icon && <props.icon className="mr-2 h-4 w-4" />}
+      {props.icon && <props.icon className="h-4 w-4" />}
       {props.title}
       {props.label && <span className="ml-auto">{props.label}</span>}
     </Link>
