@@ -2,15 +2,30 @@
 
 import { ReceiptText, LayoutDashboard, CreditCard } from "lucide-react";
 import { NavLink } from "./navLink";
+import Image from "next/image";
+import { Skeleton } from "../ui/skeleton";
+import { useEffect, useState } from "react";
+import { Separator } from "../ui/separator";
 
 export function NavbarContent({ close }: { close?: Function }) {
+  const [logoSrc, setLogoSrc] = useState("");
+
+  useEffect(() => {
+    setLogoSrc("/images/logo.png");
+  }, []);
+
   return (
     <div>
       <div>
         <div className="flex w-full items-center gap-2 pb-6 pt-8 text-xl font-bold">
-          Logo aqui
+          {logoSrc ? (
+            <Image src={logoSrc} alt="Logo" width={300} height={24} />
+          ) : (
+            <Skeleton className="h-12 w-full" />
+          )}
         </div>
-        <div className="grid gap-1">
+        <Separator />
+        <div className="mt-4 grid gap-1">
           <NavLink
             title="Resumo"
             href="/dashboard"
