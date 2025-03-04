@@ -24,7 +24,7 @@ export function NavLink(props: NavProps) {
     <Link
       href={props.disabled ? "#" : (props.href ?? "#")}
       className={cn(
-        buttonVariants({ variant: "ghost", size: "xl" }),
+        buttonVariants({ variant: "ghost", size: "lg" }),
         "w-full justify-start rounded-sm",
         props.disabled && "cursor-not-allowed",
         active && "bg-muted text-primary",

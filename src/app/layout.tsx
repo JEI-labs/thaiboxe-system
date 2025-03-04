@@ -9,9 +9,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { TRPCReactProvider } from "@/trpc/react";
 import { BreadcrumbProvider } from "@/contexts/breadcrumb";
 import { NextAuthProvider } from "@/server/auth/sessionprovider";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import AppSidebarProvider from "@/providers/sidebarProvider";
 
 export const metadata: Metadata = {
-  title: "Delta Gym",
+  title: "ThaiBoxe & Sartorato",
   description: "O melhor gerenciador de sistemas de Artes Marciais",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
@@ -33,7 +35,7 @@ export default function RootLayout({
               >
                 <BreadcrumbProvider>
                   <TooltipProvider>
-                    {children}
+                    <AppSidebarProvider>{children}</AppSidebarProvider>
                     <Toaster />
                   </TooltipProvider>
                 </BreadcrumbProvider>

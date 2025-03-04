@@ -14,9 +14,9 @@ import { useSession } from "next-auth/react";
 import { ThemeToggler } from "../theme/theme-toggler";
 
 export function UserProfileContainer(): JSX.Element {
-  // const { data: session } = useSession();
+  const { data: session } = useSession();
 
-  // if (!session) return <Skeleton className="w-32 rounded-lg py-5" />;
+  if (!session) return <Skeleton className="w-32 rounded-lg py-5" />;
 
   return (
     <DropdownMenu>
@@ -26,15 +26,12 @@ export function UserProfileContainer(): JSX.Element {
           className="h-fit gap-4 px-3 py-2 focus-visible:ring-0 focus-visible:ring-offset-0"
         >
           <div className="max-sm:hidden">
-            {/* {session.user?.name?.split(" ")[0]} */}
-            Teste User
+            {session.user?.name?.split(" ")[0]}
           </div>
           <Avatar className="h-8 w-8 ring-2 ring-primary ring-offset-2 ring-offset-muted">
-            {/* <AvatarImage src={session.user?.image ?? ""} className="ring-0" /> */}
             <AvatarImage src={""} className="ring-0" />
             <AvatarFallback className="bg-primary/40">
-              {/* {session.user?.name?.substring(0, 2).toUpperCase()} */}
-              TU
+              {session.user?.name?.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </Button>

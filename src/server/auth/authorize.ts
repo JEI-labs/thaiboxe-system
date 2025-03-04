@@ -1,73 +1,33 @@
-import { env } from "@/env";
 import { type User } from "next-auth";
-import { detailsDTO } from "./details.dto";
+import { loginSchema } from "@/validation/auth";
+import { prisma } from "../db";
+import { verify } from "argon2";
+import lodash from "lodash";
 
 export async function authorize(
   credentials: Record<"username" | "password", string> | undefined,
-  // req: Pick<RequestInternal, "body" | "query" | "headers" | "method">,
 ): Promise<User | null> {
   try {
-    const response = await fetch(`${env.API_URL}/v2/auth`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: credentials?.username,
-        password: credentials?.password,
-      }),
-    });
+    const creds = await loginSchema.parseAsync(credentials);
 
-    if (!response.ok) throw new Error(`Error: ${response.status}`);
-    const auth = (await response.json()) as {
-      access_token: string;
-      expires_at: string;
-    };
-
-    const detailsRes = await fetch(`${env.API_URL}/account`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${auth.access_token}`,
-        "Content-Type": "application/json",
+    const user = await prisma.user.findFirst({
+      where: { email: creds.username.toLowerCase() },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
       },
     });
 
-    // sem details
-    if (!detailsRes.ok) throw new Error(`Error: ${response.status}`);
-    const details = (await detailsRes.json()) as detailsDTO;
+    if (!user) return null;
 
-    return {
-      id: details.user.id,
-      username: details.user.username,
-      name: details.user.name,
-      email: details.user.email,
-      account_type: details.holder_type
-        .replace("App\\Models\\", "")
-        .toLowerCase(),
-      access_token: auth.access_token,
-      expires_at: auth.expires_at,
-      document: details.document,
-      phone: details.phone,
-      status: details.status,
-      bank: {
-        manager_id: details.manager_id,
-        bank_number: details.bank_number,
-        branch_number: details.branch_number,
-        branch_digit: details.branch_digit,
-        account_number: details.account_number,
-        account_digit: details.account_digit,
-        account_type: details.account_type,
-      },
-      otp: {
-        secret: "MXDJHSD6A6WV2PKF", // conta braia
-        issuer: "MeuBanko",
-        algorithm: "SHA1",
-        digits: 6,
-        period: 30,
-      },
-    };
+    const isValidPassword = await verify(user.password, creds.password);
+    if (!isValidPassword) return null;
 
-    // console.log("Success:", data);
+    const returnUser = lodash.omit(user, ["password"]) as User;
+    return returnUser;
   } catch (error) {
-    // Log error
     console.error("Error:", error);
   }
   return null;

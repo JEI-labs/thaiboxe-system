@@ -16,9 +16,9 @@ export function NavbarContent({ close }: { close?: Function }) {
 
   return (
     <div>
-      <div className="flex w-full items-center pb-6 pt-8">
+      <div className="jutify-center flex h-24 w-full items-center p-6">
         {logoSrc ? (
-          <Image src={logoSrc} alt="Logo" width={300} height={24} />
+          <Image src={logoSrc} alt="Logo" width={300} height={300} />
         ) : (
           <Skeleton className="h-12 w-full" />
         )}

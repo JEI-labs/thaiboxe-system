@@ -1,28 +1,25 @@
 import { Suspense } from "react";
-import { Footer } from "@/components/footer/footer.component";
-import { Header } from "@/components/header/header.component";
 import { SidebarMobile } from "@/components/layout/sidebarMobile";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { Sidebar } from "@/components/layout/sidebar";
+import { AppSidebar } from "@/components/layout/sidebar";
 import { BreadcrumbContainer } from "@/components/layout/BreadcrumbContainer";
 import { UserProfileContainer } from "@/components/layout/UserProfileContainer";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default async function DashboardLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="flex h-full w-full flex-col bg-muted/40 lg:grid lg:grid-cols-[200px_auto]">
+    <div className="flex h-full w-full flex-col bg-background">
       <ScrollArea className="hidden h-full w-full lg:flex">
-        <Suspense fallback={"Loading..."}>
-          <Sidebar />
-        </Suspense>
+        <AppSidebar />
       </ScrollArea>
       <ScrollArea>
-        <div className="min-h-[calc(100vh-2rem)] bg-background lg:mx-2 lg:my-4 lg:rounded-xl lg:border">
+        <div className="min-h-[calc(100vh-2rem)]">
           <div className="mb-4 flex items-center justify-between border-b bg-muted/40 px-4 py-2 lg:m-4 lg:mb-0 lg:rounded-lg lg:border lg:px-6">
             <div className="flex lg:hidden">
-              <SidebarMobile />
+              {/* <SidebarMobile /> */}
+              <SidebarTrigger />
             </div>
             <div className="hidden lg:flex">
               <BreadcrumbContainer />
