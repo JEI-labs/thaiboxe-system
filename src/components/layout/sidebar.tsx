@@ -1,9 +1,20 @@
 "use client";
 
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import {
+  Calendar,
+  Home,
+  Inbox,
+  LayoutDashboard,
+  Package,
+  ReceiptText,
+  Search,
+  Settings,
+  Users,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -26,27 +37,30 @@ export function AppSidebar() {
 
   const items = [
     {
-      title: "Home",
-      url: "#",
-      icon: Home,
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
     },
     {
-      title: "Inbox",
-      url: "#",
-      icon: Inbox,
+      title: "Alunos",
+      url: "/students",
+      icon: Users,
     },
     {
-      title: "Calendar",
-      url: "#",
-      icon: Calendar,
+      title: "Financeiro",
+      url: "/financial",
+      icon: ReceiptText,
     },
     {
-      title: "Search",
-      url: "#",
-      icon: Search,
+      title: "Planos",
+      url: "/plans",
+      icon: Package,
     },
+  ];
+
+  const footerItems = [
     {
-      title: "Settings",
+      title: "Configurações",
       url: "#",
       icon: Settings,
     },
@@ -85,6 +99,18 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        {footerItems.map((item) => (
+          <SidebarMenuItem key={item.title}>
+            <SidebarMenuButton asChild>
+              <a href={item.url}>
+                <item.icon />
+                <span>{item.title}</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        ))}
+      </SidebarFooter>
     </Sidebar>
   );
 }
