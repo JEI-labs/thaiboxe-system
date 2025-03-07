@@ -11,7 +11,6 @@ import {
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useState } from "react";
 import { z } from "zod";
