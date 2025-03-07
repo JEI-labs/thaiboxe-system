@@ -61,7 +61,7 @@ export function AppSidebar() {
   const footerItems = [
     {
       title: "Configurações",
-      url: "#",
+      url: "/settings",
       icon: Settings,
     },
   ];

@@ -9,8 +9,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { TRPCReactProvider } from "@/trpc/react";
 import { BreadcrumbProvider } from "@/contexts/breadcrumb";
 import { NextAuthProvider } from "@/server/auth/sessionprovider";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import AppSidebarProvider from "@/providers/sidebarProvider";
 
 export const metadata: Metadata = {
   title: "ThaiBoxe & Sartorato",
@@ -35,7 +33,7 @@ export default function RootLayout({
               >
                 <BreadcrumbProvider>
                   <TooltipProvider>
-                    <AppSidebarProvider>{children}</AppSidebarProvider>
+                    {children}
                     <Toaster />
                   </TooltipProvider>
                 </BreadcrumbProvider>
