@@ -10,8 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { ThemeToggler } from "../theme/theme-toggler";
+import { LogOut, ShieldCheck, UserIcon } from "lucide-react";
+import Link from "next/link";
 
 export function UserProfileContainer(): JSX.Element {
   const { data: session } = useSession();
@@ -37,33 +39,29 @@ export function UserProfileContainer(): JSX.Element {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-fit">
-        {/* <Link href="/profile">
+        <Link href="/profile">
           <DropdownMenuItem className="cursor-pointer gap-2 py-2 pl-3 pr-4">
             <UserIcon className="h-4 w-4" />
             Minha conta
           </DropdownMenuItem>
-        </Link> */}
-        {/* <Link href="#">
+        </Link>
+        <Link href="/security">
           <DropdownMenuItem className="cursor-not-allowed gap-2 py-2 pl-3 pr-4">
             <ShieldCheck className="h-4 w-4" />
             Segurança
           </DropdownMenuItem>
-        </Link> */}
+        </Link>
 
         {/* <DropdownMenuSeparator /> */}
 
-        <DropdownMenuItem className="py-0 pl-3 pr-4">
-          <ThemeToggler />
-        </DropdownMenuItem>
-
-        {/* <DropdownMenuSeparator /> */}
-        {/* <DropdownMenuItem
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
           className="cursor-pointer gap-2 py-2 pl-3 pr-4"
           onClick={() => signOut()}
         >
           <LogOut className="h-4 w-4" />
           Sair
-        </DropdownMenuItem> */}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

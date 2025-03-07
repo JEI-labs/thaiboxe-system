@@ -9,19 +9,19 @@ const breadcrumbItems = [
     href: "/dashboard",
   },
   {
-    label: "Alunos",
-    href: "/students",
+    label: "Segurança",
+    href: "/security",
   },
 ];
 
-export default function StudentsPage() {
+export default function FinancialPage() {
   return (
     <Suspense fallback={<div>Carregando...</div>}>
       <div className="w-full">
         <BreadcrumbUpdater items={breadcrumbItems} />
 
         <main className="flex flex-col gap-8">
-          <div>Alunos</div>
+          <div>Segurança</div>
         </main>
       </div>
     </Suspense>

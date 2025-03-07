@@ -6,7 +6,7 @@ import { BreadcrumbUpdater } from "@/contexts/breadcrumb";
 const breadcrumbItems = [
   {
     label: "Home",
-    href: "/profile",
+    href: "/dashboard",
   },
   {
     label: "Financeiro",
