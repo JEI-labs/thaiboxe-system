@@ -13,20 +13,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useArrayState } from "~/hooks/useArrayState";
-import { useBoolean } from "~/hooks/useBooleanState/useBooleanState.hook";
-
-import { ScrollArea } from "~/components/ui/scroll-area";
-import type { AdvancedFilterCheckboxType, AdvancedFilterCheckboxProps } from "./advancedFilterCheckbox.types";
+import { useBoolean } from "@/hooks/useBooleanState/useBooleanState.hook";
+import { useArrayState } from "@/hooks/useArrayState";
+import {
+  AdvancedFilterCheckboxProps,
+  AdvancedFilterCheckboxType,
+} from "./advancedFilterCheckbox.types";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function AdvancedFilterCheckbox({
   showDeleteButton = true,
   ...props
 }: Readonly<AdvancedFilterCheckboxProps>): JSX.Element {
   const open = useBoolean(props.open);
-  const data = useArrayState<AdvancedFilterCheckboxType>(props.defaultValue ?? []);
+  const data = useArrayState<AdvancedFilterCheckboxType>(
+    props.defaultValue ?? [],
+  );
 
-  const handleSelectOption = (event: Event, option: AdvancedFilterCheckboxType): void => {
+  const handleSelectOption = (
+    event: Event,
+    option: AdvancedFilterCheckboxType,
+  ): void => {
     event.preventDefault();
     let newState: AdvancedFilterCheckboxType[];
 
@@ -48,6 +55,7 @@ export function AdvancedFilterCheckbox({
 
   React.useEffect(() => {
     data.actions.setData(props.defaultValue ?? []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.defaultValue]);
 
   return (
@@ -55,13 +63,16 @@ export function AdvancedFilterCheckbox({
       <DropdownMenuTrigger asChild>
         <Button className="gap-2" variant="outline" {...props.buttonProps}>
           {props.leftIcon}
-          {props.title} {props.showCounterIndicator ? `(${data.state.length})` : null}
+          {props.title}{" "}
+          {props.showCounterIndicator ? `(${data.state.length})` : null}
           {props.rightIcon}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         <div className="flex items-center justify-between">
-          <DropdownMenuLabel>{props?.description ?? "Selecione as opções abaixo"}</DropdownMenuLabel>
+          <DropdownMenuLabel>
+            {props?.description ?? "Selecione as opções abaixo"}
+          </DropdownMenuLabel>
           {showDeleteButton && (
             <Button variant="ghost" onClick={props.onDelete}>
               <Trash2 size={16} />
@@ -74,7 +85,9 @@ export function AdvancedFilterCheckbox({
           {props.options.map((item) => (
             <DropdownMenuCheckboxItem
               key={item.id}
-              checked={Boolean(data.state.find((option) => option.id === item.id))}
+              checked={Boolean(
+                data.state.find((option) => option.id === item.id),
+              )}
               onSelect={(event) => handleSelectOption(event, item)}
             >
               {item.label}

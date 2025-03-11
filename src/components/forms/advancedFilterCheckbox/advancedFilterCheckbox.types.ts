@@ -1,5 +1,5 @@
-import type { SelectItemType } from "~/common/converters/converters.types";
-import type { ButtonProps } from "../button";
+import { SelectItemType } from "@/common/types/select";
+import { ButtonProps } from "@/components/ui/button";
 
 export interface AdvancedFilterCheckboxProps {
   open?: boolean;
