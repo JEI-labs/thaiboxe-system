@@ -15,12 +15,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useBoolean } from "~/hooks/useBooleanState/useBooleanState.hook";
-
-import { Form } from "~/components/ui/form";
-import { ScrollArea } from "~/components/ui/scroll-area";
-import { FormInputComponent } from "~/components/ui/formInput/formInput.component";
 import type { AdvancedFilterTextInputProps } from "./advancedFilterTextInput.types";
+import { useBoolean } from "@/hooks/useBooleanState/useBooleanState.hook";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { FormInputComponent } from "../formInput/formInput.component";
+import { Form } from "@/components/ui/form";
 
 export function AdvancedFilterTextInput<T extends FieldValues>({
   showDeleteButton = true,
@@ -55,6 +54,7 @@ export function AdvancedFilterTextInput<T extends FieldValues>({
       const submit = form.handleSubmit(onSubmit);
       submit();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open?.value]);
 
   return (
@@ -68,7 +68,9 @@ export function AdvancedFilterTextInput<T extends FieldValues>({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         <div className="flex items-center justify-between">
-          <DropdownMenuLabel>{props?.description ?? "Informe os dados abaixo"}</DropdownMenuLabel>
+          <DropdownMenuLabel>
+            {props?.description ?? "Informe os dados abaixo"}
+          </DropdownMenuLabel>
           {showDeleteButton && (
             <Button variant="ghost" onClick={onDelete}>
               <Trash2 size={16} />
@@ -79,7 +81,7 @@ export function AdvancedFilterTextInput<T extends FieldValues>({
         <ScrollArea className="max-h-[250px] w-[350px] overflow-y-auto">
           <Form {...form}>
             <form
-              className=" flex flex-col gap-3 p-3"
+              className="flex flex-col gap-3 p-3"
               onSubmit={(e) => {
                 e.preventDefault();
               }}

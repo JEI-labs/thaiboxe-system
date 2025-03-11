@@ -1,10 +1,21 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { cn } from "~/common/utils/utils";
-import { Button } from "../button";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "../command";
-import { Popover, PopoverContent, PopoverTrigger } from "../popover";
 import type { SelectWithSearchProps } from "./selectWithSearch.types";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
   label,
@@ -18,9 +29,13 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
 
-  const extendedOptions = hasEmptyOption ? [{ value: null, textValue: placeholder }, ...options] : options;
+  const extendedOptions = hasEmptyOption
+    ? [{ value: null, textValue: placeholder }, ...options]
+    : options;
 
-  const selectedOption = extendedOptions.find((option) => option.value === value);
+  const selectedOption = extendedOptions.find(
+    (option) => option.value === value,
+  );
 
   const handleSelect = (selectedValue: string | null) => {
     if (onValueChange) {
@@ -31,7 +46,11 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
 
   return (
     <div className={cn(props.className)}>
-      {label && <label className="mb-2 block text-sm font-medium text-gray-700">{label}</label>}
+      {label && (
+        <label className="mb-2 block text-sm font-medium text-gray-700">
+          {label}
+        </label>
+      )}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
@@ -53,7 +72,10 @@ export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
               <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
               <CommandGroup>
                 {extendedOptions.map((option) => (
-                  <CommandItem key={`${option.value}_${option.textValue}`} onSelect={() => handleSelect(option.value)}>
+                  <CommandItem
+                    key={`${option.value}_${option.textValue}`}
+                    onSelect={() => handleSelect(option.value)}
+                  >
                     {option.textValue}
                   </CommandItem>
                 ))}

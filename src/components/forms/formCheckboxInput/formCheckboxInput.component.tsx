@@ -2,9 +2,16 @@ import React from "react";
 
 import { Controller, FieldValues, UseControllerProps } from "react-hook-form";
 
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../form";
-import { Checkbox } from "../checkbox";
 import { FormCheckboxComponentProps } from "./formCheckboxInput.types";
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const FormCheckboxComponent = <T extends FieldValues>({
   control,
@@ -26,8 +33,12 @@ export const FormCheckboxComponent = <T extends FieldValues>({
               <FormItem>
                 {props.topDescription?.length || props.title?.length ? (
                   <div className="mb-4">
-                    {props.title?.length ? <FormLabel className="text-base">{props.title}</FormLabel> : null}
-                    {props.topDescription?.length ? <FormDescription>{props.topDescription}</FormDescription> : null}
+                    {props.title?.length ? (
+                      <FormLabel className="text-base">{props.title}</FormLabel>
+                    ) : null}
+                    {props.topDescription?.length ? (
+                      <FormDescription>{props.topDescription}</FormDescription>
+                    ) : null}
                   </div>
                 ) : null}
 
@@ -38,15 +49,23 @@ export const FormCheckboxComponent = <T extends FieldValues>({
                     return (
                       <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                         <FormControl>
-                          <Checkbox checked={field.value} onCheckedChange={field.onChange} disabled={props.disabled} />
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={props.disabled}
+                          />
                         </FormControl>
 
                         {props.label?.length ? (
-                          <FormLabel className="font-normal hover:cursor-pointer">{props.label}</FormLabel>
+                          <FormLabel className="font-normal hover:cursor-pointer">
+                            {props.label}
+                          </FormLabel>
                         ) : null}
 
                         {props.bottomDescription?.length ? (
-                          <FormDescription>{props.bottomDescription}</FormDescription>
+                          <FormDescription>
+                            {props.bottomDescription}
+                          </FormDescription>
                         ) : null}
                       </FormItem>
                     );

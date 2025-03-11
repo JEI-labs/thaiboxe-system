@@ -1,4 +1,4 @@
-import { SelectItemType } from "~/common/converters/converters.types";
+import { SelectItemType } from "@/common/types/select";
 
 export interface FormCheckboxListComponentProps {
   title?: string;

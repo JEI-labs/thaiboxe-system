@@ -7,16 +7,16 @@ export const axiosApi = axios.create({
   },
 });
 
-axiosApi.interceptors.request.use(async (config: any) => {
-  const session = await getServerAuthSession();
-  const token = session?.user.access_token ?? null;
+// axiosApi.interceptors.request.use(async (config: any) => {
+//   const session = await getServerAuthSession();
+//   const token = session?.user.access_token ?? null;
 
-  if (!config.headers.Authorization) {
-    config.headers.Authorization = token ? `Bearer ${token ?? ""}` : undefined;
-  }
+//   if (!config.headers.Authorization) {
+//     config.headers.Authorization = token ? `Bearer ${token ?? ""}` : undefined;
+//   }
 
-  return config;
-});
+//   return config;
+// });
 
 axiosApi.interceptors.response.use(
   (response: any) => response,

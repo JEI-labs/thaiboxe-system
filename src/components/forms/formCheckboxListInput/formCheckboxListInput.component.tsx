@@ -2,9 +2,16 @@ import React from "react";
 
 import { Controller, FieldValues, UseControllerProps } from "react-hook-form";
 
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../form";
-import { Checkbox } from "../checkbox";
 import { FormCheckboxListComponentProps } from "./formCheckboxListInput.types";
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const FormCheckboxListComponent = <T extends FieldValues>({
   control,
@@ -12,7 +19,8 @@ export const FormCheckboxListComponent = <T extends FieldValues>({
   rules,
   options = [],
   ...props
-}: UseControllerProps<T> & FormCheckboxListComponentProps): React.JSX.Element => {
+}: UseControllerProps<T> &
+  FormCheckboxListComponentProps): React.JSX.Element => {
   return (
     <Controller
       control={control}
@@ -27,8 +35,12 @@ export const FormCheckboxListComponent = <T extends FieldValues>({
               <FormItem>
                 {props.description?.length || props.title?.length ? (
                   <div className="mb-4">
-                    {props.title?.length ? <FormLabel className="text-base">{props.title}</FormLabel> : null}
-                    {props.description?.length ? <FormDescription>{props.description}</FormDescription> : null}
+                    {props.title?.length ? (
+                      <FormLabel className="text-base">{props.title}</FormLabel>
+                    ) : null}
+                    {props.description?.length ? (
+                      <FormDescription>{props.description}</FormDescription>
+                    ) : null}
                   </div>
                 ) : null}
 
@@ -39,18 +51,27 @@ export const FormCheckboxListComponent = <T extends FieldValues>({
                     name={name}
                     render={({ field }) => {
                       return (
-                        <FormItem key={item.id} className="flex flex-row items-start space-x-3 space-y-0">
+                        <FormItem
+                          key={item.id}
+                          className="flex flex-row items-start space-x-3 space-y-0"
+                        >
                           <FormControl>
                             <Checkbox
                               checked={field.value?.includes(item.id)}
                               onCheckedChange={(checked) => {
                                 return checked
                                   ? field.onChange([...field.value, item.id])
-                                  : field.onChange(field.value?.filter((value) => value !== item.id));
+                                  : field.onChange(
+                                      field.value?.filter(
+                                        (value: any) => value !== item.id,
+                                      ),
+                                    );
                               }}
                             />
                           </FormControl>
-                          <FormLabel className="font-normal hover:cursor-pointer">{item.label}</FormLabel>
+                          <FormLabel className="font-normal hover:cursor-pointer">
+                            {item.label}
+                          </FormLabel>
                         </FormItem>
                       );
                     }}

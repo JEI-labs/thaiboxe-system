@@ -1,10 +1,22 @@
 import React from "react";
 import type { FieldValues, UseControllerProps } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import { cn } from "~/common/utils/utils";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "../form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../select";
 import type { FormSelectComponentProps } from "./formSelectInput.component.types";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const FormSelectComponent = <T extends FieldValues>({
   control,
@@ -17,7 +29,10 @@ export const FormSelectComponent = <T extends FieldValues>({
   ...props
 }: UseControllerProps<T> & FormSelectComponentProps): React.JSX.Element => {
   const extendedOptions = hasEmptyOption
-    ? [{ value: null, textValue: props.placeholder ?? "-", icon: null }, ...options]
+    ? [
+        { value: null, textValue: props.placeholder ?? "-", icon: null },
+        ...options,
+      ]
     : options;
 
   return (
@@ -34,7 +49,11 @@ export const FormSelectComponent = <T extends FieldValues>({
               <FormItem className={cn("space-y-3", props.className)}>
                 <div className="flex flex-col">
                   <FormLabel>{props.label}</FormLabel>
-                  {description && <FormLabel className=" text-xs text-muted-foreground">{description}</FormLabel>}
+                  {description && (
+                    <FormLabel className="text-xs text-muted-foreground">
+                      {description}
+                    </FormLabel>
+                  )}
                 </div>
                 <Select
                   {...props}
@@ -53,7 +72,11 @@ export const FormSelectComponent = <T extends FieldValues>({
                   </FormControl>
                   <SelectContent>
                     {extendedOptions.map((item) => (
-                      <SelectItem {...item} value={item.value as string} key={`${item.value}_${item.textValue}`}>
+                      <SelectItem
+                        {...item}
+                        value={item.value as string}
+                        key={`${item.value}_${item.textValue}`}
+                      >
                         <div className="flex items-center gap-2">
                           {item.icon}
                           {item.textValue}

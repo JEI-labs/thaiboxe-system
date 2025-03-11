@@ -4,11 +4,18 @@ import type { FieldValues, UseControllerProps } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
 import { Minus, Plus } from "lucide-react";
-import { cn } from "~/common/utils/utils";
-import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../form";
-import { Input } from "../input";
-import { Button } from "../button";
 import type { FormInputComponentProps } from "./formInput.component.types";
+import {
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 export const FormInputNumberComponent = <T extends FieldValues>({
   control,
@@ -56,7 +63,10 @@ export const FormInputNumberComponent = <T extends FieldValues>({
                       className="rounded-ee-none rounded-se-none border"
                       onClick={() => {
                         field.onChange(
-                          (parseInt(field.value, 10) - 1 >= 0 ? parseInt(field.value, 10) - 1 : 0).toString(),
+                          (parseInt(field.value, 10) - 1 >= 0
+                            ? parseInt(field.value, 10) - 1
+                            : 0
+                          ).toString(),
                         );
                       }}
                     >
@@ -67,11 +77,19 @@ export const FormInputNumberComponent = <T extends FieldValues>({
                       <Input
                         {...field}
                         {...props}
-                        className={cn(props.className, props.icon ? "pl-11" : "", "rounded-none text-center")}
+                        className={cn(
+                          props.className,
+                          props.icon ? "pl-11" : "",
+                          "rounded-none text-center",
+                        )}
                         value={mask ? mask(field.value) : field.value}
                         placeholder={props.placeholder}
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>): void => {
-                          const formattedValue = handleChangeText(event.currentTarget.value);
+                        onChange={(
+                          event: React.ChangeEvent<HTMLInputElement>,
+                        ): void => {
+                          const formattedValue = handleChangeText(
+                            event.currentTarget.value,
+                          );
                           field.onChange(formattedValue);
                         }}
                       />
@@ -81,14 +99,20 @@ export const FormInputNumberComponent = <T extends FieldValues>({
                       variant="secondary"
                       className="rounded-es-none rounded-ss-none border"
                       onClick={() => {
-                        field.onChange((parseInt(field.value, 10) + 1).toString());
+                        field.onChange(
+                          (parseInt(field.value, 10) + 1).toString(),
+                        );
                       }}
                     >
                       <Plus size={18} />
                     </Button>
                   </div>
                 </FormControl>
-                {description && <FormDescription className="text-xs">{description}</FormDescription>}
+                {description && (
+                  <FormDescription className="text-xs">
+                    {description}
+                  </FormDescription>
+                )}
                 {!hideErrors && <FormMessage />}
               </FormItem>
             )}
