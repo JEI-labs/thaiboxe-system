@@ -1,8 +1,9 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { paginationSchema } from "@/server/validations/pagination";
 import { createStudentSchema } from "@/server/validations/users";
 import { TRPCError } from "@trpc/server";
 
-export const usersRouter = createTRPCRouter({
+export const studentRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createStudentSchema)
     .mutation(async ({ ctx, input }) => {
@@ -50,6 +51,57 @@ export const usersRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Não foi possível cadastrar aluno",
+        });
+      }
+    }),
+
+  getAll: protectedProcedure
+    .input(paginationSchema)
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
+      if (!userId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Não autorizado",
+        });
+      }
+
+      const { page, limit } = input;
+      const skip = (page - 1) * limit;
+
+      try {
+        const [students, total] = await Promise.all([
+          ctx.prisma.student.findMany({
+            skip,
+            take: limit,
+            orderBy: {
+              createdAt: "desc",
+            },
+          }),
+          ctx.prisma.student.count(),
+        ]);
+
+        return {
+          ok: true,
+          data: students,
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+          },
+        };
+      } catch (error) {
+        console.log(error);
+
+        if (error instanceof TRPCError) {
+          throw error;
+        }
+
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Não foi possível carregar alunos",
         });
       }
     }),
