@@ -6,14 +6,3 @@ export const createStudentSchema = z.object({
   phone: z.string().min(10, "Por favor, insira um telefone válido"),
   birthDate: z.date().optional(),
 });
-
-// id          String       @id @default(uuid())
-// name        String
-// email       String       @unique
-// phone       String?
-// birthDate   DateTime?
-// createdAt   DateTime     @default(now())
-// updatedAt   DateTime     @updatedAt
-// enrollments Enrollment[]
-// payments    Payment[]
-// attendances Attendance[]
