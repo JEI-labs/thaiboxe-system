@@ -21,7 +21,7 @@ export default function DashboardPage() {
         <BreadcrumbUpdater items={breadcrumbItems} />
 
         <main className="flex flex-col gap-8">
-          <div>Dashboard</div>
+          <div>Dashboardd</div>
         </main>
       </div>
     </Suspense>
