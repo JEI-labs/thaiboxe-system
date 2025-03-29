@@ -3,6 +3,8 @@ import { uploadFileSchema } from "@/server/validations/files";
 import { TRPCError } from "@trpc/server";
 import { put } from "@vercel/blob";
 
+const MAX_FILE_UPLOAD_SIZE = 4.5 * 1024 * 1024; // 4.5 MB
+
 export const filesRouter = createTRPCRouter({
   upload: protectedProcedure
     .input(uploadFileSchema)
@@ -17,10 +19,25 @@ export const filesRouter = createTRPCRouter({
       }
 
       const { filename, file } = input;
+      let buffer: Buffer;
 
-      const buffer = Buffer.from(file, "base64");
+      try {
+        buffer = Buffer.from(file, "base64");
+      } catch (e) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Arquivo base64 inválido",
+        });
+      }
+
+      if (buffer.length > MAX_FILE_UPLOAD_SIZE) {
+        throw new TRPCError({
+          code: "PAYLOAD_TOO_LARGE",
+          message: "Arquivo deve ter no máximo 4.5MB",
+        });
+      }
+
       const blobData = new Blob([buffer]);
-
       const blob = await put(filename, blobData, {
         access: "public",
       });
