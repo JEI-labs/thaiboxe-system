@@ -35,6 +35,7 @@ model Student {
     name        String
     email       String       @unique
     phone       String
+    avatar      String?
     birthDate   DateTime?
     createdAt   DateTime     @default(now())
     updatedAt   DateTime     @updatedAt
