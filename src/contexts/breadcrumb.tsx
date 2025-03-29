@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 interface BreadcrumbItem {
   label: string;
@@ -57,6 +63,10 @@ export const BreadcrumbProvider = ({ children }: BreadcrumbProviderProps) => {
 
 export const BreadcrumbUpdater = ({ items }: { items: BreadcrumbItem[] }) => {
   const { setBreadcrumbItems } = useBreadcrumb();
-  setBreadcrumbItems(items);
+
+  useEffect(() => {
+    setBreadcrumbItems(items);
+  }, [items, setBreadcrumbItems]);
+
   return null;
 };
