@@ -1,6 +1,9 @@
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { paginationSchema } from "@/server/validations/pagination";
-import { createStudentSchema } from "@/server/validations/users";
+import {
+  createStudentSchema,
+  updateAvatarSchema,
+} from "@/server/validations/users";
 import { TRPCError } from "@trpc/server";
 
 export const studentRouter = createTRPCRouter({
@@ -34,6 +37,7 @@ export const studentRouter = createTRPCRouter({
             name: input.name,
             phone: input.phone,
             birthDate: input.birthDate,
+            avatar: input.avatarUrl,
           },
         });
 
@@ -53,6 +57,46 @@ export const studentRouter = createTRPCRouter({
           message: "Não foi possível cadastrar aluno",
         });
       }
+    }),
+
+  updateAvatar: protectedProcedure
+    .input(updateAvatarSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
+      if (!userId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Não autorizado",
+        });
+      }
+
+      const studentExists = await ctx.prisma.student.findFirst({
+        where: {
+          id: input.studentId,
+        },
+      });
+
+      if (!studentExists) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Aluno não existe",
+        });
+      }
+
+      await ctx.prisma.student.update({
+        where: {
+          id: input.studentId,
+        },
+        data: {
+          avatar: input.avatarUrl,
+        },
+      });
+
+      return {
+        ok: true,
+        message: "Avatar atualizado com sucesso!",
+      };
     }),
 
   getAll: protectedProcedure
