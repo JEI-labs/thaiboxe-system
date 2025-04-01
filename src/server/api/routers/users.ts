@@ -2,6 +2,7 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { paginationSchema } from "@/server/validations/pagination";
 import { createStudentSchema } from "@/server/validations/users";
 import { TRPCError } from "@trpc/server";
+import { z } from "zod";
 
 export const studentRouter = createTRPCRouter({
   create: protectedProcedure
@@ -102,6 +103,46 @@ export const studentRouter = createTRPCRouter({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Não foi possível carregar alunos",
+        });
+      }
+    }),
+
+  delete: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
+      if (!userId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Não autorizado",
+        });
+      }
+
+      try {
+        const student = await ctx.prisma.student.findUnique({
+          where: { id: input.id },
+        });
+
+        if (!student) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Aluno nao encontrado",
+          });
+        }
+
+        await ctx.prisma.student.delete({
+          where: { id: input.id },
+        });
+
+        return {
+          ok: true,
+          message: "Aluno deletado com sucesso",
+        };
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Não foi possível deletar aluno",
         });
       }
     }),

@@ -5,11 +5,23 @@ import { Button } from "../ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import React from "react";
 import { StudentCardProps } from "./studentCard.types";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 export const StudentCard: React.FC<StudentCardProps> = ({
   name,
   avatar,
   email,
+  onClick,
 }) => {
   return (
     <Card className="flex items-center justify-between p-4">
@@ -30,9 +42,30 @@ export const StudentCard: React.FC<StudentCardProps> = ({
         <Button variant="outline" size="icon">
           <Pencil className="h-4 w-4" />
         </Button>
-        <Button variant="destructive" size="icon">
-          <Trash2 className="h-4 w-4" />
-        </Button>
+
+        {/* ALERT DIALOG */}
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="icon">
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                Tem certeza que deseja excluir?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Essa ação não pode ser desfeita. O aluno será removido
+                permanentemente do sistema.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={onClick}>Confirmar</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Card>
   );
