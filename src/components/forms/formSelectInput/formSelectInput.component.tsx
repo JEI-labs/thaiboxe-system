@@ -1,22 +1,22 @@
-import React from "react";
-import type { FieldValues, UseControllerProps } from "react-hook-form";
-import { Controller } from "react-hook-form";
-import type { FormSelectComponentProps } from "./formSelectInput.component.types";
+import React from 'react';
+import type { FieldValues, UseControllerProps } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
+import type { FormSelectComponentProps } from './formSelectInput.component.types';
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/form';
+import { cn } from '@/lib/utils';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 export const FormSelectComponent = <T extends FieldValues>({
   control,
@@ -30,7 +30,7 @@ export const FormSelectComponent = <T extends FieldValues>({
 }: UseControllerProps<T> & FormSelectComponentProps): React.JSX.Element => {
   const extendedOptions = hasEmptyOption
     ? [
-        { value: null, textValue: props.placeholder ?? "-", icon: null },
+        { value: null, textValue: props.placeholder ?? '-', icon: null },
         ...options,
       ]
     : options;
@@ -46,7 +46,7 @@ export const FormSelectComponent = <T extends FieldValues>({
             control={control}
             name={name}
             render={({ field }) => (
-              <FormItem className={cn("space-y-3", props.className)}>
+              <FormItem className={cn('space-y-3', props.className)}>
                 <div className="flex flex-col">
                   <FormLabel>{props.label}</FormLabel>
                   {description && (

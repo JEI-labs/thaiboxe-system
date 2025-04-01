@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { ChevronDown } from "lucide-react";
-import type { SelectWithSearchProps } from "./selectWithSearch.types";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import React, { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import type { SelectWithSearchProps } from './selectWithSearch.types';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from '@/components/ui/popover';
 import {
   Command,
   CommandEmpty,
@@ -15,12 +15,12 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
+} from '@/components/ui/command';
 
 export const SelectWithSearch: React.FC<SelectWithSearchProps> = ({
   label,
   options = [],
-  placeholder = "Selecione uma opção",
+  placeholder = 'Selecione uma opção',
   onValueChange,
   value,
   disabled,

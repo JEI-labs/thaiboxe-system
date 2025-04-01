@@ -1,16 +1,13 @@
-"use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client';
 
-import * as React from "react";
-import { QueryClient, useQuery } from "@tanstack/react-query";
-import { useSession } from "next-auth/react";
-import axios from "axios";
-
-const queryClient = new QueryClient();
+import { useQuery } from '@tanstack/react-query';
+import { useSession } from 'next-auth/react';
 
 type Props = {
   url: string;
   tag: string;
-  dependencies: any[];
+  dependencies: Array<any>;
   params: any;
 };
 

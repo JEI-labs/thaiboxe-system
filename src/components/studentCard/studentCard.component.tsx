@@ -1,10 +1,10 @@
-import { getInitials } from "@/utils/masksUtils";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Card } from "../ui/card";
-import { Button } from "../ui/button";
-import { Pencil, Trash2 } from "lucide-react";
-import React from "react";
-import { StudentCardProps } from "./studentCard.types";
+import { getInitials } from '@/utils/masksUtils';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Card } from '../ui/card';
+import { Button } from '../ui/button';
+import { Pencil, Trash2 } from 'lucide-react';
+import React from 'react';
+import { StudentCardProps } from './studentCard.types';
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -15,7 +15,7 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 
 export const StudentCard: React.FC<StudentCardProps> = ({
   name,

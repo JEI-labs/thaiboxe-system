@@ -1,5 +1,5 @@
-import { SelectItemType } from "@/common/types/select";
-import { ButtonProps } from "@/components/ui/button";
+import { SelectItemType } from '@/common/types/select';
+import { ButtonProps } from '@/components/ui/button';
 
 export interface AdvancedFilterCheckboxProps {
   open?: boolean;
@@ -13,7 +13,9 @@ export interface AdvancedFilterCheckboxProps {
   rightIcon?: JSX.Element;
   showDeleteButton?: boolean;
   onDelete?: () => void;
-  onChange?: (values: Array<AdvancedFilterCheckboxType>) => void;
+  onChange?: (_values: Array<AdvancedFilterCheckboxType>) => void;
 }
 
-export interface AdvancedFilterCheckboxType extends SelectItemType {}
+export interface AdvancedFilterCheckboxType extends SelectItemType {
+  checked?: boolean;
+}

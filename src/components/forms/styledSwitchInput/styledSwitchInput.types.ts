@@ -4,6 +4,6 @@ export interface StyledSwitchComponentProps {
   bottomDescription?: string;
   className?: string;
   value: boolean;
-  onChange: (value: boolean) => void;
+  onChange: (_value: boolean) => void;
   disabled?: boolean;
 }

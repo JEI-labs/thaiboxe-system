@@ -1,9 +1,9 @@
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { AppSidebar } from "@/components/layout/sidebar";
-import { BreadcrumbContainer } from "@/components/layout/BreadcrumbContainer";
-import { UserProfileContainer } from "@/components/layout/UserProfileContainer";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import AppSidebarProvider from "@/providers/sidebarProvider";
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { AppSidebar } from '@/components/layout/sidebar';
+import { BreadcrumbContainer } from '@/components/layout/BreadcrumbContainer';
+import { UserProfileContainer } from '@/components/layout/UserProfileContainer';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import AppSidebarProvider from '@/providers/sidebarProvider';
 
 export default async function DashboardLayout({
   children,

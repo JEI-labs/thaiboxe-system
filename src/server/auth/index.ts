@@ -1,14 +1,14 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { PrismaAdapter } from '@auth/prisma-adapter';
 import {
   getServerSession,
   type DefaultSession,
   type NextAuthOptions,
-} from "next-auth";
-import { type Adapter } from "next-auth/adapters";
+} from 'next-auth';
+import { type Adapter } from 'next-auth/adapters';
 
-import { prisma } from "@/server/db";
-import Credentials from "next-auth/providers/credentials";
-import { authorize } from "./authorize";
+import { prisma } from '@/server/db';
+import Credentials from 'next-auth/providers/credentials';
+import { authorize } from './authorize';
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -16,13 +16,13 @@ import { authorize } from "./authorize";
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session extends DefaultSession {
     user: {
       id: number;
       name: string;
       email: string;
-    } & DefaultSession["user"];
+    } & DefaultSession['user'];
   }
 
   interface User {
@@ -38,17 +38,17 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  session: { strategy: "jwt" },
+  session: { strategy: 'jwt' },
   jwt: {
     secret: process.env.NEXTAUTH_SECRET,
     maxAge: 1 * 24 * 30 * 60, // 1 days
   },
   pages: {
-    signIn: "/login",
+    signIn: '/login',
     // newUser: "/auth/register",
   },
   callbacks: {
-    jwt: ({ token, user, trigger, session }) => {
+    jwt: ({ token, user }) => {
       if (user) {
         token.id = user.id;
         token.name = user.name;
@@ -71,10 +71,10 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
     Credentials({
-      name: "credentials",
+      name: 'credentials',
       credentials: {
-        username: { label: "Usuário", type: "username" },
-        password: { label: "Senha", type: "password" },
+        username: { label: 'Usuário', type: 'username' },
+        password: { label: 'Senha', type: 'password' },
       },
       authorize,
     }),

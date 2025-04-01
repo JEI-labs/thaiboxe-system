@@ -1,8 +1,8 @@
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { paginationSchema } from "@/server/validations/pagination";
-import { createStudentSchema } from "@/server/validations/users";
-import { TRPCError } from "@trpc/server";
-import { z } from "zod";
+import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
+import { paginationSchema } from '@/server/validations/pagination';
+import { createStudentSchema } from '@/server/validations/users';
+import { TRPCError } from '@trpc/server';
+import { z } from 'zod';
 
 export const studentRouter = createTRPCRouter({
   create: protectedProcedure
@@ -12,8 +12,8 @@ export const studentRouter = createTRPCRouter({
 
       if (!userId) {
         throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Não autorizado",
+          code: 'UNAUTHORIZED',
+          message: 'Não autorizado',
         });
       }
 
@@ -24,8 +24,8 @@ export const studentRouter = createTRPCRouter({
 
         if (emailExists) {
           throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Email já cadastrado",
+            code: 'BAD_REQUEST',
+            message: 'Email já cadastrado',
           });
         }
 
@@ -50,8 +50,8 @@ export const studentRouter = createTRPCRouter({
         }
 
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Não foi possível cadastrar aluno",
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Não foi possível cadastrar aluno',
         });
       }
     }),
@@ -63,8 +63,8 @@ export const studentRouter = createTRPCRouter({
 
       if (!userId) {
         throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Não autorizado",
+          code: 'UNAUTHORIZED',
+          message: 'Não autorizado',
         });
       }
 
@@ -77,7 +77,7 @@ export const studentRouter = createTRPCRouter({
             skip,
             take: limit,
             orderBy: {
-              createdAt: "desc",
+              createdAt: 'desc',
             },
           }),
           ctx.prisma.student.count(),
@@ -101,8 +101,8 @@ export const studentRouter = createTRPCRouter({
         }
 
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Não foi possível carregar alunos",
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Não foi possível carregar alunos',
         });
       }
     }),
@@ -114,8 +114,8 @@ export const studentRouter = createTRPCRouter({
 
       if (!userId) {
         throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Não autorizado",
+          code: 'UNAUTHORIZED',
+          message: 'Não autorizado',
         });
       }
 
@@ -126,8 +126,8 @@ export const studentRouter = createTRPCRouter({
 
         if (!student) {
           throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Aluno nao encontrado",
+            code: 'NOT_FOUND',
+            message: 'Aluno nao encontrado',
           });
         }
 
@@ -137,12 +137,13 @@ export const studentRouter = createTRPCRouter({
 
         return {
           ok: true,
-          message: "Aluno deletado com sucesso",
+          message: 'Aluno deletado com sucesso',
         };
       } catch (error) {
+        console.log(error);
         throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Não foi possível deletar aluno",
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Não foi possível deletar aluno',
         });
       }
     }),

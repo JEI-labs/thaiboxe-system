@@ -1,8 +1,8 @@
-import { InputProps } from "@/components/ui/input";
+import { InputProps } from '@/components/ui/input';
 
 export interface FormInputComponentProps extends InputProps {
-  mask?: (value: string) => string;
-  unmask?: (value: string) => string | number;
+  mask?: (_value: string) => string;
+  unmask?: (_value: string) => string | number;
   label?: string | JSX.Element;
   description?: string;
   hideErrors?: boolean;

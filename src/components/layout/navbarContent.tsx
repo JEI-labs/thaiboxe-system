@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { ReceiptText, LayoutDashboard, CreditCard } from "lucide-react";
-import { NavLink } from "./navLink";
-import Image from "next/image";
-import { Skeleton } from "../ui/skeleton";
-import { useEffect, useState } from "react";
-import { Separator } from "../ui/separator";
+import { ReceiptText, LayoutDashboard, CreditCard } from 'lucide-react';
+import { NavLink } from './navLink';
+import Image from 'next/image';
+import { Skeleton } from '../ui/skeleton';
+import { useEffect, useState } from 'react';
+import { Separator } from '../ui/separator';
 
-export function NavbarContent({ close }: { close?: Function }) {
-  const [logoSrc, setLogoSrc] = useState("");
+export function NavbarContent({ close }: { close?: () => void }) {
+  const [logoSrc, setLogoSrc] = useState('');
 
   useEffect(() => {
-    setLogoSrc("/images/logo.png");
+    setLogoSrc('/images/logo.png');
   }, []);
 
   return (

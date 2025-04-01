@@ -1,42 +1,49 @@
 {
   "compilerOptions": {
-    /* Base Options: */
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "target": "es2022",
-    "allowJs": true,
-    "resolveJsonModule": true,
-    "moduleDetection": "force",
-    "isolatedModules": true,
+    /* ------------------------------- BASE OPTIONS ------------------------------- */
 
-    /* Strictness */
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "checkJs": true,
+    "esModuleInterop": true, // Enables default interoperability between CommonJS and ES Modules
+    "skipLibCheck": true, // Skips type checking of declaration files (*.d.ts) to speed up compilation
+    "target": "es2022", // Sets the JavaScript language version for emitted JavaScript
+    "allowJs": true, // Allows JavaScript files to be compiled
+    "resolveJsonModule": true, // Allows importing JSON files as modules
+    "moduleDetection": "force", // Forces TypeScript to treat every file as a module
+    "isolatedModules": true, // Ensures that each file can be safely transpiled independently
+    "removeComments": true, // Removes comments from the emitted JavaScript files
 
-    /* Bundled projects */
-    "lib": ["dom", "dom.iterable", "ES2022"],
-    "noEmit": true,
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
-    "jsx": "preserve",
-    "plugins": [{ "name": "next" }],
-    "incremental": true,
+    /* ------------------------------- STRICTNESS ------------------------------- */
 
-    /* Path Aliases */
-    "baseUrl": ".",
+    "strict": true, // Enables all strict type-checking options
+    "noUncheckedIndexedAccess": true, // Adds undefined to object index signatures, making them safer
+    "checkJs": true, // Enables type checking for JavaScript files
+
+    /* ---------------------------- BUNDLED PROJECTS ---------------------------- */
+
+    "lib": ["dom", "dom.iterable", "ES2022"], // Specifies the libraries to include during compilation
+    "noEmit": true, // Prevents TypeScript from emitting JavaScript files
+    "module": "ESNext", // Specifies the module code generation (ESNext modules)
+    "moduleResolution": "Bundler", // Uses bundler-specific module resolution (ideal for Next.js/Vite)
+    "jsx": "preserve", // Preserves JSX in output to let bundlers handle it (Next.js behavior)
+    "plugins": [{ "name": "next" }], // Loads the Next.js TypeScript plugin for better integration
+    "incremental": true, // Enables incremental compilation to improve build performance
+
+    /* ------------------------------- PATH ALIASES ------------------------------- */
+
+    "baseUrl": ".", // Sets the base directory for module resolution
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"] // Defines a path alias (@) to simplify imports from the src directory
     }
   },
   "include": [
-    ".eslintrc.cjs",
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.cjs",
-    "**/*.js",
-    ".next/types/**/*.ts"
+    ".eslintrc.cjs", // Includes ESLint config file in the compilation
+    "next-env.d.ts", // Includes Next.js type declarations
+    "**/*.ts", // Includes all TypeScript files in the project
+    "**/*.tsx", // Includes all TypeScript files using JSX
+    "**/*.cjs", // Includes all CommonJS JavaScript files
+    "**/*.js", // Includes all JavaScript files
+    ".next/types/**/*.ts" // Includes Next.js specific type declarations for the build process
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules" // Excludes the node_modules folder from compilation
+  ]
 }

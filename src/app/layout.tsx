@@ -1,19 +1,19 @@
-import "@/styles/globals.css";
+import '@/styles/globals.css';
 
-import { GeistSans } from "geist/font/sans";
-import { type Metadata } from "next";
-import { ThemeProvider } from "next-themes";
-import { QueryProvider } from "@/components/reactquery/query-provider";
-import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { TRPCReactProvider } from "@/trpc/react";
-import { BreadcrumbProvider } from "@/contexts/breadcrumb";
-import { NextAuthProvider } from "@/server/auth/sessionprovider";
+import { GeistSans } from 'geist/font/sans';
+import { type Metadata } from 'next';
+import { ThemeProvider } from 'next-themes';
+import { QueryProvider } from '@/components/reactquery/query-provider';
+import { Toaster } from '@/components/ui/toaster';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { TRPCReactProvider } from '@/trpc/react';
+import { BreadcrumbProvider } from '@/contexts/breadcrumb';
+import { NextAuthProvider } from '@/server/auth/sessionprovider';
 
 export const metadata: Metadata = {
-  title: "ThaiBoxe & Sartorato",
-  description: "O melhor gerenciador de sistemas de Artes Marciais",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  title: 'ThaiBoxe & Sartorato',
+  description: 'O melhor gerenciador de sistemas de Artes Marciais',
+  icons: [{ rel: 'icon', url: '/favicon.ico' }],
 };
 
 export default function RootLayout({

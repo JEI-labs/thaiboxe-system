@@ -1,21 +1,21 @@
-"use client";
+'use client';
 
-import { BreadcrumbUpdater } from "@/contexts/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { UserPlus } from "lucide-react";
-import { api } from "@/trpc/react";
-import { StudentCard } from "@/components/studentCard/studentCard.component";
-import { LoadingContent } from "@/components/LoadingContent";
-import { toast } from "@/hooks/use-toast";
+import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
+import { Button } from '@/components/ui/button';
+import { UserPlus } from 'lucide-react';
+import { api } from '@/trpc/react';
+import { StudentCard } from '@/components/studentCard/studentCard.component';
+import { LoadingContent } from '@/components/LoadingContent';
+import { toast } from '@/hooks/use-toast';
 
 const breadcrumbItems = [
   {
-    label: "Home",
-    href: "/dashboard",
+    label: 'Home',
+    href: '/dashboard',
   },
   {
-    label: "Alunos",
-    href: "/students",
+    label: 'Alunos',
+    href: '/students',
   },
 ];
 
@@ -27,7 +27,7 @@ export default function StudentsPage() {
     },
     onError: (error) => {
       toast({
-        title: "Erro ao deletar aluno",
+        title: 'Erro ao deletar aluno',
         description: error.message,
       });
     },
@@ -61,7 +61,7 @@ export default function StudentsPage() {
             <StudentCard
               key={student.id}
               name={student.name}
-              avatar={student?.avatar!}
+              avatar={student?.avatar || ''}
               email={student.email}
               onClick={() => handleDeleteStudent(student.id)}
             />
