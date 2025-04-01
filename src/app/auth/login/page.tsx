@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   AlertCircle,
@@ -7,56 +7,56 @@ import {
   EyeOff,
   LoaderCircle,
   Mail,
-} from "lucide-react";
-import Link from "next/link";
+} from 'lucide-react';
+import Link from 'next/link';
 
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useState } from "react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
-import { Form } from "@/components/ui/form";
-import { FormInputComponent } from "@/components/forms/formInput/formInput.component";
-import { AuthLayout } from "@/components/layout/AuthLayout";
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useState } from 'react';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { signIn } from 'next-auth/react';
+import { Form } from '@/components/ui/form';
+import { FormInputComponent } from '@/components/forms/formInput/formInput.component';
+import { AuthLayout } from '@/components/layout/AuthLayout';
 
 export default function LoginPage(): JSX.Element {
   const [seePass, setSeePass] = useState(false);
   const [disabled, setDisabled] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
 
   const PasswordIcon = seePass ? EyeOff : Eye;
 
   const formSchema = z.object({
     username: z
       .string()
-      .email("Por favor, insira um endereço de e-mail válido."),
+      .email('Por favor, insira um endereço de e-mail válido.'),
     password: z
       .string()
-      .min(6, { message: "A senha deve ter pelo menos 6 caracteres." })
-      .max(20, { message: "A senha pode ter no máximo 20 caracteres." }),
+      .min(6, { message: 'A senha deve ter pelo menos 6 caracteres.' })
+      .max(20, { message: 'A senha pode ter no máximo 20 caracteres.' }),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
-      password: "",
+      username: '',
+      password: '',
     },
   });
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     setDisabled(true);
-    const result = await signIn("credentials", { ...data, redirect: false });
+    const result = await signIn('credentials', { ...data, redirect: false });
     if (result && result.status === 401) {
-      setErrorMessage("E-mail ou senha incorreto.");
+      setErrorMessage('E-mail ou senha incorreto.');
     } else if (result && result.status === 200) {
-      window.location.href = "/dashboard";
-      setErrorMessage("");
+      window.location.href = '/dashboard';
+      setErrorMessage('');
       form.reset();
     } else {
-      setErrorMessage("Houve um erro inexperado, tente novamente mais tarde.");
+      setErrorMessage('Houve um erro inexperado, tente novamente mais tarde.');
     }
     setDisabled(false);
   }
@@ -94,7 +94,7 @@ export default function LoginPage(): JSX.Element {
                 control={form.control}
                 name="password"
                 label="Senha"
-                type={seePass ? "text" : "password"}
+                type={seePass ? 'text' : 'password'}
                 placeholder="Digite sua senha"
                 required
                 disabled={disabled}

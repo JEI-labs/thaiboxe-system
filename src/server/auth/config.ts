@@ -1,8 +1,9 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import DiscordProvider from "next-auth/providers/discord";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { PrismaAdapter } from '@auth/prisma-adapter';
+import DiscordProvider from 'next-auth/providers/discord';
 
-import { prisma } from "@/server/db";
-import { DefaultSession } from "next-auth";
+import { prisma } from '@/server/db';
+import { DefaultSession } from 'next-auth';
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -10,13 +11,13 @@ import { DefaultSession } from "next-auth";
  *
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
-declare module "next-auth" {
+declare module 'next-auth' {
   interface Session extends DefaultSession {
     user: {
       id: number;
       name: string;
       email: string;
-    } & DefaultSession["user"];
+    } & DefaultSession['user'];
   }
 
   // interface User {

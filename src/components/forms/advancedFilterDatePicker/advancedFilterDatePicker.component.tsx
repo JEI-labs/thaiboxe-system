@@ -1,26 +1,26 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import * as React from 'react';
 
-import { Trash2 } from "lucide-react";
-import { ptBR } from "date-fns/locale";
-import { Button } from "@/components/ui/button";
+import { Trash2 } from 'lucide-react';
+import { ptBR } from 'date-fns/locale';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenuLabel,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import type {
   AdvancedFilterDatePickerProps,
   AdvancedFilterDatePickerType,
-} from "./advancedFilterDatePicker.types";
-import { useBoolean } from "@/hooks/useBooleanState/useBooleanState.hook";
-import moment from "moment-timezone";
-import { DefaultCalendar } from "@/components/ui/default-calendar";
+} from './advancedFilterDatePicker.types';
+import { useBoolean } from '@/hooks/useBooleanState/useBooleanState.hook';
+import moment from 'moment-timezone';
+import { DefaultCalendar } from '@/components/ui/default-calendar';
 
-moment.locale("pt-br");
+moment.locale('pt-br');
 
 export function AdvancedFilterDatePicker({
   showDeleteButton = true,
@@ -39,35 +39,35 @@ export function AdvancedFilterDatePicker({
   const handleFormatDate = (
     date?: AdvancedFilterDatePickerType,
   ): AdvancedFilterDatePickerType => {
-    let formattedDate: AdvancedFilterDatePickerType = {
+    const formattedDate: AdvancedFilterDatePickerType = {
       from: date?.from,
       to: date?.to,
     };
 
     if (date?.from && date.to) {
       formattedDate.from = moment(date.from)
-        .tz("America/Sao_Paulo")
-        .startOf("day")
+        .tz('America/Sao_Paulo')
+        .startOf('day')
         .toDate();
       formattedDate.to = moment(date.to)
-        .tz("America/Sao_Paulo")
-        .endOf("day")
+        .tz('America/Sao_Paulo')
+        .endOf('day')
         .toDate();
     } else if (date?.from) {
       formattedDate.from = moment(date.from)
-        .tz("America/Sao_Paulo")
-        .startOf("day")
+        .tz('America/Sao_Paulo')
+        .startOf('day')
         .toDate();
       formattedDate.to = moment(date.from)
-        .tz("America/Sao_Paulo")
-        .endOf("day")
+        .tz('America/Sao_Paulo')
+        .endOf('day')
         .toDate();
     }
 
     return formattedDate;
   };
 
-  const handleChangeDate = (date: AdvancedFilterDatePickerType) => {
+  const handleChangeDate = (date: AdvancedFilterDatePickerType | undefined) => {
     const formattedDate = handleFormatDate(date);
     setDate(formattedDate);
 
@@ -97,7 +97,7 @@ export function AdvancedFilterDatePicker({
       <DropdownMenuContent align="start">
         <div className="flex items-center justify-between">
           <DropdownMenuLabel>
-            {props?.description ?? "Selecione a data abaixo"}
+            {props?.description ?? 'Selecione a data abaixo'}
           </DropdownMenuLabel>
           {showDeleteButton && (
             <Button variant="ghost" onClick={props.onDelete}>
@@ -110,7 +110,6 @@ export function AdvancedFilterDatePicker({
         <DefaultCalendar
           mode="range"
           selected={date}
-          // @ts-ignore
           onSelect={handleChangeDate}
           numberOfMonths={props.numberOfMonths ?? 1}
           locale={ptBR}

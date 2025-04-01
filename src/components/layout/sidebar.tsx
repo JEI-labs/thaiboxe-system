@@ -1,16 +1,12 @@
-"use client";
+'use client';
 
 import {
-  Calendar,
-  Home,
-  Inbox,
   LayoutDashboard,
   Package,
   ReceiptText,
-  Search,
   Settings,
   Users,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -22,46 +18,46 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import { Skeleton } from "../ui/skeleton";
-import { Separator } from "../ui/separator";
+} from '@/components/ui/sidebar';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { Skeleton } from '../ui/skeleton';
+import { Separator } from '../ui/separator';
 
 export function AppSidebar() {
-  const [logoSrc, setLogoSrc] = useState("");
+  const [logoSrc, setLogoSrc] = useState('');
 
   useEffect(() => {
-    setLogoSrc("/images/logo.png");
+    setLogoSrc('/images/logo.png');
   }, []);
 
   const items = [
     {
-      title: "Dashboard",
-      url: "/dashboard",
+      title: 'Dashboard',
+      url: '/dashboard',
       icon: LayoutDashboard,
     },
     {
-      title: "Alunos",
-      url: "/students",
+      title: 'Alunos',
+      url: '/students',
       icon: Users,
     },
     {
-      title: "Financeiro",
-      url: "/financial",
+      title: 'Financeiro',
+      url: '/financial',
       icon: ReceiptText,
     },
     {
-      title: "Planos",
-      url: "/plans",
+      title: 'Planos',
+      url: '/plans',
       icon: Package,
     },
   ];
 
   const footerItems = [
     {
-      title: "Configurações",
-      url: "/settings",
+      title: 'Configurações',
+      url: '/settings',
       icon: Settings,
     },
   ];

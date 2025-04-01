@@ -1,5 +1,5 @@
-import Image from "next/image";
-import { ScrollArea } from "../ui/scroll-area";
+import Image from 'next/image';
+import { ScrollArea } from '../ui/scroll-area';
 
 export function AuthLayout({
   children,

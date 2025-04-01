@@ -1,8 +1,8 @@
-import React from "react";
+import React from 'react';
 
-import { Controller, FieldValues, UseControllerProps } from "react-hook-form";
+import { Controller, FieldValues, UseControllerProps } from 'react-hook-form';
 
-import { FormCheckboxListComponentProps } from "./formCheckboxListInput.types";
+import { FormCheckboxListComponentProps } from './formCheckboxListInput.types';
 import {
   FormControl,
   FormDescription,
@@ -10,8 +10,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
+} from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export const FormCheckboxListComponent = <T extends FieldValues>({
   control,
@@ -63,6 +63,7 @@ export const FormCheckboxListComponent = <T extends FieldValues>({
                                   ? field.onChange([...field.value, item.id])
                                   : field.onChange(
                                       field.value?.filter(
+                                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                         (value: any) => value !== item.id,
                                       ),
                                     );

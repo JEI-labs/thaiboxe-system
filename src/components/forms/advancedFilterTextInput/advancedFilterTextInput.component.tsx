@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import * as React from 'react';
 
-import { Trash2 } from "lucide-react";
-import type { DefaultValues, FieldValues } from "react-hook-form";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import lodash from "lodash";
-import { Button } from "@/components/ui/button";
+import { Trash2 } from 'lucide-react';
+import type { DefaultValues, FieldValues } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import lodash from 'lodash';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenuLabel,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import type { AdvancedFilterTextInputProps } from "./advancedFilterTextInput.types";
-import { useBoolean } from "@/hooks/useBooleanState/useBooleanState.hook";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { FormInputComponent } from "../formInput/formInput.component";
-import { Form } from "@/components/ui/form";
+} from '@/components/ui/dropdown-menu';
+import type { AdvancedFilterTextInputProps } from './advancedFilterTextInput.types';
+import { useBoolean } from '@/hooks/useBooleanState/useBooleanState.hook';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { FormInputComponent } from '../formInput/formInput.component';
+import { Form } from '@/components/ui/form';
 
 export function AdvancedFilterTextInput<T extends FieldValues>({
   showDeleteButton = true,
@@ -35,12 +35,13 @@ export function AdvancedFilterTextInput<T extends FieldValues>({
 }: Readonly<AdvancedFilterTextInputProps<T>>): JSX.Element {
   const open = useBoolean(props.open);
 
-  const inputProps = lodash.omit(props, ["zodResolver", "description"]);
+  const inputProps = lodash.omit(props, ['zodResolver', 'description']);
 
   const form = useForm<T>({
     resolver: props.zodResolver ? zodResolver(props.zodResolver) : undefined,
-    defaultValues: defaultValue ?? ({ [props.name]: "" } as DefaultValues<T>),
-    mode: validationMode ?? "onSubmit",
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    defaultValues: defaultValue ?? ({ [props.name]: '' } as DefaultValues<T>),
+    mode: validationMode ?? 'onSubmit',
   });
 
   const onSubmit = (data: T): void => {
@@ -69,7 +70,7 @@ export function AdvancedFilterTextInput<T extends FieldValues>({
       <DropdownMenuContent align="start">
         <div className="flex items-center justify-between">
           <DropdownMenuLabel>
-            {props?.description ?? "Informe os dados abaixo"}
+            {props?.description ?? 'Informe os dados abaixo'}
           </DropdownMenuLabel>
           {showDeleteButton && (
             <Button variant="ghost" onClick={onDelete}>

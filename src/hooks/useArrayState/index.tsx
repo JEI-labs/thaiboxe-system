@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import type { UseArrayStateReturn } from "./types";
+import type { UseArrayStateReturn } from './types';
 
 export const useArrayState = <T,>(
   initialState: Array<T> = [],
 ): UseArrayStateReturn<T> => {
   const [state, setState] = useState<Array<T>>(initialState);
 
-  const add = (value: T): T[] => {
+  const add = (value: T): Array<T> => {
     let returnedState = state;
 
     setState((prevState) => {
@@ -19,7 +19,7 @@ export const useArrayState = <T,>(
     return returnedState;
   };
 
-  const update = (index: number, value: T): T[] => {
+  const update = (index: number, value: T): Array<T> => {
     let returnedState = state;
 
     setState((prevState) => {
@@ -33,7 +33,7 @@ export const useArrayState = <T,>(
     return returnedState;
   };
 
-  const remove = (index: number): T[] => {
+  const remove = (index: number): Array<T> => {
     let returnedState = state;
 
     setState((prevState) => {

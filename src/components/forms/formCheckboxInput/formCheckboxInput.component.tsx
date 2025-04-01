@@ -1,8 +1,8 @@
-import React from "react";
+import React from 'react';
 
-import { Controller, FieldValues, UseControllerProps } from "react-hook-form";
+import { Controller, FieldValues, UseControllerProps } from 'react-hook-form';
 
-import { FormCheckboxComponentProps } from "./formCheckboxInput.types";
+import { FormCheckboxComponentProps } from './formCheckboxInput.types';
 import {
   FormControl,
   FormDescription,
@@ -10,8 +10,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
+} from '@/components/ui/form';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export const FormCheckboxComponent = <T extends FieldValues>({
   control,

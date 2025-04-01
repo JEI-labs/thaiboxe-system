@@ -1,8 +1,8 @@
-import { SelectItemType } from "@/common/types/select";
+import { SelectItemType } from '@/common/types/select';
 
 export interface FormCheckboxListComponentProps {
   title?: string;
   description?: string;
   label?: string;
-  options: SelectItemType[];
+  options: Array<SelectItemType>;
 }

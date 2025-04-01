@@ -19,6 +19,7 @@
     "preview": "next build && next start",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "prepare": "husky",
     "db:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
@@ -26,6 +27,7 @@
     "@hookform/resolvers": "^4.0.0",
     "@prisma/client": "^6.0.0",
     "@radix-ui/react-accordion": "^1.2.1",
+    "@radix-ui/react-alert-dialog": "^1.1.6",
     "@radix-ui/react-avatar": "^1.1.1",
     "@radix-ui/react-checkbox": "^1.1.4",
     "@radix-ui/react-dialog": "^1.1.6",
@@ -72,6 +74,8 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
     "@types/eslint": "^8.56.10",
     "@types/lodash": "^4.17.16",
     "@types/node": "^20.17.23",
@@ -80,15 +84,27 @@
     "@types/vanilla-masker": "^1.2.4",
     "@typescript-eslint/eslint-plugin": "^8.1.0",
     "@typescript-eslint/parser": "^8.1.0",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "^15.0.1",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.2.4",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.5",
+    "eslint-plugin-react": "^7.37.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
     "postcss": "^8.4.39",
     "prettier": "^3.3.2",
     "prettier-plugin-tailwindcss": "^0.6.5",
     "prisma": "^6.0.0",
     "tailwindcss": "^3.4.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.29.0"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   },
   "ct3aMetadata": {
     "initVersion": "7.38.1"

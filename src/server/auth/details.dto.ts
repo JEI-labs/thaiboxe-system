@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 interface Address {
   id: string;
   street: string;
@@ -45,7 +46,7 @@ interface Holder {
   establishment_type: string;
   main_cnae: string;
   revenue: string;
-  address: Address[];
+  address: Array<Address>;
   created_at: string;
   updated_at: string;
   hr_name: string | null;
@@ -54,25 +55,25 @@ interface Holder {
   payroll_day: string | null;
   document: string;
   flow_business_id: string | null;
-  partners: Partner[];
+  partners: Array<Partner>;
 }
 
 interface User {
-  id: string;
-  name: string;
-  email: string;
-  username: string;
-  created_at: string;
-  updated_at: string;
-  password_reseted_at: string | null;
-  "2fa_verified_at": string | null;
-  status: string;
-  role: string;
-  pin_reset_at: string | null;
-  password_expired: boolean;
-  email_notifications: boolean;
-  has_pin: boolean;
-  has_password: boolean;
+  'id': string;
+  'name': string;
+  'email': string;
+  'username': string;
+  'created_at': string;
+  'updated_at': string;
+  'password_reseted_at': string | null;
+  '2fa_verified_at': string | null;
+  'status': string;
+  'role': string;
+  'pin_reset_at': string | null;
+  'password_expired': boolean;
+  'email_notifications': boolean;
+  'has_pin': boolean;
+  'has_password': boolean;
 }
 
 export interface detailsDTO {
@@ -122,9 +123,9 @@ export interface detailsDTO {
   address: Address;
   holder: Holder;
   plan: any | null;
-  escrows: any[];
-  buckets: any[];
-  invoices: any[];
+  escrows: Array<any>;
+  buckets: Array<any>;
+  invoices: Array<any>;
   balance: number;
   has_pin: boolean;
   has_password: boolean;

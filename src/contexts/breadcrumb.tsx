@@ -1,6 +1,12 @@
-"use client";
+'use client';
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 
 interface BreadcrumbItem {
   label: string;
@@ -8,9 +14,9 @@ interface BreadcrumbItem {
 }
 
 interface BreadcrumbContextType {
-  breadcrumbItems: BreadcrumbItem[];
-  setBreadcrumbItems: (items: BreadcrumbItem[]) => void;
-  addBreadcrumbItem: (item: BreadcrumbItem) => void;
+  breadcrumbItems: Array<BreadcrumbItem>;
+  setBreadcrumbItems: (_items: Array<BreadcrumbItem>) => void;
+  addBreadcrumbItem: (_item: BreadcrumbItem) => void;
   resetBreadcrumb: () => void;
 }
 
@@ -21,7 +27,7 @@ const BreadcrumbContext = createContext<BreadcrumbContextType | undefined>(
 export const useBreadcrumb = () => {
   const context = useContext(BreadcrumbContext);
   if (!context) {
-    throw new Error("useBreadcrumb must be used within a BreadcrumbProvider");
+    throw new Error('useBreadcrumb must be used within a BreadcrumbProvider');
   }
   return context;
 };
@@ -31,7 +37,9 @@ interface BreadcrumbProviderProps {
 }
 
 export const BreadcrumbProvider = ({ children }: BreadcrumbProviderProps) => {
-  const [breadcrumbItems, setBreadcrumbItems] = useState<BreadcrumbItem[]>([]);
+  const [breadcrumbItems, setBreadcrumbItems] = useState<Array<BreadcrumbItem>>(
+    [],
+  );
 
   const addBreadcrumbItem = (item: BreadcrumbItem) => {
     setBreadcrumbItems((prevItems) => [...prevItems, item]);
@@ -55,8 +63,16 @@ export const BreadcrumbProvider = ({ children }: BreadcrumbProviderProps) => {
   );
 };
 
-export const BreadcrumbUpdater = ({ items }: { items: BreadcrumbItem[] }) => {
+export const BreadcrumbUpdater = ({
+  items,
+}: {
+  items: Array<BreadcrumbItem>;
+}) => {
   const { setBreadcrumbItems } = useBreadcrumb();
-  setBreadcrumbItems(items);
+
+  useEffect(() => {
+    setBreadcrumbItems(items);
+  }, [items, setBreadcrumbItems]);
+
   return null;
 };
