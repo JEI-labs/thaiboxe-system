@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
 /* eslint-disable react/require-default-props */
-import React from "react";
-import Link from "next/link";
+import React from 'react';
+import Link from 'next/link';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,8 +10,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { useBreadcrumb } from "@/contexts/breadcrumb";
+} from '@/components/ui/breadcrumb';
+import { useBreadcrumb } from '@/contexts/breadcrumb';
 
 export type BreadcrumbItem = {
   label: string;

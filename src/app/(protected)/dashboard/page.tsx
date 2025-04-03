@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { Suspense, useRef } from "react";
-import { BreadcrumbUpdater } from "@/contexts/breadcrumb";
-import { api } from "@/trpc/react";
-import { toBase64 } from "@/common/utils/files";
+import { Suspense, useRef } from 'react';
+import { api } from '@/trpc/react';
+import { toBase64 } from '@/common/utils/files';
+import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 
 const breadcrumbItems = [
   {
-    label: "Home",
-    href: "/dashboard",
+    label: 'Home',
+    href: '/dashboard',
   },
   {
-    label: "Dashboard",
-    href: "/dashboard",
+    label: 'Dashboard',
+    href: '/dashboard',
   },
 ];
 
@@ -28,7 +28,7 @@ export default function DashboardPage() {
       file: base64,
     });
 
-    console.log("URL pública:", result.url);
+    console.log('URL pública:', result.url);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,7 +57,7 @@ export default function DashboardPage() {
             onClick={triggerFileInput}
             disabled={isPending}
           >
-            {isPending ? "Enviando..." : "Upload de Imagem"}
+            {isPending ? 'Enviando...' : 'Upload de Imagem'}
           </button>
 
           <input

@@ -1,6 +1,6 @@
-import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
-import { studentRouter } from "./routers/students";
-import { filesRouter } from "./routers/files";
+import { createCallerFactory, createTRPCRouter } from '@/server/api/trpc';
+import { studentRouter } from './routers/students';
+import { filesRouter } from './routers/files';
 
 /**
  * This is the primary router for your server.

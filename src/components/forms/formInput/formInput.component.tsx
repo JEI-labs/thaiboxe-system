@@ -1,11 +1,11 @@
-import React from "react";
+import React from 'react';
 
-import type { FieldValues, UseControllerProps } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import type { FieldValues, UseControllerProps } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 
-import type { FormInputComponentProps } from "./formInput.component.types";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import type { FormInputComponentProps } from './formInput.component.types';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import {
   FormControl,
   FormDescription,
@@ -13,7 +13,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 
 export const FormInputComponent = <T extends FieldValues>({
   control,
@@ -35,7 +35,7 @@ export const FormInputComponent = <T extends FieldValues>({
 
   const handleChangeText = (value: string): string => {
     if (!value.trim().length) {
-      return "";
+      return '';
     }
     return handleRemoveMask(value);
   };
@@ -51,7 +51,7 @@ export const FormInputComponent = <T extends FieldValues>({
             control={control}
             name={name}
             render={({ field }) => (
-              <FormItem className={cn(props.generalclassname ?? "")}>
+              <FormItem className={cn(props.generalclassname ?? '')}>
                 <FormLabel>{props.label}</FormLabel>
                 <FormControl>
                   <div className="relative">
@@ -59,7 +59,7 @@ export const FormInputComponent = <T extends FieldValues>({
                     <Input
                       {...field}
                       {...props}
-                      className={cn(props.className, props.icon ? "pl-11" : "")}
+                      className={cn(props.className, props.icon ? 'pl-11' : '')}
                       value={mask ? mask(field.value) : field.value}
                       placeholder={props.placeholder}
                       onChange={(

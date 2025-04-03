@@ -1,7 +1,6 @@
-
 export interface FormCheckboxComponentProps {
-  title?: string
-  topDescription?: string
-  bottomDescription?: string
-  label?: string
+  title?: string;
+  topDescription?: string;
+  bottomDescription?: string;
+  label?: string;
 }

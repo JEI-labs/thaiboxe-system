@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState } from 'react';
 
-import type { UseBooleanReturn } from "./useBooleanState.types";
+import type { UseBooleanReturn } from './useBooleanState.types';
 
 export const useBoolean = (defaultValue?: boolean): UseBooleanReturn => {
   const [value, setValue] = useState(!!defaultValue);

@@ -1,7 +1,7 @@
-import { addDays, isValid, parse } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import moment from "moment";
-import "moment/locale/pt-br";
+import { addDays, isValid, parse } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import moment from 'moment';
+import 'moment/locale/pt-br';
 
 /**
  * Formats a date according to a specified pattern.
@@ -25,12 +25,12 @@ import "moment/locale/pt-br";
  */
 export function formatDate(
   date: Date | string | number,
-  pattern = "DD/MM/YYYY [às] HH:mm",
+  pattern = 'DD/MM/YYYY [às] HH:mm',
 ): string {
   if (!moment(date).isValid()) {
-    return "";
+    return '';
   }
-  return moment(date).locale("pt-br").format(pattern);
+  return moment(date).locale('pt-br').format(pattern);
 }
 
 export const getNextBusinessDay = (date: Date): Date => {
@@ -99,12 +99,12 @@ export const parseDate = (
  */
 export const timestampToDate = (
   timestamp: number,
-  pattern = "DD/MM/YYYY [às] HH:mm",
+  pattern = 'DD/MM/YYYY [às] HH:mm',
 ): string => {
   // Verifica se o timestamp é válido
   const date = moment(timestamp * (timestamp < 10000000000 ? 1000 : 1));
   if (!date.isValid()) {
-    return "";
+    return '';
   }
-  return date.locale("pt-br").format(pattern);
+  return date.locale('pt-br').format(pattern);
 };

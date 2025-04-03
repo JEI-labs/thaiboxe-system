@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { Suspense } from "react";
-import { BreadcrumbUpdater } from "@/contexts/breadcrumb";
+import { Suspense } from 'react';
+import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 
 const breadcrumbItems = [
   {
-    label: "Home",
-    href: "/dashboard",
+    label: 'Home',
+    href: '/dashboard',
   },
   {
-    label: "Segurança",
-    href: "/security",
+    label: 'Segurança',
+    href: '/security',
   },
 ];
 

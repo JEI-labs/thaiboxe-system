@@ -1,7 +1,7 @@
-import React from "react";
-import type { StyledSwitchComponentProps } from "./styledSwitchInput.types";
-import { cn } from "@/lib/utils";
-import { Switch } from "@/components/ui/switch";
+import React from 'react';
+import type { StyledSwitchComponentProps } from './styledSwitchInput.types';
+import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/switch';
 
 export const StyledSwitchComponent = ({
   ...props
@@ -9,11 +9,11 @@ export const StyledSwitchComponent = ({
   return (
     <div
       className={cn(
-        "flex w-full items-center justify-between rounded-lg border p-4",
+        'flex w-full items-center justify-between rounded-lg border p-4',
         props.className,
       )}
     >
-      <div className={cn("flex flex-col")}>
+      <div className={cn('flex flex-col')}>
         {props.title && (
           <span className="text-sm font-semibold">{props.title}</span>
         )}

@@ -1,5 +1,5 @@
-import VMasker from "vanilla-masker";
-import { formatToBRL } from "brazilian-values";
+import VMasker from 'vanilla-masker';
+import { formatToBRL } from 'brazilian-values';
 
 /**
  * Formats a given value as CPF or CNPJ based on its length.
@@ -10,13 +10,13 @@ import { formatToBRL } from "brazilian-values";
  * @returns The formatted value as a CPF or CNPJ.
  */
 export function maskCpfCnpj(value?: string | null): string {
-  if (!value) return "";
-  const cleanValue = value?.replace(/\D/g, "") ?? "";
+  if (!value) return '';
+  const cleanValue = value?.replace(/\D/g, '') ?? '';
 
   if (cleanValue.length <= 11) {
-    return VMasker.toPattern(cleanValue, "999.999.999-99");
+    return VMasker.toPattern(cleanValue, '999.999.999-99');
   }
-  return VMasker.toPattern(cleanValue, "99.999.999/9999-99");
+  return VMasker.toPattern(cleanValue, '99.999.999/9999-99');
 }
 
 /**
@@ -27,7 +27,7 @@ export function maskCpfCnpj(value?: string | null): string {
  * @returns The numeric string with non-numeric characters removed.
  */
 export function unmaskNonNumerics(value: string): string {
-  return value.replace(/\D/g, "");
+  return value.replace(/\D/g, '');
 }
 
 /**
@@ -44,7 +44,7 @@ export function unmaskNonNumerics(value: string): string {
  * ```
  */
 export const maskPhoneBRL = (value: string): string =>
-  VMasker.toPattern(value, { pattern: "(+99) 99 99999-9999" });
+  VMasker.toPattern(value, { pattern: '(+99) 99 99999-9999' });
 
 /**
  *  Masks a Brazilian phone number in the format (99) 99999-9999.
@@ -53,7 +53,7 @@ export const maskPhoneBRL = (value: string): string =>
  * @returns {string} - The formatted phone number with the specified mask.
  */
 export const maskPhoneWithoutDDI = (value: string): string =>
-  VMasker.toPattern(value, { pattern: "(99) 99999-9999" });
+  VMasker.toPattern(value, { pattern: '(99) 99999-9999' });
 
 /**
  * Removes all line breaks from the input string.
@@ -68,10 +68,10 @@ export const maskPhoneWithoutDDI = (value: string): string =>
  */
 export const removeLineBreaks = (value: string): string => {
   if (!value?.length) {
-    return "";
+    return '';
   }
 
-  return value.replace(/[\r\n]+/g, "");
+  return value.replace(/[\r\n]+/g, '');
 };
 
 /**
@@ -90,27 +90,27 @@ export const removeLineBreaks = (value: string): string => {
  */
 export const maskDecimalWithAcronym = (
   value: number | string,
-  acronym = "R$",
-  positionAcronym: "left" | "right" = "left",
+  acronym = 'R$',
+  positionAcronym: 'left' | 'right' = 'left',
   precision = 2,
   acronymWithSpace = true,
 ): string => {
-  if (value === "-") {
+  if (value === '-') {
     return value;
   }
 
   if (value !== 0 && !value) {
-    return "";
+    return '';
   }
 
   const maskedValue = VMasker?.toMoney(Number(value).toFixed(0), {
     precision,
-    separator: ",",
+    separator: ',',
   });
   const isNegative = Number(VMasker.toNumber(value)) < 0;
 
   if (isNegative) {
-    if (positionAcronym === "left") {
+    if (positionAcronym === 'left') {
       return acronymWithSpace
         ? `${acronym} -${maskedValue}`
         : `${acronym}-${maskedValue}`;
@@ -120,7 +120,7 @@ export const maskDecimalWithAcronym = (
       : `-${maskedValue}${acronym}`;
   }
 
-  if (positionAcronym === "left") {
+  if (positionAcronym === 'left') {
     return acronymWithSpace
       ? `${acronym} ${maskedValue}`
       : `${acronym}${maskedValue}`;
@@ -142,16 +142,16 @@ export const maskDecimalWithAcronym = (
  */
 export const maskIntegerWithAcronym = (
   value: number | string,
-  acronym = "R$",
-  positionAcronym: "left" | "right" = "left",
+  acronym = 'R$',
+  positionAcronym: 'left' | 'right' = 'left',
   precision = 2,
   addMinusSignal = true,
 ): string => {
-  if (value === "-") {
+  if (value === '-') {
     return value;
   }
   if (value !== 0 && !value) {
-    return "";
+    return '';
   }
 
   const numericValue = Number(value);
@@ -160,14 +160,14 @@ export const maskIntegerWithAcronym = (
   const formattedValue = Math.abs(numericValue).toFixed(precision);
 
   if (isNegative && addMinusSignal) {
-    if (positionAcronym === "left") {
+    if (positionAcronym === 'left') {
       return `${acronym} -${formattedValue}`;
     }
 
     return `-${formattedValue} ${acronym}`;
   }
 
-  if (positionAcronym === "left") {
+  if (positionAcronym === 'left') {
     return `${acronym} ${formattedValue}`;
   }
   return `${formattedValue} ${acronym}`;
@@ -185,10 +185,10 @@ export const maskIntegerWithAcronym = (
  * console.log(unmaskedValue); // Output: 15098
  */
 export const unmaskDecimal = (value: string): number => {
-  if (!value || typeof value !== "string") {
+  if (!value || typeof value !== 'string') {
     return 0;
   }
-  const unmaskedValue = value.replace(/[^\d,]/g, "");
+  const unmaskedValue = value.replace(/[^\d,]/g, '');
   return Number(VMasker.toNumber(unmaskedValue));
 };
 
@@ -221,7 +221,7 @@ export const convertVanillaMaskToNumber = (input: string | number): number => {
   // Use regular expression to remove dots and replace commas with dots
 
   const maskedValue = maskDecimal(String(input));
-  const cleanString = maskedValue.replace(/\./g, "").replace(/,/, ".");
+  const cleanString = maskedValue.replace(/\./g, '').replace(/,/, '.');
 
   // Use parseFloat to parse the string as a floating-point number
   const numberValue = parseFloat(cleanString);
@@ -243,9 +243,9 @@ export const convertVanillaMaskToNumber = (input: string | number): number => {
  * const maskedValue = maskDecimal(originalValue, ',');
  * console.log(maskedValue); // Output: '12,345.67' (or your custom currency format)
  */
-export const maskDecimal = (value: string, separator = ","): string => {
+export const maskDecimal = (value: string, separator = ','): string => {
   if (value === undefined || value === null) {
-    return "";
+    return '';
   }
 
   const masked = VMasker.toMoney(value, {
@@ -266,17 +266,17 @@ export const maskDecimal = (value: string, separator = ","): string => {
  * @returns {string} A string containing only numeric characters.
  */
 export const maskOnlyNumbers = (value: string): string => {
-  if (value == null) return "";
-  if (value.length > 1 && value.startsWith("0"))
+  if (value == null) return '';
+  if (value.length > 1 && value.startsWith('0'))
     return value.slice(1, value.length);
 
-  return String(value).replace(/\D/g, "");
+  return String(value).replace(/\D/g, '');
 };
 
 export const maskOnlyNumbersV2 = (value: string): string => {
-  if (value == null) return "";
+  if (value == null) return '';
 
-  return String(value).replace(/\D/g, "");
+  return String(value).replace(/\D/g, '');
 };
 
 /**
@@ -293,9 +293,9 @@ export const maskOnlyNumbersV2 = (value: string): string => {
  * ```
  */
 export function maskCep(value?: string | null): string {
-  if (!value) return "";
-  const cleanValue = value.replace(/\D/g, ""); // Remove non-digit characters
-  return VMasker.toPattern(cleanValue, "99999-999"); // Apply CEP mask
+  if (!value) return '';
+  const cleanValue = value.replace(/\D/g, ''); // Remove non-digit characters
+  return VMasker.toPattern(cleanValue, '99999-999'); // Apply CEP mask
 }
 
 export function maskBRL(v: number) {
@@ -304,15 +304,15 @@ export function maskBRL(v: number) {
 
 export function maskMoney({
   value,
-  currency = "BRL",
-  locale = "pt-BR",
+  currency = 'BRL',
+  locale = 'pt-BR',
 }: {
   value: number;
   currency?: string;
   locale?: string;
 }) {
   value = value / 100;
-  const formatOptions = { currency: currency, style: "currency" };
+  const formatOptions = { currency, style: 'currency' };
 
   return value.toLocaleString(
     locale,
@@ -321,7 +321,7 @@ export function maskMoney({
 }
 
 export function maskPercent(v: number) {
-  return v.toLocaleString("pt-br", { minimumFractionDigits: 2 }) + "%";
+  return v.toLocaleString('pt-br', { minimumFractionDigits: 2 }) + '%';
 }
 
 export function maskDocument(document: string) {
@@ -335,17 +335,17 @@ export function maskDocument(document: string) {
 export function maskCnpj(v: string) {
   if (!v) return v;
 
-  v = v.replace(/\D/g, ""); //Remove tudo o que não é dígito
+  v = v.replace(/\D/g, ''); //Remove tudo o que não é dígito
   v = v.substring(0, 14);
-  v = v.replace(/^(\d{2})(\d)/, "$1.$2"); //Coloca ponto entre o segundo e o terceiro dígitos
-  v = v.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3"); //Coloca ponto entre o quinto e o sexto dígitos
-  v = v.replace(/\.(\d{3})(\d)/, ".$1/$2"); //Coloca uma barra entre o oitavo e o nono dígitos
-  v = v.replace(/(\d{4})(\d)/, "$1-$2"); //Coloca um hífen depois do bloco de quatro dígitos
+  v = v.replace(/^(\d{2})(\d)/, '$1.$2'); //Coloca ponto entre o segundo e o terceiro dígitos
+  v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3'); //Coloca ponto entre o quinto e o sexto dígitos
+  v = v.replace(/\.(\d{3})(\d)/, '.$1/$2'); //Coloca uma barra entre o oitavo e o nono dígitos
+  v = v.replace(/(\d{4})(\d)/, '$1-$2'); //Coloca um hífen depois do bloco de quatro dígitos
   return v;
 }
 
 export function unmaskCnpj(value: string) {
-  value = value.replace(/\D/g, ""); // Remove tudo que não é dígito
+  value = value.replace(/\D/g, ''); // Remove tudo que não é dígito
   value = value.substring(0, 14); // Limita a 14 dígitos para evitar números extras
   return value;
 }
@@ -353,56 +353,56 @@ export function unmaskCnpj(value: string) {
 export function maskCpf(v: string) {
   if (!v) return v;
 
-  v = v.replace(/\D/g, ""); //Remove tudo o que não é dígito
+  v = v.replace(/\D/g, ''); //Remove tudo o que não é dígito
   v = v.substring(0, 11);
-  v = v.replace(/(\d{3})(\d)/, "$1.$2"); //Coloca um ponto entre o terceiro e o quarto dígitos
-  v = v.replace(/(\d{3})(\d)/, "$1.$2"); //Coloca um ponto entre o terceiro e o quarto dígitos
+  v = v.replace(/(\d{3})(\d)/, '$1.$2'); //Coloca um ponto entre o terceiro e o quarto dígitos
+  v = v.replace(/(\d{3})(\d)/, '$1.$2'); //Coloca um ponto entre o terceiro e o quarto dígitos
   //de novo (para o segundo bloco de números)
-  v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2"); //Coloca um hífen entre o terceiro e o quarto dígitos
+  v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2'); //Coloca um hífen entre o terceiro e o quarto dígitos
   return v;
 }
 
 export function maskPhone(value: string) {
-  if (!value) return "";
-  value = value.replace(/\D/g, "");
-  value = value.replace(/(\d{2})(\d)/, "($1) $2");
-  value = value.replace(/(\d)(\d{4})$/, "$1-$2");
+  if (!value) return '';
+  value = value.replace(/\D/g, '');
+  value = value.replace(/(\d{2})(\d)/, '($1) $2');
+  value = value.replace(/(\d)(\d{4})$/, '$1-$2');
   return value;
 }
 
 export const normalizePhoneNumber = (value: string | undefined) => {
-  if (!value) return "";
+  if (!value) return '';
 
   return value
-    .replace(/[\D]/g, "")
-    .replace(/(\d{2})(\d)/, "($1) $2")
-    .replace(/(\d{5})(\d)/, "$1-$2")
-    .replace(/(-\d{4})(\d+?)/, "$1");
+    .replace(/[\D]/g, '')
+    .replace(/(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{5})(\d)/, '$1-$2')
+    .replace(/(-\d{4})(\d+?)/, '$1');
 };
 
 export const normalizeCnpjNumber = (value: string | undefined) => {
-  if (!value) return "";
+  if (!value) return '';
 
   return value
-    .replace(/[\D]/g, "")
-    .replace(/(\d{2})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1/$2")
-    .replace(/(\d{4})(\d)/, "$1-$2")
-    .replace(/(-\d{2})\d+?$/, "$1");
+    .replace(/[\D]/g, '')
+    .replace(/(\d{2})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1/$2')
+    .replace(/(\d{4})(\d)/, '$1-$2')
+    .replace(/(-\d{2})\d+?$/, '$1');
 };
 
 export const normalizeCepNumber = (value: string | undefined) => {
-  if (!value) return "";
+  if (!value) return '';
   return value
-    .replace(/\D/g, "")
-    .replace(/^(\d{5})(\d{3})+?$/, "$1-$2")
-    .replace(/(-\d{3})(\d+?)/, "$1");
+    .replace(/\D/g, '')
+    .replace(/^(\d{5})(\d{3})+?$/, '$1-$2')
+    .replace(/(-\d{3})(\d+?)/, '$1');
 };
 
 export const normalizeBRL = (value: string | undefined) => {
-  if (!value) return "";
-  return value.replace(/\D/g, "");
+  if (!value) return '';
+  return value.replace(/\D/g, '');
 };
 
 export function maskCardNumber(
@@ -411,21 +411,21 @@ export function maskCardNumber(
 ): string {
   if (!cardNumber) {
     if (shortened) {
-      return "****";
+      return '****';
     }
 
-    return "**** **** **** ****";
+    return '**** **** **** ****';
   }
 
-  const sanitized = cardNumber.replace(/\D/g, "");
+  const sanitized = cardNumber.replace(/\D/g, '');
 
   // Check if length is valid for a card number
   if (sanitized.length < 4) {
     if (shortened) {
-      return "****";
+      return '****';
     }
 
-    return "**** **** **** ****";
+    return '**** **** **** ****';
   }
 
   if (shortened) {
@@ -436,11 +436,11 @@ export function maskCardNumber(
 }
 
 export function formatCardNumber(cardNumber: string): string {
-  const sanitized = cardNumber.replace(/\D/g, "");
+  const sanitized = cardNumber.replace(/\D/g, '');
 
   if (sanitized.length < 16 || sanitized.length > 19) {
     return cardNumber;
   }
 
-  return sanitized.match(/.{1,4}/g)?.join(" ") ?? "";
+  return sanitized.match(/.{1,4}/g)?.join(' ') ?? '';
 }

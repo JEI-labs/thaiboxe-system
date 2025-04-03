@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { useTheme } from "next-themes";
+import * as React from 'react';
+import { useTheme } from 'next-themes';
 
-import { Moon, Sun } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Moon, Sun } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export function ThemeToggler(): JSX.Element {
   const { theme, setTheme } = useTheme();
 
   const handleToggleMode = () => {
-    setTheme(theme === "light" ? "dark" : "light");
+    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   return (

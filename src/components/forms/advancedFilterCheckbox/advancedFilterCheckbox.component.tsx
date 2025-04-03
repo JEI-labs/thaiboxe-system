@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import * as React from "react";
+import * as React from 'react';
 
-import { Trash2 } from "lucide-react";
+import { Trash2 } from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -12,14 +12,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useBoolean } from "@/hooks/useBooleanState/useBooleanState.hook";
-import { useArrayState } from "@/hooks/useArrayState";
+} from '@/components/ui/dropdown-menu';
+import { useBoolean } from '@/hooks/useBooleanState/useBooleanState.hook';
+import { useArrayState } from '@/hooks/useArrayState';
 import {
   AdvancedFilterCheckboxProps,
   AdvancedFilterCheckboxType,
-} from "./advancedFilterCheckbox.types";
-import { ScrollArea } from "@/components/ui/scroll-area";
+} from './advancedFilterCheckbox.types';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function AdvancedFilterCheckbox({
   showDeleteButton = true,
@@ -35,7 +35,7 @@ export function AdvancedFilterCheckbox({
     option: AdvancedFilterCheckboxType,
   ): void => {
     event.preventDefault();
-    let newState: AdvancedFilterCheckboxType[];
+    let newState: Array<AdvancedFilterCheckboxType>;
 
     const index = data.state.findIndex((item) => item.id === option.id);
 
@@ -63,7 +63,7 @@ export function AdvancedFilterCheckbox({
       <DropdownMenuTrigger asChild>
         <Button className="gap-2" variant="outline" {...props.buttonProps}>
           {props.leftIcon}
-          {props.title}{" "}
+          {props.title}{' '}
           {props.showCounterIndicator ? `(${data.state.length})` : null}
           {props.rightIcon}
         </Button>
@@ -71,7 +71,7 @@ export function AdvancedFilterCheckbox({
       <DropdownMenuContent align="start">
         <div className="flex items-center justify-between">
           <DropdownMenuLabel>
-            {props?.description ?? "Selecione as opções abaixo"}
+            {props?.description ?? 'Selecione as opções abaixo'}
           </DropdownMenuLabel>
           {showDeleteButton && (
             <Button variant="ghost" onClick={props.onDelete}>

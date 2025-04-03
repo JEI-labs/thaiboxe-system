@@ -1,10 +1,10 @@
-import React from "react";
+import React from 'react';
 
-import type { FieldValues, UseControllerProps } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import type { FieldValues, UseControllerProps } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 
-import { Minus, Plus } from "lucide-react";
-import type { FormInputComponentProps } from "./formInput.component.types";
+import { Minus, Plus } from 'lucide-react';
+import type { FormInputComponentProps } from './formInput.component.types';
 import {
   FormControl,
   FormDescription,
@@ -12,10 +12,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 export const FormInputNumberComponent = <T extends FieldValues>({
   control,
@@ -37,7 +37,7 @@ export const FormInputNumberComponent = <T extends FieldValues>({
 
   const handleChangeText = (value: string): string => {
     if (!value.trim().length) {
-      return "";
+      return '';
     }
     return handleRemoveMask(value);
   };
@@ -79,8 +79,8 @@ export const FormInputNumberComponent = <T extends FieldValues>({
                         {...props}
                         className={cn(
                           props.className,
-                          props.icon ? "pl-11" : "",
-                          "rounded-none text-center",
+                          props.icon ? 'pl-11' : '',
+                          'rounded-none text-center',
                         )}
                         value={mask ? mask(field.value) : field.value}
                         placeholder={props.placeholder}

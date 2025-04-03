@@ -1,6 +1,6 @@
-import React from "react";
-import { Controller } from "react-hook-form";
-import type { FieldValues, UseControllerProps } from "react-hook-form";
+import React from 'react';
+import { Controller } from 'react-hook-form';
+import type { FieldValues, UseControllerProps } from 'react-hook-form';
 import {
   FormControl,
   FormDescription,
@@ -8,10 +8,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import type { FormSwitchComponentProps } from "./formSwitchInput.types";
-import { cn } from "@/lib/utils";
-import { Switch } from "@/components/ui/switch";
+} from '@/components/ui/form';
+import type { FormSwitchComponentProps } from './formSwitchInput.types';
+import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/switch';
 
 export const FormSwitchComponent = <T extends FieldValues>({
   control,
@@ -32,13 +32,13 @@ export const FormSwitchComponent = <T extends FieldValues>({
             render={({ field }) => (
               <FormItem
                 className={cn(
-                  "flex flex-col",
+                  'flex flex-col',
                   props.asCard &&
-                    "flex w-full flex-row items-center justify-between rounded-lg border p-4",
+                    'flex w-full flex-row items-center justify-between rounded-lg border p-4',
                   props.className,
                 )}
               >
-                <div className={cn("flex flex-col")}>
+                <div className={cn('flex flex-col')}>
                   {props.title?.length && (
                     <FormLabel className="text-sm">{props.title}</FormLabel>
                   )}
