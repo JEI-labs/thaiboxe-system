@@ -1,8 +1,8 @@
 'use client';
 
-import { Suspense, useRef } from 'react';
-import { api } from '@/trpc/react';
-import { toBase64 } from '@/common/utils/files';
+import { Suspense } from 'react';
+// import { api } from '@/trpc/react';
+// import { toBase64 } from '@/common/utils/files';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 
 const breadcrumbItems = [
@@ -17,30 +17,30 @@ const breadcrumbItems = [
 ];
 
 export default function DashboardPage() {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const { mutateAsync: uploadFile, isPending } = api.files.upload.useMutation();
+  // const fileInputRef = useRef<HTMLInputElement>(null);
+  // const { mutateAsync: uploadFile, isPending } = api.files.upload.useMutation();
 
-  const handleUpload = async (file: File) => {
-    const base64 = await toBase64(file);
+  // const handleUpload = async (file: File) => {
+  //   const base64 = await toBase64(file);
 
-    const result = await uploadFile({
-      filename: file.name,
-      file: base64,
-    });
+  //   const result = await uploadFile({
+  //     filename: file.name,
+  //     file: base64,
+  //   });
 
-    console.log('URL pública:', result.url);
-  };
+  //   console.log('URL pública:', result.url);
+  // };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleUpload(file);
-    }
-  };
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     handleUpload(file);
+  //   }
+  // };
 
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
+  // const triggerFileInput = () => {
+  //   fileInputRef.current?.click();
+  // };
 
   return (
     <Suspense fallback={<div>Carregando...</div>}>
@@ -51,7 +51,7 @@ export default function DashboardPage() {
           <div>Dashboard</div>
         </main>
 
-        <div>
+        {/* <div>
           <button
             className="rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
             onClick={triggerFileInput}
@@ -67,7 +67,7 @@ export default function DashboardPage() {
             ref={fileInputRef}
             onChange={handleFileChange}
           />
-        </div>
+        </div> */}
       </div>
     </Suspense>
   );
