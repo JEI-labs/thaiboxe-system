@@ -7,6 +7,7 @@ import {
 import { convertToDate } from '@/utils/converterUtils';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { del } from '@vercel/blob';
 
 export const studentRouter = createTRPCRouter({
   create: protectedProcedure
@@ -14,7 +15,6 @@ export const studentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const birthDateFormatted = convertToDate(input.birthDate);
-      console.log(birthDateFormatted);
 
       if (!userId) {
         throw new TRPCError({
@@ -176,6 +176,14 @@ export const studentRouter = createTRPCRouter({
             code: 'NOT_FOUND',
             message: 'Aluno nao encontrado',
           });
+        }
+
+        if (student.avatar) {
+          try {
+            await del(student.avatar);
+          } catch (err) {
+            console.error('Erro ao deletar avatar do Vercel Blob:', err);
+          }
         }
 
         await ctx.prisma.student.delete({

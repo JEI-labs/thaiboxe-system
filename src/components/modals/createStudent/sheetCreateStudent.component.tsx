@@ -29,6 +29,7 @@ import {
   IStudentCreateTypes,
 } from '@/server/validations/students';
 import { FormFileInputComponent } from '@/components/forms/formFileInput/formFileInput.component';
+import { blobUrlToBase64 } from '@/common/utils/files';
 
 export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
   side,
@@ -39,6 +40,8 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
   const { toast } = useToast();
 
   const createUser = api.student.create.useMutation();
+  const updateUser = api.student.updateAvatar.useMutation();
+  const { mutateAsync: uploadFile } = api.files.upload.useMutation();
 
   const form = useForm<IStudentCreateTypes>({
     resolver: zodResolver(createStudentSchema),
@@ -48,9 +51,25 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
 
   const onSubmit = async (data: IStudentCreateTypes) => {
     try {
-      await createUser.mutateAsync({
-        ...data,
+      const userCreated = await createUser.mutateAsync(data);
+
+      let avatarRealUrl = '';
+      if (data.avatarUrl) {
+        const base64 = await blobUrlToBase64(data.avatarUrl);
+
+        const result = await uploadFile({
+          filename: `avatar_${data.name}`,
+          file: base64,
+        });
+
+        avatarRealUrl = result.url;
+      }
+
+      await updateUser.mutateAsync({
+        avatarUrl: avatarRealUrl,
+        studentId: userCreated.data.id,
       });
+
       setIsOpen(false);
       if (refetch) refetch();
 
