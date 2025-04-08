@@ -3,7 +3,8 @@ import { paginationSchema } from '@/server/validations/pagination';
 import {
   createStudentSchema,
   updateAvatarSchema,
-} from '@/server/validations/users';
+} from '@/server/validations/students';
+import { convertToDate } from '@/utils/converterUtils';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
@@ -12,6 +13,8 @@ export const studentRouter = createTRPCRouter({
     .input(createStudentSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
+      const birthDateFormatted = convertToDate(input.birthDate);
+      console.log(birthDateFormatted);
 
       if (!userId) {
         throw new TRPCError({
@@ -37,7 +40,7 @@ export const studentRouter = createTRPCRouter({
             email: input.email,
             name: input.name,
             phone: input.phone,
-            birthDate: input.birthDate,
+            birthDate: birthDateFormatted,
             avatar: input.avatarUrl,
           },
         });
