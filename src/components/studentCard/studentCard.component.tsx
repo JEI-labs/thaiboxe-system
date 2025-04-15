@@ -2,7 +2,7 @@ import { getInitials } from '@/utils/masksUtils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import React from 'react';
 import { StudentCardProps } from './studentCard.types';
 import {
@@ -16,7 +16,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-
+import { DrawerDialogDemo } from '@/components/forms/drawerDialog/drawerDialog.components';
 export const StudentCard: React.FC<StudentCardProps> = ({
   name,
   avatar,
@@ -37,12 +37,8 @@ export const StudentCard: React.FC<StudentCardProps> = ({
           <p className="text-sm text-muted-foreground">{email}</p>
         </div>
       </div>
-
       <div className="mr-2 flex gap-3">
-        <Button variant="outline" size="icon">
-          <Pencil className="h-4 w-4" />
-        </Button>
-
+        <DrawerDialogDemo />
         {/* ALERT DIALOG */}
         <AlertDialog>
           <AlertDialogTrigger asChild>
