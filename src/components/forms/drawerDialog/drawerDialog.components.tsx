@@ -24,8 +24,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Pencil } from 'lucide-react';
-import { FormInputComponent } from '../formInput/formInput.component';
-
 export function DrawerDialogDemo() {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery('(min-width: 768px)');
@@ -40,17 +38,12 @@ export function DrawerDialogDemo() {
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
+            <DialogTitle>Editar Aluno</DialogTitle>
             <DialogDescription>
-              Make changes to your profile here. Click save when you&re done.
+              Faça as alterações necessarias e depois click em salvar.
             </DialogDescription>
           </DialogHeader>
-          <FormInputComponent
-            name="name"
-            label="Nome"
-            type="text"
-            placeholder="Nome do arrombado"
-          />
+          <ProfileForm />
         </DialogContent>
       </Dialog>
     );
@@ -65,9 +58,9 @@ export function DrawerDialogDemo() {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">
-          <DrawerTitle>Edit profile</DrawerTitle>
+          <DrawerTitle>Editar Aluno</DrawerTitle>
           <DrawerDescription>
-            Make changes to your profile here. Click save when you&re done.
+            Faça as alterações necessarias e depois click em salvar.
           </DrawerDescription>
         </DrawerHeader>
         <ProfileForm className="px-4" />
@@ -85,14 +78,18 @@ function ProfileForm({ className }: React.ComponentProps<'form'>) {
   return (
     <form className={cn('grid items-start gap-4', className)}>
       <div className="grid gap-2">
-        <Label htmlFor="email">Email</Label>
-        <Input type="email" id="email" defaultValue="shadcn@example.com" />
+        <Label htmlFor="nome">Nome</Label>
+        <Input type="nome" id="nome" placeholder="Digite o Nome" />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="username">Username</Label>
-        <Input id="username" defaultValue="@shadcn" />
+        <Label htmlFor="email">Email</Label>
+        <Input id="email" placeholder="Digite o Email" />
       </div>
-      <Button type="submit">Save changes</Button>
+      <div className="grid gap-2">
+        <Label htmlFor="telefone">Telefone do Aluno</Label>
+        <Input id="telefone" placeholder="Digite o numero de telefone" />
+      </div>
+      <Button type="submit">Salvar mudanças</Button>
     </form>
   );
 }
