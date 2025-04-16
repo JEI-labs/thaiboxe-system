@@ -3,15 +3,18 @@ import { paginationSchema } from '@/server/validations/pagination';
 import {
   createStudentSchema,
   updateAvatarSchema,
-} from '@/server/validations/users';
+} from '@/server/validations/students';
+import { convertToDate } from '@/utils/converterUtils';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
+import { del } from '@vercel/blob';
 
 export const studentRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createStudentSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
+      const birthDateFormatted = convertToDate(input.birthDate);
 
       if (!userId) {
         throw new TRPCError({
@@ -37,7 +40,7 @@ export const studentRouter = createTRPCRouter({
             email: input.email,
             name: input.name,
             phone: input.phone,
-            birthDate: input.birthDate,
+            birthDate: birthDateFormatted,
             avatar: input.avatarUrl,
           },
         });
@@ -173,6 +176,14 @@ export const studentRouter = createTRPCRouter({
             code: 'NOT_FOUND',
             message: 'Aluno nao encontrado',
           });
+        }
+
+        if (student.avatar) {
+          try {
+            await del(student.avatar);
+          } catch (err) {
+            console.error('Erro ao deletar avatar do Vercel Blob:', err);
+          }
         }
 
         await ctx.prisma.student.delete({
