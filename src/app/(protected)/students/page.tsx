@@ -7,6 +7,8 @@ import { api } from '@/trpc/react';
 import { StudentCard } from '@/components/studentCard/studentCard.component';
 import { LoadingContent } from '@/components/LoadingContent';
 import { toast } from '@/hooks/use-toast';
+import { useState } from 'react';
+import { SheetCreateStudent } from '@/components/modals/createStudent/sheetCreateStudent.component';
 
 const breadcrumbItems = [
   {
@@ -20,6 +22,7 @@ const breadcrumbItems = [
 ];
 
 export default function StudentsPage() {
+  const [showSheet, setShowSheet] = useState(false);
   const studentsApi = api.student.getAll.useQuery({ page: 1, limit: 10 });
   const deleteStudentApi = api.student.delete.useMutation({
     onSuccess: () => {
@@ -39,8 +42,12 @@ export default function StudentsPage() {
     return <LoadingContent textLoading="Carregando alunos..." />;
   }
 
-  const handleDeleteStudent = (studentId: string) => {
-    deleteStudentApi.mutate({ id: studentId });
+  const handleDeleteStudent = async (studentId: string) => {
+    await deleteStudentApi.mutate({ id: studentId });
+    toast({
+      title: 'Sucesso',
+      description: 'Aluno deletado com sucesso',
+    });
   };
 
   return (
@@ -50,7 +57,7 @@ export default function StudentsPage() {
       <main className="flex flex-col gap-6 py-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Alunos</h1>
-          <Button>
+          <Button onClick={() => setShowSheet(true)}>
             <UserPlus className="mr-2 h-4 w-4" />
             Adicionar Aluno
           </Button>
@@ -67,6 +74,15 @@ export default function StudentsPage() {
             />
           ))}
         </div>
+
+        {showSheet && (
+          <SheetCreateStudent
+            side="right"
+            isOpen={showSheet}
+            setIsOpen={setShowSheet}
+            refetch={studentsApi.refetch}
+          />
+        )}
       </main>
     </div>
   );
