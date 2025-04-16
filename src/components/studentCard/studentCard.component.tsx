@@ -26,8 +26,11 @@ export const StudentCard: React.FC<StudentCardProps> = ({
   return (
     <Card className="flex items-center justify-between p-4">
       <div className="flex items-center gap-4">
-        <Avatar className="h-10 w-10 lg:flex">
-          <AvatarImage src={avatar} />
+        <Avatar className="h-16 w-16">
+          <AvatarImage
+            src={avatar}
+            className="h-full w-full rounded-full object-cover"
+          />
           <AvatarFallback className="bg-primary text-primary-foreground">
             {getInitials(name)}
           </AvatarFallback>

@@ -1,5 +1,5 @@
 import { type User } from 'next-auth';
-import { loginSchema } from '@/validation/auth';
+import { loginSchema } from '@/server/validations/auth';
 import { prisma } from '../db';
 import { verify } from 'argon2';
 import lodash from 'lodash';
