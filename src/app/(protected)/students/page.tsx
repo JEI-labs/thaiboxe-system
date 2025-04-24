@@ -9,6 +9,7 @@ import { LoadingContent } from '@/components/LoadingContent';
 import { toast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { SheetCreateStudent } from '@/components/modals/createStudent/sheetCreateStudent.component';
+import { SheetEditStudent } from '@/components/modals/EditStudent/sheetEditStudent.component';
 
 const breadcrumbItems = [
   {
@@ -23,6 +24,8 @@ const breadcrumbItems = [
 
 export default function StudentsPage() {
   const [showSheet, setShowSheet] = useState(false);
+  const [showSheetEdit, setShowSheetEdit] = useState(false);
+  const [dataStudentSelectedID, setDataStudentSelectedID] = useState('');
   const studentsApi = api.student.getAll.useQuery({ page: 1, limit: 10 });
   const deleteStudentApi = api.student.delete.useMutation({
     onSuccess: () => {
@@ -35,7 +38,6 @@ export default function StudentsPage() {
       });
     },
   });
-
   const { data: studentsData } = studentsApi;
 
   if (studentsApi.isLoading) {
@@ -48,6 +50,11 @@ export default function StudentsPage() {
       title: 'Sucesso',
       description: 'Aluno deletado com sucesso',
     });
+  };
+
+  const handleEditStudent = async (studentId: string) => {
+    setShowSheetEdit(true);
+    setDataStudentSelectedID(studentId);
   };
 
   return (
@@ -70,10 +77,21 @@ export default function StudentsPage() {
               name={student.name}
               avatar={student?.avatar || ''}
               email={student.email}
-              onClick={() => handleDeleteStudent(student.id)}
+              onDelete={() => handleDeleteStudent(student.id)}
+              onEdit={() => handleEditStudent(student.id)}
             />
           ))}
         </div>
+
+        {showSheetEdit && (
+          <SheetEditStudent
+            side="right"
+            isOpen={showSheetEdit}
+            setIsOpen={setShowSheetEdit}
+            refetch={studentsApi.refetch}
+            studentId={dataStudentSelectedID}
+          />
+        )}
 
         {showSheet && (
           <SheetCreateStudent

@@ -2,7 +2,7 @@ import { getInitials } from '@/utils/masksUtils';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
-import { Trash2 } from 'lucide-react';
+import { Edit2, Trash2 } from 'lucide-react';
 import React from 'react';
 import { StudentCardProps } from './studentCard.types';
 import {
@@ -16,12 +16,12 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { DrawerDialogDemo } from '@/components/forms/drawerDialog/drawerDialog.components';
 export const StudentCard: React.FC<StudentCardProps> = ({
   name,
   avatar,
   email,
-  onClick,
+  onDelete,
+  onEdit,
 }) => {
   return (
     <Card className="flex items-center justify-between p-4">
@@ -40,9 +40,13 @@ export const StudentCard: React.FC<StudentCardProps> = ({
           <p className="text-sm text-muted-foreground">{email}</p>
         </div>
       </div>
+
+      {/* BUTTONS EDIT AND DELETE */}
       <div className="mr-2 flex gap-3">
-        <DrawerDialogDemo />
-        {/* ALERT DIALOG */}
+        <Button size="icon" onClick={onEdit}>
+          <Edit2 className="h-4 w-4" />
+        </Button>
+
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" size="icon">
@@ -61,7 +65,9 @@ export const StudentCard: React.FC<StudentCardProps> = ({
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={onClick}>Confirmar</AlertDialogAction>
+              <AlertDialogAction onClick={onDelete}>
+                Confirmar
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

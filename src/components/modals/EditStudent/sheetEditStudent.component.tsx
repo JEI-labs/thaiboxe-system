@@ -22,53 +22,72 @@ import {
 } from '@/utils/masksUtils';
 import { Separator } from '@/components/ui/separator';
 import { api } from '@/trpc/react';
-import { SheetCreateStudentProps } from './sheetCreateStudent.types';
 import {
-  createStudentSchema,
-  defaultCreateStudentValues,
-  IStudentCreateTypes,
+  IUpdateStudentTypes,
+  updateStudentSchema,
 } from '@/server/validations/students';
 import { FormFileInputComponent } from '@/components/forms/formFileInput/formFileInput.component';
 import { blobUrlToBase64 } from '@/common/utils/files';
+import { ISheetEditStudent } from './sheetEditStudent.types';
 
-export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
+export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
   side,
   isOpen,
   setIsOpen,
+  studentId,
   refetch,
 }) => {
   const { toast } = useToast();
-
-  const createUser = api.student.create.useMutation();
+  const studentEdit = api.student.getByID.useQuery({
+    id: studentId,
+  });
+  const updateStudent = api.student.updateByID.useMutation();
   const updateUser = api.student.updateAvatar.useMutation();
   const { mutateAsync: uploadFile } = api.files.upload.useMutation();
+  const userData = studentEdit.data?.data;
 
-  const form = useForm<IStudentCreateTypes>({
-    resolver: zodResolver(createStudentSchema),
-    defaultValues: defaultCreateStudentValues,
+  const form = useForm<IUpdateStudentTypes>({
+    resolver: zodResolver(updateStudentSchema),
+    defaultValues: {
+      id: userData?.id ?? '',
+      name: userData?.name ?? '',
+      email: userData?.email ?? '',
+      phone: userData?.phone ?? '',
+      avatarUrl: userData?.avatar ?? '',
+      birthDate: userData?.birthDate
+        ? userData.birthDate.toISOString()
+        : undefined,
+    },
     mode: 'onChange',
   });
 
-  const onSubmit = async (data: IStudentCreateTypes) => {
+  const onSubmit = async (data: IUpdateStudentTypes) => {
     try {
-      const userCreated = await createUser.mutateAsync(data);
+      const userEdited = await updateStudent.mutateAsync(data);
 
-      let avatarRealUrl = '';
-      if (data.avatarUrl) {
-        const base64 = await blobUrlToBase64(data.avatarUrl);
+      // Update avatar if changed
+      if (data.avatarUrl !== userData?.avatar) {
+        let avatarRealUrl = '';
 
-        const result = await uploadFile({
-          filename: `avatar_${data.name}`,
-          file: base64,
-        });
+        if (data.avatarUrl) {
+          const base64 = await blobUrlToBase64(data.avatarUrl);
+          const safeFilename = `avatar_${userEdited.data.id}`;
 
-        avatarRealUrl = result.url;
+          const result = await uploadFile({
+            filename: safeFilename,
+            file: base64,
+          });
+
+          if (!result?.url) throw new Error('Falha no upload do avatar');
+
+          avatarRealUrl = result.url;
+
+          await updateUser.mutateAsync({
+            avatarUrl: avatarRealUrl,
+            studentId: userEdited.data.id,
+          });
+        }
       }
-
-      await updateUser.mutateAsync({
-        avatarUrl: avatarRealUrl,
-        studentId: userCreated.data.id,
-      });
 
       setIsOpen(false);
       if (refetch) refetch();
@@ -79,9 +98,11 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
         variant: 'default',
       });
     } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Ocorreu um erro inesperado';
       toast({
         title: 'Erro',
-        description: 'Ocorreu um erro ao atualizar os dados',
+        description: errorMessage,
         variant: 'destructive',
       });
       console.error(error);
@@ -98,7 +119,7 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <SheetHeader className="mx-2 mb-12 flex">
               <div className="mb-8 flex flex-col">
-                <SheetTitle className="text-2xl">Criar Novo Aluno</SheetTitle>
+                <SheetTitle className="text-2xl">Editar Aluno</SheetTitle>
                 <SheetDescription className="mt-4 text-sm">
                   Faça as alterações necessárias para o aluno selecionado abaixo
                 </SheetDescription>
@@ -166,9 +187,11 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
             <div className="flex justify-center md:justify-end">
               <Button
                 type="submit"
-                disabled={createUser.isPending || form.formState.isSubmitting}
+                disabled={
+                  updateStudent.isPending || form.formState.isSubmitting
+                }
               >
-                {createUser.isPending ? 'Criando aluno...' : 'Criar aluno'}
+                {updateStudent.isPending ? 'Editando aluno...' : 'Editar aluno'}
               </Button>
             </div>
           </form>

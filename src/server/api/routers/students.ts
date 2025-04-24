@@ -3,6 +3,7 @@ import { paginationSchema } from '@/server/validations/pagination';
 import {
   createStudentSchema,
   updateAvatarSchema,
+  updateStudentSchema,
 } from '@/server/validations/students';
 import { convertToDate } from '@/utils/converterUtils';
 import { TRPCError } from '@trpc/server';
@@ -103,6 +104,59 @@ export const studentRouter = createTRPCRouter({
       };
     }),
 
+  updateByID: protectedProcedure
+    .input(updateStudentSchema)
+    .mutation(async ({ input, ctx }) => {
+      const birthDateFormatted = convertToDate(input.birthDate);
+
+      try {
+        const duplicate = await ctx.prisma.student.findFirst({
+          where: {
+            id: input.id,
+            email: input.email,
+          },
+        });
+
+        if (duplicate) {
+          throw new TRPCError({
+            code: 'CONFLICT',
+            message: 'Já existe um aluno com esse email',
+          });
+        }
+
+        const result = await ctx.prisma.student.update({
+          where: {
+            id: input.id,
+          },
+          data: {
+            email: input.email,
+            name: input.name,
+            phone: input.phone,
+            birthDate: birthDateFormatted,
+          },
+        });
+
+        if (!result) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'Aluno não encontrado.',
+          });
+        }
+
+        return {
+          message: 'Aluno atualizado com sucesso',
+          data: result,
+        };
+      } catch (error) {
+        const errorObj = {
+          error,
+          message: 'Erro inesperado ao atualizar aluno',
+        };
+
+        throw errorObj;
+      }
+    }),
+
   getAll: protectedProcedure
     .input(paginationSchema)
     .query(async ({ ctx, input }) => {
@@ -152,6 +206,29 @@ export const studentRouter = createTRPCRouter({
           message: 'Não foi possível carregar alunos',
         });
       }
+    }),
+
+  getByID: protectedProcedure
+    .input(z.object({ id: z.string().cuid() }))
+    .query(async ({ input, ctx }) => {
+      const studentData = await ctx.prisma.student.findFirst({
+        where: {
+          id: input.id,
+        },
+      });
+
+      if (!studentData) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Categoria não encontrada.',
+          cause: { id: input.id, userId: ctx.session.user.id },
+        });
+      }
+
+      return {
+        message: 'Aluno encontrado',
+        data: studentData,
+      };
     }),
 
   delete: protectedProcedure
