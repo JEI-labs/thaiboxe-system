@@ -1,100 +1,100 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum ExpenseCategory {
-    RENT
-    SALARIES
-    EQUIPMENT
-    MAINTENANCE
-    OTHER
+  RENT
+  SALARIES
+  EQUIPMENT
+  MAINTENANCE
+  OTHER
 }
 
 enum PaymentStatus {
-    PENDING
-    PAID
-    OVERDUE
+  PENDING
+  PAID
+  OVERDUE
 }
 
 model User {
-    id        String   @id @default(uuid())
-    name      String
-    email     String   @unique
-    password  String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Student {
-    id          String       @id @default(uuid())
-    name        String
-    email       String       @unique
-    phone       String
-    avatar      String?
-    birthDate   DateTime?
-    createdAt   DateTime     @default(now())
-    updatedAt   DateTime     @updatedAt
-    enrollments Enrollment[]
-    payments    Payment[]
-    attendances Attendance[]
+  id          String       @id @default(uuid())
+  name        String
+  email       String       @unique
+  phone       String
+  avatar      String?
+  birthDate   DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  enrollments Enrollment[]
+  payments    Payment[]
+  attendances Attendance[]
 }
 
 model Plan {
-    id          String       @id @default(uuid())
-    name        String       @unique
-    description String?
-    price       Decimal
-    duration    Int
-    createdAt   DateTime     @default(now())
-    updatedAt   DateTime     @updatedAt
-    enrollments Enrollment[]
+  id          String       @id @default(uuid())
+  name        String       @unique
+  description String?
+  price       Decimal
+  duration    Int
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  enrollments Enrollment[]
 }
 
 model Enrollment {
-    id        String   @id @default(uuid())
-    studentId String
-    planId    String
-    startDate DateTime @default(now())
-    endDate   DateTime
-    isActive  Boolean  @default(true)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id        String   @id @default(uuid())
+  studentId String
+  planId    String
+  startDate DateTime @default(now())
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-    student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-    plan    Plan    @relation(fields: [planId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  plan    Plan    @relation(fields: [planId], references: [id], onDelete: Cascade)
 }
 
 model Payment {
-    id          String        @id @default(uuid())
-    studentId   String
-    amount      Decimal
-    paymentDate DateTime      @default(now())
-    dueDate     DateTime
-    status      PaymentStatus @default(PENDING)
-    createdAt   DateTime      @default(now())
-    updatedAt   DateTime      @updatedAt
+  id          String        @id @default(uuid())
+  studentId   String
+  amount      Decimal
+  paymentDate DateTime      @default(now())
+  dueDate     DateTime
+  status      PaymentStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
-    student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
 model Expense {
-    id        String          @id @default(uuid())
-    title     String
-    amount    Decimal
-    category  ExpenseCategory
-    createdAt DateTime        @default(now())
-    updatedAt DateTime        @updatedAt
+  id        String          @id @default(uuid())
+  title     String
+  amount    Decimal
+  category  ExpenseCategory
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 }
 
 model Attendance {
-    id        String   @id @default(uuid())
-    studentId String
-    date      DateTime @default(now())
+  id        String   @id @default(uuid())
+  studentId String
+  date      DateTime @default(now())
 
-    student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }

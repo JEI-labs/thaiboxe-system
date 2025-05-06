@@ -2,12 +2,7 @@ import { cn } from '@/lib/utils';
 import { Upload } from 'lucide-react';
 import Image from 'next/image';
 import React, { useState } from 'react';
-import type {
-  ControllerRenderProps,
-  FieldValues,
-  Path,
-  UseControllerProps,
-} from 'react-hook-form';
+import type { FieldValues, Path, UseControllerProps } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { FormInputFileComponentProps } from './formFIleInput.types';
 import {
@@ -24,107 +19,112 @@ import { Input } from '@/components/ui/input';
 export const FormFileInputComponent = <T extends FieldValues>({
   control,
   name,
-  description,
   rules,
   hideErrors,
   accept = '*',
-  ...props
+  showPreview = false,
+  cardClassname,
+  generalclassname,
+  label,
 }: UseControllerProps<T> & FormInputFileComponentProps): React.JSX.Element => {
   const [fileName, setFileName] = useState<string | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-
-  // Função para remover o arquivo
-  const handleRemoveFile = (
-    field: ControllerRenderProps<T, Path<T> & (string | undefined)>,
-  ) => {
-    setFileName(null);
-    setImagePreview(null);
-    field.onChange(null);
-  };
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   return (
     <Controller
       control={control}
-      name={name}
+      name={name as Path<T>}
       rules={rules}
-      render={({ field }): React.JSX.Element => {
+      render={({ field }) => {
+        // se já houver um valor inicial no field.value, use-o como preview
+        const previewSrc =
+          showPreview &&
+          (previewUrl ??
+            (typeof field.value === 'string' ? field.value : null));
+
         return (
           <FormField
             control={control}
-            name={name}
+            name={name as Path<T>}
             render={() => (
-              <FormItem className={cn(props.generalclassname)}>
+              <FormItem className={cn(generalclassname)}>
                 <div className="grid gap-2 text-muted-foreground">
                   <FormLabel className="grid gap-1 text-muted-foreground">
                     <div className="flex items-center">
-                      <p className="text-sm md:text-base">{props.label}</p>
-                      {props.required && (
+                      <p className="text-sm md:text-base">{label}</p>
+                      {rules?.required && (
                         <span className="ml-1 text-red-400">*</span>
                       )}
                     </div>
+
                     <div
                       className={cn(
                         'flex w-full flex-col items-center gap-4 overflow-auto whitespace-normal break-words rounded-md border p-2 sm:flex-row sm:p-4',
-                        props.cardClassname,
+                        cardClassname,
                       )}
                     >
-                      {/* Exibir preview da imagem se disponível */}
-                      {props.showPreview && imagePreview && (
+                      {/* 1) Preview da imagem (inicial ou selecionada) */}
+                      {previewSrc && (
                         <Image
-                          src={imagePreview}
+                          src={previewSrc}
                           alt="Preview do arquivo"
                           width={80}
                           height={80}
                           className="h-20 w-20 rounded-md object-cover sm:h-24 sm:w-24"
                         />
                       )}
+
+                      {/* 2) Botão para escolher arquivo */}
                       <label
                         className={cn(
                           buttonVariants({ variant: 'default' }),
-                          'w-lg cursor-pointer gap-2 text-center sm:w-auto',
+                          'flex cursor-pointer items-center gap-2 text-center sm:w-auto',
                         )}
                       >
-                        <Upload className="h-4 w-4" /> Escolher Arquivo
+                        <Upload className="h-4 w-4" />
+                        {fileName ? 'Trocar Arquivo' : 'Escolher Arquivo'}
                         <Input
-                          className="hidden"
                           type="file"
                           accept={accept}
-                          onChange={(
-                            e: React.ChangeEvent<HTMLInputElement>,
-                          ) => {
+                          className="hidden"
+                          onChange={(e) => {
                             const file = e.target.files?.[0];
-                            if (file) {
-                              const fileURL = URL.createObjectURL(file);
-                              setFileName(file.name);
-                              field.onChange(fileURL); // Define apenas a string da URL
-                              setImagePreview(fileURL);
-                            }
+                            if (!file) return;
+                            const url = URL.createObjectURL(file);
+                            setFileName(file.name);
+                            setPreviewUrl(url);
+                            field.onChange(url);
                           }}
                         />
                       </label>
-                      {description && description}
 
-                      {/* Exibir nome do arquivo e botão de remover */}
+                      {/* 3) Nome do arquivo e botão de remover */}
                       {fileName && (
                         <div className="flex w-full max-w-full items-center">
                           <p
                             className="w-full max-w-full overflow-hidden whitespace-normal break-words text-center text-sm sm:text-left sm:text-base"
                             title={fileName}
                           >
-                            {`Anexado: ${fileName}`}
+                            Anexado: {fileName}
                           </p>
                           <button
                             type="button"
-                            onClick={() => handleRemoveFile(field)}
+                            onClick={() => {
+                              setFileName(null);
+                              setPreviewUrl(null);
+                              field.onChange(null);
+                            }}
                             className="ml-2 flex text-destructive hover:text-destructive/70"
                           >
-                            Remover anexo
+                            Remover
                           </button>
                         </div>
                       )}
                     </div>
                   </FormLabel>
+
                   <FormControl />
+
                   <div className="flex flex-col justify-between sm:flex-row">
                     {!hideErrors && <FormMessage />}
                     <FormDescription className="mt-1 text-right text-muted-foreground/50 sm:mt-0">

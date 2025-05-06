@@ -3,14 +3,14 @@ const config = {
   printWidth: 80,
   singleQuote: true,
   bracketSpacing: true,
-  quoteProps: "consistent",
-  arrowParens: "always",
-  trailingComma: "all",
-  htmlWhitespaceSensitivity: "ignore",
+  quoteProps: 'consistent',
+  arrowParens: 'always',
+  trailingComma: 'all',
+  htmlWhitespaceSensitivity: 'ignore',
   tabWidth: 2,
   useTabs: false,
-  endOfLine: "lf",
-  plugins: ["prettier-plugin-tailwindcss"],
+  endOfLine: 'lf',
+  plugins: ['prettier-plugin-tailwindcss'],
 };
 
 export default config;

@@ -1,7 +1,7 @@
 ## 📋 O que foi feito?
 
-- Descreva aqui todas as alterações realizadas no código.
-- Mencione qualquer funcionalidade nova implementada.
+- Adicionado um componente Drawer com Dialog, para montar o formulario de edição de estudantes.
+- por enquanto nada.
 - Caso tenha sido feita alguma refatoração, explique o motivo.
 
 ## 📌 Motivo:
