@@ -21,7 +21,7 @@ export default function FinancialPage() {
         <BreadcrumbUpdater items={breadcrumbItems} />
 
         <main className="flex flex-col gap-8">
-          <div>Planos</div>
+          <div>Plano</div>
         </main>
       </div>
     </Suspense>
