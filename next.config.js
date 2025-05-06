@@ -14,7 +14,10 @@ const config = {
         port: '',
       },
     ],
-    domains: ['i.pravatar.cc'],
+    domains: [
+      'i.pravatar.cc',
+      'yqmujiufpgt9jxbw.public.blob.vercel-storage.com',
+    ],
   },
 };
 
