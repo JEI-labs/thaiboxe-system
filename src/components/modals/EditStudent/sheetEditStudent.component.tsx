@@ -1,19 +1,20 @@
 'use client';
 
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
 } from '@/components/ui/sheet';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Form } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { FormInputComponent } from '@/components/forms/formInput/formInput.component';
+import { FormFileInputComponent } from '@/components/forms/formFileInput/formFileInput.component';
 import {
   maskCellphone,
   maskDate,
@@ -26,7 +27,6 @@ import {
   IUpdateStudentTypes,
   updateStudentSchema,
 } from '@/server/validations/students';
-import { FormFileInputComponent } from '@/components/forms/formFileInput/formFileInput.component';
 import { blobUrlToBase64 } from '@/common/utils/files';
 import { ISheetEditStudent } from './sheetEditStudent.types';
 
@@ -38,74 +38,76 @@ export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
   refetch,
 }) => {
   const { toast } = useToast();
-  const studentEdit = api.student.getByID.useQuery({
-    id: studentId,
-  });
+  const studentEdit = api.student.getByID.useQuery({ id: studentId });
   const updateStudent = api.student.updateByID.useMutation();
-  const updateUser = api.student.updateAvatar.useMutation();
+  const updateUserAvatar = api.student.updateAvatar.useMutation();
   const { mutateAsync: uploadFile } = api.files.upload.useMutation();
-  const userData = studentEdit.data?.data;
 
   const form = useForm<IUpdateStudentTypes>({
     resolver: zodResolver(updateStudentSchema),
     defaultValues: {
-      id: userData?.id ?? '',
-      name: userData?.name ?? '',
-      email: userData?.email ?? '',
-      phone: userData?.phone ?? '',
-      avatarUrl: userData?.avatar ?? '',
-      birthDate: userData?.birthDate
-        ? userData.birthDate.toISOString()
-        : undefined,
+      id: '',
+      name: '',
+      email: '',
+      phone: '',
+      avatarUrl: '',
+      birthDate: '',
     },
     mode: 'onChange',
   });
 
+  useEffect(() => {
+    const user = studentEdit.data?.data;
+    if (user) {
+      form.reset({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        avatarUrl: user.avatar ?? '',
+        birthDate: user.birthDate
+          ? maskDate(new Date(user.birthDate).toLocaleDateString('pt-BR'))
+          : '',
+      });
+    }
+  }, [studentEdit.data, form]);
+
   const onSubmit = async (data: IUpdateStudentTypes) => {
     try {
-      const userEdited = await updateStudent.mutateAsync(data);
+      const updated = await updateStudent.mutateAsync(data);
 
-      // Update avatar if changed
-      if (data.avatarUrl !== userData?.avatar) {
-        let avatarRealUrl = '';
+      if (data.avatarUrl && data.avatarUrl !== studentEdit.data?.data.avatar) {
+        const base64 = await blobUrlToBase64(data.avatarUrl);
+        const safeFilename = `avatar_${updated.data.id}`;
+        const uploadResult = await uploadFile({
+          filename: safeFilename,
+          file: base64,
+        });
+        if (!uploadResult.url) throw new Error('Falha no upload do avatar');
 
-        if (data.avatarUrl) {
-          const base64 = await blobUrlToBase64(data.avatarUrl);
-          const safeFilename = `avatar_${userEdited.data.id}`;
-
-          const result = await uploadFile({
-            filename: safeFilename,
-            file: base64,
-          });
-
-          if (!result?.url) throw new Error('Falha no upload do avatar');
-
-          avatarRealUrl = result.url;
-
-          await updateUser.mutateAsync({
-            avatarUrl: avatarRealUrl,
-            studentId: userEdited.data.id,
-          });
-        }
+        await updateUserAvatar.mutateAsync({
+          avatarUrl: uploadResult.url,
+          studentId: updated.data.id,
+        });
       }
 
       setIsOpen(false);
-      if (refetch) refetch();
+      refetch?.();
 
       toast({
         title: 'Sucesso',
         description: 'Dados atualizados com sucesso',
         variant: 'default',
       });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Ocorreu um erro inesperado';
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Ocorreu um erro inesperado';
       toast({
         title: 'Erro',
-        description: errorMessage,
+        description: message,
         variant: 'destructive',
       });
-      console.error(error);
+      console.error(err);
     }
   };
 
@@ -117,28 +119,24 @@ export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
       >
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <SheetHeader className="mx-2 mb-12 flex">
-              <div className="mb-8 flex flex-col">
-                <SheetTitle className="text-2xl">Editar Aluno</SheetTitle>
-                <SheetDescription className="mt-4 text-sm">
-                  Faça as alterações necessárias para o aluno selecionado abaixo
-                </SheetDescription>
-              </div>
+            <SheetHeader className="mx-2 mb-8 flex flex-col items-center">
+              <SheetTitle className="text-2xl">Editar Aluno</SheetTitle>
+              <SheetDescription className="mt-2 text-center text-sm">
+                Faça as alterações necessárias para o aluno selecionado abaixo
+              </SheetDescription>
 
-              <div className="flex w-full justify-center">
-                <FormFileInputComponent
-                  control={form.control}
-                  name="avatarUrl"
-                  label="Imagem do aluno"
-                  type="file"
-                  accept=".jpg, .jpeg, .png"
-                />
-              </div>
+              <FormFileInputComponent
+                control={form.control}
+                name="avatarUrl"
+                id="avatar-upload"
+                accept=".jpg, .jpeg, .png"
+                showPreview
+              />
             </SheetHeader>
 
             <Separator />
 
-            <div className="mx-2 mb-12 mt-8 grid grid-cols-4 items-center gap-8">
+            <div className="mx-2 my-8 grid grid-cols-4 gap-6">
               <div className="col-span-4">
                 <FormInputComponent
                   control={form.control}
@@ -168,7 +166,7 @@ export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
                   type="text"
                   mask={maskDate}
                   placeholder="DD/MM/AAAA"
-                  maxLength={20}
+                  maxLength={10}
                 />
               </div>
               <div className="col-span-2">
@@ -179,12 +177,12 @@ export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
                   mask={maskCellphone}
                   unmask={unmaskCellphone}
                   placeholder="(XX) XXXXX-XXXX"
-                  maxLength={20}
+                  maxLength={15}
                 />
               </div>
             </div>
 
-            <div className="flex justify-center md:justify-end">
+            <div className="mb-4 flex justify-end">
               <Button
                 type="submit"
                 disabled={

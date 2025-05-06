@@ -49,7 +49,7 @@ export const updateAvatarSchema = z.object({
 });
 
 export const updateStudentSchema = createStudentSchema.extend({
-  id: z.string().cuid({ message: 'ID da categoria é inválido' }),
+  id: z.string({ message: 'ID da categoria é inválido' }),
 });
 
 export type IStudentCreateTypes = z.infer<typeof createStudentSchema>;

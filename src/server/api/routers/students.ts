@@ -109,52 +109,34 @@ export const studentRouter = createTRPCRouter({
     .mutation(async ({ input, ctx }) => {
       const birthDateFormatted = convertToDate(input.birthDate);
 
-      try {
-        const duplicate = await ctx.prisma.student.findFirst({
-          where: {
-            id: input.id,
-            email: input.email,
-          },
+      // 1) Procura por ALGUÉM que não seja o próprio ID mas já tenha este e-mail
+      const conflict = await ctx.prisma.student.findFirst({
+        where: {
+          email: input.email,
+          NOT: { id: input.id },
+        },
+      });
+      if (conflict) {
+        throw new TRPCError({
+          code: 'CONFLICT',
+          message: 'Já existe um aluno com esse email',
         });
-
-        if (duplicate) {
-          throw new TRPCError({
-            code: 'CONFLICT',
-            message: 'Já existe um aluno com esse email',
-          });
-        }
-
-        const result = await ctx.prisma.student.update({
-          where: {
-            id: input.id,
-          },
-          data: {
-            email: input.email,
-            name: input.name,
-            phone: input.phone,
-            birthDate: birthDateFormatted,
-          },
-        });
-
-        if (!result) {
-          throw new TRPCError({
-            code: 'NOT_FOUND',
-            message: 'Aluno não encontrado.',
-          });
-        }
-
-        return {
-          message: 'Aluno atualizado com sucesso',
-          data: result,
-        };
-      } catch (error) {
-        const errorObj = {
-          error,
-          message: 'Erro inesperado ao atualizar aluno',
-        };
-
-        throw errorObj;
       }
+
+      const updated = await ctx.prisma.student.update({
+        where: { id: input.id },
+        data: {
+          name: input.name,
+          email: input.email,
+          phone: input.phone,
+          birthDate: birthDateFormatted,
+        },
+      });
+
+      return {
+        message: 'Aluno atualizado com sucesso',
+        data: updated,
+      };
     }),
 
   getAll: protectedProcedure
@@ -209,7 +191,7 @@ export const studentRouter = createTRPCRouter({
     }),
 
   getByID: protectedProcedure
-    .input(z.object({ id: z.string().cuid() }))
+    .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
       const studentData = await ctx.prisma.student.findFirst({
         where: {
