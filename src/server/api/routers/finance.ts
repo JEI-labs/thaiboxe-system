@@ -6,6 +6,10 @@ import { convertToDate } from '@/utils/converterUtils';
 import { TRPCError } from '@trpc/server';
 
 export const financeRouter = createTRPCRouter({
+  /**
+   * Retorna todos os lançamentos financeiros do usuário autenticado,
+   * ordenados por data decrescente.
+   */
   getAll: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id;
     if (!userId) {
@@ -17,7 +21,7 @@ export const financeRouter = createTRPCRouter({
 
     try {
       const entries = await ctx.prisma.financeEntry.findMany({
-        where: { userId },
+        where: { userId: userId.toString() },
         orderBy: { date: 'desc' },
       });
       return {
@@ -34,6 +38,10 @@ export const financeRouter = createTRPCRouter({
     }
   }),
 
+  /**
+   * Cria um novo lançamento financeiro com todos os campos do schema:
+   * date, amount, type, status, category, paymentMethod, referenceId, description, currency.
+   */
   create: protectedProcedure
     .input(createFinanceEntrySchema)
     .mutation(async ({ ctx, input }) => {
@@ -51,11 +59,16 @@ export const financeRouter = createTRPCRouter({
       try {
         const entry = await ctx.prisma.financeEntry.create({
           data: {
-            userId,
+            userId: userId.toString(),
             date: dateObj,
-            amount: input.amount,
+            amount: Number(input.amount),
+            type: input.type,
+            status: input.status,
             category: input.category,
-            description: input.description ?? null,
+            paymentMethod: input.paymentMethod ?? undefined,
+            referenceId: input.referenceId ?? undefined,
+            description: input.description ?? undefined,
+            currency: input.currency,
           },
         });
         return {
