@@ -30,6 +30,7 @@ import {
 } from '@/server/validations/students';
 import { FormFileInputComponent } from '@/components/forms/formFileInput/formFileInput.component';
 import { blobUrlToBase64 } from '@/common/utils/files';
+import { CameraCaptureButton } from '@/components/camera/camera.component';
 
 export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
   side,
@@ -104,13 +105,22 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
                 </SheetDescription>
               </div>
 
-              <div className="flex w-full justify-center">
+              <div className="flex w-full flex-col items-center justify-center gap-2">
                 <FormFileInputComponent
                   control={form.control}
                   name="avatarUrl"
                   label="Imagem do aluno"
                   type="file"
                   accept=".jpg, .jpeg, .png"
+                  showPreview
+                />
+
+                <CameraCaptureButton
+                  onCapture={(blobUrl) => {
+                    form.setValue('avatarUrl', blobUrl, {
+                      shouldValidate: true,
+                    });
+                  }}
                 />
               </div>
             </SheetHeader>

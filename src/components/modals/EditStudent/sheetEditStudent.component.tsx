@@ -29,6 +29,7 @@ import {
 } from '@/server/validations/students';
 import { blobUrlToBase64 } from '@/common/utils/files';
 import { ISheetEditStudent } from './sheetEditStudent.types';
+import { CameraCaptureButton } from '@/components/camera/camera.component';
 
 export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
   side,
@@ -125,13 +126,24 @@ export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
                 Faça as alterações necessárias para o aluno selecionado abaixo
               </SheetDescription>
 
-              <FormFileInputComponent
-                control={form.control}
-                name="avatarUrl"
-                id="avatar-upload"
-                accept=".jpg, .jpeg, .png"
-                showPreview
-              />
+              <div className="flex w-full flex-col items-center justify-center gap-2">
+                <FormFileInputComponent
+                  control={form.control}
+                  name="avatarUrl"
+                  label="Imagem do aluno"
+                  type="file"
+                  accept=".jpg, .jpeg, .png"
+                  showPreview
+                />
+
+                <CameraCaptureButton
+                  onCapture={(blobUrl) => {
+                    form.setValue('avatarUrl', blobUrl, {
+                      shouldValidate: true,
+                    });
+                  }}
+                />
+              </div>
             </SheetHeader>
 
             <Separator />
