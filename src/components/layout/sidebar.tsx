@@ -37,15 +37,11 @@ interface SidebarItem {
 interface SidebarRootItem {
   title: string;
   icon: React.ElementType;
-  items: Array<SidebarItem>;
+  url?: string;
+  items?: Array<SidebarItem>;
 }
 
 const registrationsItems = [
-  {
-    title: 'Alunos',
-    url: '/registrations/students',
-    icon: Users,
-  },
   {
     title: 'Fornecedores',
     url: '/registrations/suppliers',
@@ -83,7 +79,12 @@ const sidebarItems: Array<SidebarRootItem> = [
   {
     title: 'Dashboard',
     icon: LayoutDashboard,
-    items: [],
+    url: '/dashboard',
+  },
+  {
+    title: 'Alunos',
+    url: '/students',
+    icon: Users,
   },
   {
     title: 'Financeiro',
@@ -117,10 +118,10 @@ export function AppSidebar() {
             {sidebarItems.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild>
-                  <div className="cursor-pointer py-5">
+                  <Link href={item.url ?? ''} className="cursor-pointer py-5">
                     {item.icon && <item.icon />}
                     <span className="text-md font-normal">{item.title}</span>
-                  </div>
+                  </Link>
                 </SidebarMenuButton>
 
                 {Array.isArray(item.items) && item.items.length > 0 && (
