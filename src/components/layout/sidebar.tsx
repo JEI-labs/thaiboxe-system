@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  BarChart2,
   Boxes,
   DollarSign,
   LayoutDashboard,
@@ -55,6 +56,11 @@ const registrationsItems = [
 ];
 
 const financialItems = [
+  {
+    title: 'Resumo',
+    url: '/financial/summary',
+    icon: BarChart2,
+  },
   {
     title: 'Receitas',
     url: '/financial/revenues',
