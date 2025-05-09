@@ -28,7 +28,7 @@ const breadcrumbItems = [
   { label: 'Financeiro', href: '/financial' },
 ];
 
-export default function FinancialPage() {
+export default function RevenuesPage() {
   const { toast } = useToast();
   const { data: entries, refetch } = api.finance.getAll.useQuery();
   const createEntry = api.finance.create.useMutation();

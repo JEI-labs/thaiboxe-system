@@ -1,5 +1,5 @@
 import { AppSidebar } from '@/components/layout/sidebar';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 export default function AppSidebarProvider({
   children,
@@ -9,7 +9,6 @@ export default function AppSidebarProvider({
   return (
     <SidebarProvider className="bg-background">
       <AppSidebar />
-      <SidebarTrigger className="p-6 max-sm:hidden" />
       {children}
     </SidebarProvider>
   );

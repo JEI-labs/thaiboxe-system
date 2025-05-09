@@ -1,104 +1,163 @@
 'use client';
 
 import {
+  Boxes,
+  DollarSign,
   LayoutDashboard,
   Package,
+  ReceiptCentIcon,
   ReceiptText,
   Settings,
   Users,
+  UserSquare,
 } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
 } from '@/components/ui/sidebar';
-import { useEffect, useState } from 'react';
+
 import Image from 'next/image';
-import { Skeleton } from '../ui/skeleton';
+import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { Separator } from '../ui/separator';
 
+interface SidebarItem {
+  title: string;
+  url: string;
+  icon: React.ElementType;
+}
+interface SidebarRootItem {
+  title: string;
+  icon: React.ElementType;
+  items: Array<SidebarItem>;
+}
+
+const registrationsItems = [
+  {
+    title: 'Alunos',
+    url: '/registrations/students',
+    icon: Users,
+  },
+  {
+    title: 'Fornecedores',
+    url: '/registrations/suppliers',
+    icon: UserSquare,
+  },
+  {
+    title: 'Planos',
+    url: '/registrations/plans',
+    icon: Package,
+  },
+];
+
+const financialItems = [
+  {
+    title: 'Receitas',
+    url: '/financial/revenues',
+    icon: DollarSign,
+  },
+  {
+    title: 'Despesas',
+    url: '/financial/expenses',
+    icon: ReceiptCentIcon,
+  },
+];
+
+const footerItems: Array<SidebarItem> = [
+  {
+    title: 'Configurações',
+    url: '/settings',
+    icon: Settings,
+  },
+];
+
+const sidebarItems: Array<SidebarRootItem> = [
+  {
+    title: 'Dashboard',
+    icon: LayoutDashboard,
+    items: [],
+  },
+  {
+    title: 'Financeiro',
+    icon: ReceiptText,
+    items: financialItems,
+  },
+  {
+    title: 'Cadastros',
+    icon: Boxes,
+    items: registrationsItems,
+  },
+];
+
 export function AppSidebar() {
-  const [logoSrc, setLogoSrc] = useState('');
-
-  useEffect(() => {
-    setLogoSrc('/images/logo.png');
-  }, []);
-
-  const items = [
-    {
-      title: 'Dashboard',
-      url: '/dashboard',
-      icon: LayoutDashboard,
-    },
-    {
-      title: 'Alunos',
-      url: '/students',
-      icon: Users,
-    },
-    {
-      title: 'Financeiro',
-      url: '/financial',
-      icon: ReceiptText,
-    },
-    {
-      title: 'Planos',
-      url: '/plans',
-      icon: Package,
-    },
-  ];
-
-  const footerItems = [
-    {
-      title: 'Configurações',
-      url: '/settings',
-      icon: Settings,
-    },
-  ];
+  const path = usePathname();
 
   return (
     <Sidebar>
       <SidebarHeader>
         <div className="jutify-center flex h-24 w-full items-center p-6">
-          {logoSrc ? (
-            <Image src={logoSrc} alt="Logo" width={300} height={300} />
-          ) : (
-            <Skeleton className="h-12 w-full" />
-          )}
+          <Image src="/images/logo.png" alt="Logo" width={300} height={300} />
         </div>
-        <div className="-mb-6 text-center font-bold">Team Sartorato</div>
+        <p className="text-center font-bold">Team Sartorato</p>
       </SidebarHeader>
+
+      <Separator />
+
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>
-            <Separator />
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          <SidebarMenu>
+            {sidebarItems.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild>
+                  <div className="cursor-pointer py-5">
+                    {item.icon && <item.icon />}
+                    <span className="text-md font-normal">{item.title}</span>
+                  </div>
+                </SidebarMenuButton>
+
+                {Array.isArray(item.items) && item.items.length > 0 && (
+                  <SidebarMenuSub>
+                    {item.items.map((subItem) => (
+                      <SidebarMenuButton
+                        asChild
+                        key={subItem.title}
+                        className={cn(
+                          path === subItem.url
+                            ? 'bg-accent'
+                            : 'transparent text-muted-foreground',
+                        )}
+                      >
+                        <Link
+                          className={cn(
+                            'flex items-center gap-4 rounded-lg px-3 py-1.5',
+                          )}
+                          href={subItem.url}
+                        >
+                          {subItem.icon && <subItem.icon />}
+                          <span>{subItem.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    ))}
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+
       <SidebarFooter>
         {footerItems.map((item) => (
           <SidebarMenuItem key={item.title}>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton asChild className="py-5">
               <a href={item.url}>
                 <item.icon />
                 <span>{item.title}</span>
