@@ -7,7 +7,7 @@ import {
 } from '@/server/validations/categories';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { Prisma } from '@prisma/client';
+import { ECategoryStatus, Prisma } from '@prisma/client';
 
 export const categoryRouter = createTRPCRouter({
   // --- CREATE ---
@@ -104,6 +104,9 @@ export const categoryRouter = createTRPCRouter({
     .input(
       paginationSchema.extend({
         search: z.string().optional(),
+        status: z.array(z.nativeEnum(ECategoryStatus)).optional(),
+        from: z.string().optional(), // espera YYYY-MM-DD
+        to: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -115,13 +118,28 @@ export const categoryRouter = createTRPCRouter({
         });
       }
 
-      const { page, limit, search } = input;
+      const { page, limit, search, status, from, to } = input;
       const skip = (page - 1) * limit;
-
-      // monta o where dinamicamente
+      console.log(status);
+      // Monta filtros dinamicamente
       const where: Prisma.CategoryWhereInput = {
         userId: userId.toString(),
+
+        // filtro de busca por nome
         ...(search ? { name: { contains: search, mode: 'insensitive' } } : {}),
+
+        // filtro de status
+        ...(status ? { status: { in: status } } : {}),
+
+        // filtro por intervalo de data de criação
+        ...(from || to
+          ? {
+              createdAt: {
+                ...(from ? { gte: new Date(from) } : {}),
+                ...(to ? { lte: new Date(to) } : {}),
+              },
+            }
+          : {}),
       };
 
       const [data, total] = await Promise.all([

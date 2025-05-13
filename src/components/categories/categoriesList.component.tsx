@@ -1,22 +1,34 @@
 'use client';
 
 import React from 'react';
-import { CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { ICategoryList } from './categoryList.types';
+import { Button } from '../ui/button';
+import { MdDelete } from 'react-icons/md';
+import { Edit2Icon } from 'lucide-react';
 
 export const CategoriesList: React.FC<ICategoryList> = ({
   categories,
   isLoading,
+  onEdit,
+  onDelete,
 }) => {
+  const handleDelete = (id: string) => {
+    onDelete(id);
+  };
+
+  const handleEdit = (id: string) => {
+    onEdit(id);
+  };
+
   return (
     <div className="w-full">
-      <CardHeader>
-        <CardTitle>Lista de Categorias</CardTitle>
-      </CardHeader>
+      <div className="mt-4">
+        <h1 className="text-md font-semibold">Lista de Categorias</h1>
+      </div>
 
-      <CardContent>
+      <div className="my-8 p-0">
         {isLoading ? (
           <p className="py-4 text-center">Carregando categorias…</p>
         ) : categories.length === 0 ? (
@@ -24,49 +36,70 @@ export const CategoriesList: React.FC<ICategoryList> = ({
             Não foram encontradas categorias.
           </p>
         ) : (
-          <ScrollArea className="h-full w-full">
-            <div className="space-y-4">
+          <ScrollArea className="h-full w-full overflow-auto">
+            <div className="mr-6 space-y-4">
               {categories.map((cat) => (
-                <div
-                  key={cat.id}
-                  className="flex flex-col rounded-lg border p-4 transition-shadow hover:shadow-lg"
-                >
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold">{cat.name}</h3>
-                    <Badge
-                      variant={
-                        cat.status === 'ACTIVE' ? 'default' : 'destructive'
-                      }
-                    >
-                      {cat.status === 'ACTIVE' ? 'Ativa' : 'Inativa'}
-                    </Badge>
-                  </div>
-
-                  {cat.description && (
-                    <div className="mt-4">
-                      <span className="mr-2 text-sm font-semibold">
-                        Descrição:
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        {cat.description}
-                      </span>
+                <div key={cat.id} className="overflow-hidden rounded-lg border">
+                  <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    {/* título + badge */}
+                    <div className="flex w-full items-center justify-between break-words">
+                      <h3 className="text-lg font-semibold">{cat.name}</h3>
+                      <Badge
+                        variant={
+                          cat.status === 'ACTIVE' ? 'default' : 'destructive'
+                        }
+                        className="mt-2"
+                      >
+                        {cat.status === 'ACTIVE' ? 'Ativa' : 'Inativa'}
+                      </Badge>
                     </div>
-                  )}
 
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Criada em:{' '}
-                    {new Date(cat.createdAt).toLocaleDateString('pt-BR', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                    })}
-                  </p>
+                    {/* descrição + data */}
+                    <div className="w-full text-sm text-muted-foreground">
+                      {cat.description && (
+                        <p className="break-words">
+                          <span className="font-semibold">Descrição: </span>
+                          {cat.description}
+                        </p>
+                      )}
+                      <p className="mt-2 text-xs">
+                        Criada em:{' '}
+                        {new Date(cat.createdAt).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                        })}
+                      </p>
+                    </div>
+
+                    {/* botões */}
+                    <div className="flex w-full justify-end gap-2 sm:justify-end">
+                      <Button
+                        variant="default"
+                        size="icon"
+                        onClick={() => {
+                          handleEdit(cat.id);
+                        }}
+                      >
+                        <Edit2Icon size={18} />
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => {
+                          handleDelete(cat.id);
+                        }}
+                      >
+                        <MdDelete size={18} />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           </ScrollArea>
         )}
-      </CardContent>
+      </div>
     </div>
   );
 };
