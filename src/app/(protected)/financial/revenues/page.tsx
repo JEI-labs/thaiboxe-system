@@ -49,7 +49,7 @@ export default function RevenuesPage() {
       <div className="w-full gap-6 py-6">
         <BreadcrumbUpdater items={breadcrumbItems} />
 
-        <h1 className="mb-4 text-2xl font-semibold">Lançamentos de Receitas</h1>
+        <h1 className="mb-8 text-2xl font-semibold">Lançamentos de Receitas</h1>
 
         <div className="mb-4 flex flex-col items-start justify-between gap-2 md:flex-row md:items-center">
           <Search
