@@ -31,7 +31,7 @@ export default function FinanceSummary() {
     limit: 10,
   });
 
-  // calcula totais de receitas, despesas e saldo
+  // calcula totais de receitas, despesas e saldoo
   const summary = useMemo(() => {
     let incomes = 0;
     let expenses = 0;
