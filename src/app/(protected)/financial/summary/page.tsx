@@ -22,7 +22,14 @@ const breadcrumbItems = [
 ];
 
 export default function FinanceSummary() {
-  const { data: entries, refetch, isLoading } = api.finance.getAll.useQuery();
+  const {
+    data: entries,
+    refetch,
+    isLoading,
+  } = api.finance.getAll.useQuery({
+    page: 1,
+    limit: 10,
+  });
 
   // calcula totais de receitas, despesas e saldo
   const summary = useMemo(() => {
@@ -68,6 +75,7 @@ export default function FinanceSummary() {
                 description: entry.description ?? null,
                 paymentMethod: entry.paymentMethod ?? null,
               }))}
+              isLoading={isLoading}
             />
           </div>
         </main>
