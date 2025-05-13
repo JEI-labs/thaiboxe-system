@@ -30,7 +30,11 @@ const breadcrumbItems = [
 
 export default function ExpensesPage() {
   const { toast } = useToast();
-  const { data: entries, refetch } = api.finance.getAll.useQuery();
+  const { data: entries, refetch } = api.finance.getAll.useQuery({
+    page: 1,
+    limit: 10,
+    type: 'EXPENSE',
+  });
   const createEntry = api.finance.create.useMutation();
 
   const form = useForm<ICreateFinanceEntry>({
@@ -250,7 +254,7 @@ export default function ExpensesPage() {
                           : 'Cancelado'}
                     </Badge>
                   </div>
-                  <span className="font-medium">{entry.category}</span>
+                  <span className="font-medium">{entry.categoryId}</span>
                   {entry.referenceId && (
                     <span className="text-sm text-muted-foreground">
                       Ref: {entry.referenceId}
