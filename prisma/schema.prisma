@@ -7,14 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ExpenseCategory {
-  RENT
-  SALARIES
-  EQUIPMENT
-  MAINTENANCE
-  OTHER
-}
-
 enum PaymentStatus {
   PENDING
   PAID
@@ -29,6 +21,7 @@ model User {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   FinanceEntry FinanceEntry[]
+  Category     Category[]
 }
 
 model Student {
@@ -83,22 +76,15 @@ model Payment {
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
-enum EPaymentMethod {
-  CASH
-  CREDIT_CARD
-  DEBIT_CARD
-  TRANSFER
-  PIX
-  BOLETO
-}
-
 model Expense {
-  id        String          @id @default(uuid())
-  title     String
-  amount    Decimal
-  category  ExpenseCategory
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  id         String   @id @default(uuid())
+  title      String
+  amount     Decimal
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  //
+  categoryId String
+  Category   Category @relation(fields: [categoryId], references: [id])
 }
 
 model Attendance {
@@ -109,28 +95,7 @@ model Attendance {
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
-model FinanceEntry {
-  id            String              @id @default(cuid())
-  userId        String
-  date          DateTime
-  amount        Float
-  category      String
-  paymentMethod EPaymentMethod?
-  description   String?
-  referenceId   String?
-  type          EFinanceEntryType
-  status        EFinanceEntryStatus @default(PENDING)
-  currency      String?             @default("BRL")
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-
-  user User @relation(fields: [userId], references: [id])
-
-  @@index([userId, date])
-  @@index([userId, status])
-  @@index([userId, category])
-}
-
+// ----------------------------------- FINANCEIRO --------------------------------
 enum EFinanceEntryStatus {
   PENDING
   PAID
@@ -140,4 +105,59 @@ enum EFinanceEntryStatus {
 enum EFinanceEntryType {
   INCOME
   EXPENSE
+}
+
+enum EPaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  TRANSFER
+  PIX
+  BOLETO
+}
+
+model FinanceEntry {
+  id            String              @id @default(cuid())
+  date          DateTime
+  amount        Float
+  paymentMethod EPaymentMethod?
+  description   String?
+  referenceId   String?
+  type          EFinanceEntryType
+  status        EFinanceEntryStatus @default(PENDING)
+  currency      String?             @default("BRL")
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  //
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  //
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  @@index([userId, date])
+  @@index([userId, status])
+}
+
+// ----------------------------------------------------------------------------
+// CATEGORIAS
+enum ECategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Category {
+  id           String          @id @default(uuid())
+  name         String
+  status       ECategoryStatus
+  description  String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  Expense      Expense[]
+  FinanceEntry FinanceEntry[]
+
+  //
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }

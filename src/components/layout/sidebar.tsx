@@ -23,6 +23,7 @@ import {
   SidebarMenuItem,
   SidebarMenuSub,
 } from '@/components/ui/sidebar';
+import { MdCategory } from 'react-icons/md';
 
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -52,6 +53,11 @@ const registrationsItems = [
     title: 'Planos',
     url: '/registrations/plans',
     icon: Package,
+  },
+  {
+    title: 'Categorias',
+    url: '/registrations/categories',
+    icon: MdCategory,
   },
 ];
 
