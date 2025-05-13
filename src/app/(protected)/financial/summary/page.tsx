@@ -1,9 +1,14 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
 // import { api } from '@/trpc/react';
 // import { toBase64 } from '@/common/utils/files';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
+import { FinancialSummary } from '@/components/finance/financeSummary/financeSummary.component';
+import { api } from '@/trpc/react';
+import { Button } from '@/components/ui/button';
+import { FinanceEntriesList } from '@/components/finance/financeList.component';
+import { Separator } from '@/components/ui/separator';
 
 const breadcrumbItems = [
   {
@@ -16,58 +21,56 @@ const breadcrumbItems = [
   },
 ];
 
-export default function DashboardPage() {
-  // const fileInputRef = useRef<HTMLInputElement>(null);
-  // const { mutateAsync: uploadFile, isPending } = api.files.upload.useMutation();
+export default function FinanceSummary() {
+  const { data: entries, refetch, isLoading } = api.finance.getAll.useQuery();
 
-  // const handleUpload = async (file: File) => {
-  //   const base64 = await toBase64(file);
-
-  //   const result = await uploadFile({
-  //     filename: file.name,
-  //     file: base64,
-  //   });
-
-  //   console.log('URL pública:', result.url);
-  // };
-
-  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-  //   if (file) {
-  //     handleUpload(file);
-  //   }
-  // };
-
-  // const triggerFileInput = () => {
-  //   fileInputRef.current?.click();
-  // };
+  // calcula totais de receitas, despesas e saldo
+  const summary = useMemo(() => {
+    let incomes = 0;
+    let expenses = 0;
+    entries?.data.forEach((e) => {
+      if (e.type === 'INCOME') incomes += e.amount;
+      else expenses += e.amount;
+    });
+    return { incomes, expenses, net: incomes - expenses };
+  }, [entries]);
 
   return (
     <Suspense fallback={<div>Carregando...</div>}>
       <div className="w-full">
         <BreadcrumbUpdater items={breadcrumbItems} />
 
-        <main className="flex flex-col gap-8">
-          <div>Dashboard</div>
+        <main className="flex flex-col">
+          <div className="text-2xl font-semibold">Resumo Financeiro</div>
+
+          <div className="my-4 flex justify-end gap-2">
+            <Button size={'sm'}>Filtrar</Button>
+            <Button size={'sm'} onClick={() => refetch()}>
+              {isLoading ? 'Atualizando...' : 'Atualizar'}
+            </Button>
+          </div>
+
+          <div className="mb-8">
+            <FinancialSummary
+              expenses={summary.expenses}
+              incomes={summary.incomes}
+              net={summary.net}
+            />
+          </div>
+
+          <Separator />
+
+          <div className="mt-8">
+            <FinanceEntriesList
+              entries={(entries?.data || []).map((entry) => ({
+                ...entry,
+                referenceId: entry.referenceId ?? null,
+                description: entry.description ?? null,
+                paymentMethod: entry.paymentMethod ?? null,
+              }))}
+            />
+          </div>
         </main>
-
-        {/* <div>
-          <button
-            className="rounded bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
-            onClick={triggerFileInput}
-            disabled={isPending}
-          >
-            {isPending ? 'Enviando...' : 'Upload de Imagem'}
-          </button>
-
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-          />
-        </div> */}
       </div>
     </Suspense>
   );
