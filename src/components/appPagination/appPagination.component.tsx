@@ -22,7 +22,7 @@ export function AppPagination({
   onItemsPerPageChange,
   itemsPerPageOptions = [10, 25, 50, 100],
 }: AppPaginationProps) {
-  const itemsPerPageLabel = 'Itens por página';
+  const itemsPerPageLabel = 'Itens';
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   return (
@@ -49,7 +49,7 @@ export function AppPagination({
               onValueChange={(value) => onItemsPerPageChange(Number(value))}
               defaultValue={String(itemsPerPage)}
             >
-              <SelectTrigger className="h-7 w-[70px] rounded border px-2 py-0 text-xs md:h-8 md:text-sm">
+              <SelectTrigger className="h-7 w-[60px] rounded border px-2 py-0 text-xs md:h-8 md:text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-background">

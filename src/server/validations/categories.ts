@@ -12,9 +12,11 @@ export type ICreateCategory = z.infer<typeof createCategorySchema>;
 
 export const updateCategorySchema = z.object({
   id: z.string(),
-  name: z.string().min(1).max(50),
+  name: z.string().min(1, 'Nome é obrigatório').max(50),
   description: z.string().nullable(),
-  status: z.nativeEnum(ECategoryStatus),
+  status: z.nativeEnum(ECategoryStatus, {
+    errorMap: () => ({ message: 'Status é obrigatório' }),
+  }),
 });
 
 export type IUpdateCategory = z.infer<typeof updateCategorySchema>;
