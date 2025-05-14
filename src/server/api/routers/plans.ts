@@ -1,18 +1,15 @@
-// server/api/routers/category.ts
+// server/api/routers/plan.ts
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import { paginationSchema } from '@/server/validations/pagination';
-import {
-  createCategorySchema,
-  updateCategorySchema,
-} from '@/server/validations/categories';
+import { createPlanSchema, updatePlanSchema } from '@/server/validations/plans';
 import { TRPCError } from '@trpc/server';
+import { Prisma } from '@prisma/client';
 import { z } from 'zod';
-import { ECategoryStatus, Prisma } from '@prisma/client';
 
-export const categoryRouter = createTRPCRouter({
+export const planRouter = createTRPCRouter({
   // --- CREATE ---
   create: protectedProcedure
-    .input(createCategorySchema)
+    .input(createPlanSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       if (!userId) {
@@ -23,32 +20,38 @@ export const categoryRouter = createTRPCRouter({
       }
 
       // 1) Verifica duplicata para este usuário
-      const exists = await ctx.prisma.category.findFirst({
-        where: { userId, name: input.name },
+      const exists = await ctx.prisma.plan.findFirst({
+        where: {
+          userId: userId.toString(),
+          name: input.name,
+        },
       });
       if (exists) {
         throw new TRPCError({
           code: 'CONFLICT',
-          message: 'Você já tem uma categoria com esse nome',
+          message: 'Você já tem um plano com esse nome',
         });
       }
 
-      // 2) Cria categoria conectando ao user real
-      const category = await ctx.prisma.category.create({
+      // 2) Cria plano vinculando ao usuário
+      const plan = await ctx.prisma.plan.create({
         data: {
           name: input.name,
           description: input.description,
-          status: input.status,
-          userId,
+          price: new Prisma.Decimal(input.price),
+          duration: input.duration,
+          user: {
+            connect: { id: userId.toString() },
+          },
         },
       });
 
-      return { ok: true, data: category };
+      return { ok: true, data: plan };
     }),
 
   // --- UPDATE ---
   update: protectedProcedure
-    .input(updateCategorySchema)
+    .input(updatePlanSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       if (!userId) {
@@ -58,19 +61,19 @@ export const categoryRouter = createTRPCRouter({
         });
       }
 
-      // 1) Checa se a categoria existe e pertence ao user
-      const current = await ctx.prisma.category.findFirst({
+      // 1) Checa se o plano existe e pertence ao usuário
+      const current = await ctx.prisma.plan.findFirst({
         where: { id: input.id, userId: userId.toString() },
       });
       if (!current) {
         throw new TRPCError({
           code: 'NOT_FOUND',
-          message: 'Categoria não encontrada',
+          message: 'Plano não encontrado',
         });
       }
 
-      // 2) Evita conflito de nome com outra categoria do mesmo user
-      const conflict = await ctx.prisma.category.findFirst({
+      // 2) Evita conflito de nome com outro plano do mesmo usuário
+      const conflict = await ctx.prisma.plan.findFirst({
         where: {
           userId,
           name: input.name,
@@ -80,36 +83,33 @@ export const categoryRouter = createTRPCRouter({
       if (conflict) {
         throw new TRPCError({
           code: 'CONFLICT',
-          message: 'Outra categoria com esse nome já existe',
+          message: 'Outro plano com esse nome já existe',
         });
       }
 
       // 3) Atualiza
-      const updated = await ctx.prisma.category.update({
+      const updated = await ctx.prisma.plan.update({
         where: { id: input.id },
         data: {
           name: input.name,
-          status: input.status,
           description: input.description,
+          price: new Prisma.Decimal(input.price),
+          duration: input.duration,
         },
       });
 
       return { ok: true, data: updated };
     }),
 
-  // --- LIST + PAGINATION ---
+  // --- LIST + PAGINAÇÃO ---
   getAll: protectedProcedure
     .input(
       paginationSchema.extend({
         search: z.string().optional(),
-        status: z.array(z.nativeEnum(ECategoryStatus)).optional(),
-        from: z.string().optional(), // espera YYYY-MM-DD
-        to: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-
       if (!userId) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
@@ -117,38 +117,21 @@ export const categoryRouter = createTRPCRouter({
         });
       }
 
-      const { page, limit, search, status, from, to } = input;
+      const { page, limit, search } = input;
       const skip = (page - 1) * limit;
-
-      // Monta filtros dinamicamente
-      const where: Prisma.CategoryWhereInput = {
+      const where: Prisma.PlanWhereInput = {
         userId,
-
-        // filtro de busca por nome
         ...(search ? { name: { contains: search, mode: 'insensitive' } } : {}),
-
-        // filtro de status
-        ...(status ? { status: { in: status } } : {}),
-
-        // filtro por intervalo de data de criação
-        ...(from || to
-          ? {
-              createdAt: {
-                ...(from ? { gte: new Date(from) } : {}),
-                ...(to ? { lte: new Date(to) } : {}),
-              },
-            }
-          : {}),
       };
 
       const [data, total] = await Promise.all([
-        ctx.prisma.category.findMany({
+        ctx.prisma.plan.findMany({
           where,
           skip,
           take: limit,
           orderBy: { createdAt: 'desc' },
         }),
-        ctx.prisma.category.count({ where }),
+        ctx.prisma.plan.count({ where }),
       ]);
 
       return {
@@ -168,16 +151,24 @@ export const categoryRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const category = await ctx.prisma.category.findFirst({
-        where: { id: input.id, userId },
-      });
-      if (!category) {
+      if (!userId) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Categoria não encontrada',
+          code: 'UNAUTHORIZED',
+          message: 'Não autorizado',
         });
       }
-      return { ok: true, data: category };
+
+      const plan = await ctx.prisma.plan.findFirst({
+        where: { id: input.id, userId },
+      });
+      if (!plan) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Plano não encontrado',
+        });
+      }
+
+      return { ok: true, data: plan };
     }),
 
   // --- DELETE ---
@@ -185,18 +176,25 @@ export const categoryRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const toDelete = await ctx.prisma.category.findFirst({
-        where: { id: input.id, userId },
-      });
-
-      if (!toDelete) {
+      if (!userId) {
         throw new TRPCError({
-          code: 'NOT_FOUND',
-          message: 'Categoria não encontrada',
+          code: 'UNAUTHORIZED',
+          message: 'Não autorizado',
         });
       }
 
-      await ctx.prisma.category.delete({ where: { id: input.id } });
-      return { ok: true, message: 'Categoria excluída com sucesso' };
+      // Verifica se pertence ao usuário
+      const toDelete = await ctx.prisma.plan.findFirst({
+        where: { id: input.id, userId },
+      });
+      if (!toDelete) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Plano não encontrado',
+        });
+      }
+
+      await ctx.prisma.plan.delete({ where: { id: input.id } });
+      return { ok: true, message: 'Plano excluído com sucesso' };
     }),
 });

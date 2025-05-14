@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import CategoriesList from '@/components/categories/categoriesList.component';
 import { Button } from '@/components/ui/button';
-import { SheetCreateCategory } from '@/components/modals/createCategories/createCategories.component';
+import { SheetCreateCategory } from '@/components/modals/category/createCategories/createCategories.component';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { api } from '@/trpc/react';
 import Search from '@/components/Search';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
-import { SheetEditCategory } from '@/components/modals/editCategory/editCategory.component';
+import { SheetEditCategory } from '@/components/modals/category/editCategory/editCategory.component';
 import { AdvancedFilterDatePicker } from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
 import { Calendar } from 'lucide-react';
 import { AdvancedFilterCheckbox } from '@/components/forms/advancedFilterCheckbox/advancedFilterCheckbox.component';
@@ -105,7 +105,7 @@ export default function CategoriesPage() {
               setDateTo(to ? to.toISOString() : '');
             }}
             description="Data de criação das categorias"
-            numberOfMonths={2}
+            numberOfMonths={1}
             showDeleteButton={false}
             rightIcon={<Calendar />}
           />
