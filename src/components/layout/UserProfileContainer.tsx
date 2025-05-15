@@ -11,11 +11,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { signOut, useSession } from 'next-auth/react';
-import { LogOut, ShieldCheck, UserIcon } from 'lucide-react';
+import { LogOut, UserPen } from 'lucide-react';
 import Link from 'next/link';
+import { api } from '@/trpc/react';
 
 export function UserProfileContainer(): JSX.Element {
   const { data: session } = useSession();
+  const getMeApi = api.users.getMe.useQuery();
+  const userData = getMeApi.data;
 
   if (!session) return <Skeleton className="w-32 rounded-lg py-5" />;
 
@@ -26,13 +29,11 @@ export function UserProfileContainer(): JSX.Element {
           variant="ghost"
           className="h-fit gap-4 px-3 py-2 focus-visible:ring-0 focus-visible:ring-offset-0"
         >
-          <div className="max-sm:hidden">
-            {session.user?.name?.split(' ')[0]}
-          </div>
+          <div className="max-sm:hidden">{userData?.name?.split(' ')[0]}</div>
           <Avatar className="h-8 w-8 ring-2 ring-primary ring-offset-2 ring-offset-muted">
             <AvatarImage src={''} className="ring-0" />
             <AvatarFallback className="bg-primary/40">
-              {session.user?.name?.substring(0, 2).toUpperCase()}
+              {userData?.name?.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -40,16 +41,16 @@ export function UserProfileContainer(): JSX.Element {
       <DropdownMenuContent align="end" className="w-fit">
         <Link href="/profile">
           <DropdownMenuItem className="cursor-pointer gap-2 py-2 pl-3 pr-4">
-            <UserIcon className="h-4 w-4" />
-            Minha conta
+            <UserPen className="h-4 w-4" />
+            Editar perfil
           </DropdownMenuItem>
         </Link>
-        <Link href="/security">
+        {/* <Link href="/security">
           <DropdownMenuItem className="cursor-not-allowed gap-2 py-2 pl-3 pr-4">
             <ShieldCheck className="h-4 w-4" />
             Segurança
           </DropdownMenuItem>
-        </Link>
+        </Link> */}
 
         {/* <DropdownMenuSeparator /> */}
 
