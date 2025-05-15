@@ -19,7 +19,7 @@ import { authorize } from './authorize';
 declare module 'next-auth' {
   interface Session extends DefaultSession {
     user: {
-      id: number;
+      id: string;
       name: string;
       email: string;
     } & DefaultSession['user'];
@@ -61,7 +61,7 @@ export const authOptions: NextAuthOptions = {
     },
     session: ({ session, token }) => {
       if (token) {
-        session.user.id = token.id as number;
+        session.user.id = token.id as string;
         session.user.name = token.name as string;
         session.user.email = token.email as string;
       }

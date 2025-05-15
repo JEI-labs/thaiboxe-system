@@ -8,8 +8,8 @@ import { StudentCard } from '@/components/studentCard/studentCard.component';
 import { LoadingContent } from '@/components/LoadingContent';
 import { toast } from '@/hooks/use-toast';
 import { useState } from 'react';
-import { SheetCreateStudent } from '@/components/modals/createStudent/sheetCreateStudent.component';
-import { SheetEditStudent } from '@/components/modals/EditStudent/sheetEditStudent.component';
+import { SheetCreateStudent } from '@/components/modals/student/createStudent/sheetCreateStudent.component';
+import { SheetEditStudent } from '@/components/modals/student/EditStudent/sheetEditStudent.component';
 
 const breadcrumbItems = [
   {

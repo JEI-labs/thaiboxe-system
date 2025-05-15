@@ -24,7 +24,7 @@ export const categoryRouter = createTRPCRouter({
 
       // 1) Verifica duplicata para este usuário
       const exists = await ctx.prisma.category.findFirst({
-        where: { userId: userId.toString(), name: input.name },
+        where: { userId, name: input.name },
       });
       if (exists) {
         throw new TRPCError({
@@ -39,9 +39,7 @@ export const categoryRouter = createTRPCRouter({
           name: input.name,
           description: input.description,
           status: input.status,
-          user: {
-            connect: { id: userId.toString() },
-          },
+          userId,
         },
       });
 
@@ -74,7 +72,7 @@ export const categoryRouter = createTRPCRouter({
       // 2) Evita conflito de nome com outra categoria do mesmo user
       const conflict = await ctx.prisma.category.findFirst({
         where: {
-          userId: userId.toString(),
+          userId,
           name: input.name,
           NOT: { id: input.id },
         },
@@ -111,6 +109,7 @@ export const categoryRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
+
       if (!userId) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
@@ -120,10 +119,10 @@ export const categoryRouter = createTRPCRouter({
 
       const { page, limit, search, status, from, to } = input;
       const skip = (page - 1) * limit;
-      console.log(status);
+
       // Monta filtros dinamicamente
       const where: Prisma.CategoryWhereInput = {
-        userId: userId.toString(),
+        userId,
 
         // filtro de busca por nome
         ...(search ? { name: { contains: search, mode: 'insensitive' } } : {}),
@@ -170,7 +169,7 @@ export const categoryRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const category = await ctx.prisma.category.findFirst({
-        where: { id: input.id, userId: userId.toString() },
+        where: { id: input.id, userId },
       });
       if (!category) {
         throw new TRPCError({
@@ -187,8 +186,9 @@ export const categoryRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const toDelete = await ctx.prisma.category.findFirst({
-        where: { id: input.id, userId: userId.toString() },
+        where: { id: input.id, userId },
       });
+
       if (!toDelete) {
         throw new TRPCError({
           code: 'NOT_FOUND',

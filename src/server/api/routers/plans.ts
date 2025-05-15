@@ -9,7 +9,6 @@ export const plansRouter = createTRPCRouter({
     .input(createPlanSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-
       if (!userId) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
@@ -53,7 +52,6 @@ export const plansRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-
       if (!userId) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',

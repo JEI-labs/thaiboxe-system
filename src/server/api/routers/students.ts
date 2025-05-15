@@ -27,7 +27,7 @@ export const studentRouter = createTRPCRouter({
 
       try {
         const emailExists = await ctx.prisma.student.findFirst({
-          where: { email: input.email },
+          where: { email: input.email, userId },
         });
 
         if (emailExists) {
@@ -56,6 +56,7 @@ export const studentRouter = createTRPCRouter({
             phone: input.phone,
             birthDate: birthDateFormatted,
             avatar: input.avatarUrl,
+            userId,
           },
         });
 
@@ -121,6 +122,7 @@ export const studentRouter = createTRPCRouter({
       const studentExists = await ctx.prisma.student.findFirst({
         where: {
           id: input.studentId,
+          userId,
         },
       });
 
@@ -134,6 +136,7 @@ export const studentRouter = createTRPCRouter({
       await ctx.prisma.student.update({
         where: {
           id: input.studentId,
+          userId,
         },
         data: {
           avatar: input.avatarUrl,
@@ -149,11 +152,21 @@ export const studentRouter = createTRPCRouter({
   updateByID: protectedProcedure
     .input(updateStudentSchema)
     .mutation(async ({ input, ctx }) => {
+      const userId = ctx.session.user.id;
+
+      if (!userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Não autorizado',
+        });
+      }
+
       const birthDateFormatted = convertToDate(input.birthDate);
 
       // 1) Procura por ALGUÉM que não seja o próprio ID mas já tenha este e-mail
       const conflict = await ctx.prisma.student.findFirst({
         where: {
+          userId,
           email: input.email,
           NOT: { id: input.id },
         },
@@ -199,6 +212,9 @@ export const studentRouter = createTRPCRouter({
       try {
         const [students, total] = await Promise.all([
           ctx.prisma.student.findMany({
+            where: {
+              userId,
+            },
             skip,
             take: limit,
             orderBy: {
@@ -208,7 +224,11 @@ export const studentRouter = createTRPCRouter({
               payments: true,
             },
           }),
-          ctx.prisma.student.count(),
+          ctx.prisma.student.count({
+            where: {
+              userId,
+            },
+          }),
         ]);
 
         const result = students.map((student) => {
@@ -264,9 +284,19 @@ export const studentRouter = createTRPCRouter({
   getByID: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
+      const userId = ctx.session.user.id;
+
+      if (!userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Não autorizado',
+        });
+      }
+
       const studentData = await ctx.prisma.student.findFirst({
         where: {
           id: input.id,
+          userId,
         },
       });
 
@@ -298,7 +328,7 @@ export const studentRouter = createTRPCRouter({
 
       try {
         const student = await ctx.prisma.student.findUnique({
-          where: { id: input.id },
+          where: { id: input.id, userId },
         });
 
         if (!student) {
@@ -317,7 +347,7 @@ export const studentRouter = createTRPCRouter({
         }
 
         await ctx.prisma.student.delete({
-          where: { id: input.id },
+          where: { id: input.id, userId },
         });
 
         return {

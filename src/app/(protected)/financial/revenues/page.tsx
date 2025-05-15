@@ -9,7 +9,7 @@ import { AppPagination } from '@/components/appPagination/appPagination.componen
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { api } from '@/trpc/react';
-import { SheetCreateFinanceEntry } from '@/components/modals/createRevenues/createRevenues.component';
+import { SheetCreateFinanceEntry } from '@/components/modals/revenues/createRevenues/createRevenues.component';
 import { FinanceEntriesList } from '@/components/finance/financeList.component';
 
 const breadcrumbItems = [

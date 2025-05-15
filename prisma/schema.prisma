@@ -22,6 +22,8 @@ model User {
   updatedAt    DateTime       @updatedAt
   FinanceEntry FinanceEntry[]
   Category     Category[]
+  Plan         Plan[]
+  Student      Student[]
 }
 
 model Student {
@@ -35,7 +37,10 @@ model Student {
   updatedAt   DateTime     @updatedAt
   enrollments Enrollment[]
   payments    Payment[]
-  attendances Attendance[]
+
+  //
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Plan {
@@ -47,6 +52,9 @@ model Plan {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   enrollments Enrollment[]
+  //
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Enrollment {
@@ -58,22 +66,22 @@ model Enrollment {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  plan    Plan    @relation(fields: [planId], references: [id], onDelete: Cascade)
+  //
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  plan      Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
 }
 
 model Payment {
   id          String        @id @default(uuid())
-  studentId   String
   amount      Decimal
   paymentDate DateTime      @default(now())
   dueDate     DateTime
   status      PaymentStatus @default(PENDING)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-
-  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  //
+  studentId   String
+  student     Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
 model Expense {
@@ -84,15 +92,7 @@ model Expense {
   updatedAt  DateTime @updatedAt
   //
   categoryId String
-  Category   Category @relation(fields: [categoryId], references: [id])
-}
-
-model Attendance {
-  id        String   @id @default(uuid())
-  studentId String
-  date      DateTime @default(now())
-
-  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  Category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 }
 
 // ----------------------------------- FINANCEIRO --------------------------------
@@ -131,10 +131,10 @@ model FinanceEntry {
 
   //
   userId     String
-  user       User     @relation(fields: [userId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   //
   categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@index([userId, date])
   @@index([userId, status])
@@ -159,5 +159,5 @@ model Category {
 
   //
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
