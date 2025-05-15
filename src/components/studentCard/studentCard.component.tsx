@@ -16,17 +16,21 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
+import { cn } from '@/lib/utils';
+import { Separator } from '../ui/separator';
+
 export const StudentCard: React.FC<StudentCardProps> = ({
   name,
   avatar,
   email,
+  status,
   onDelete,
   onEdit,
 }) => {
   return (
-    <Card className="flex items-center justify-between p-4">
-      <div className="flex items-center gap-4">
-        <Avatar className="h-16 w-16">
+    <Card className="flex flex-col justify-between gap-4 p-4 md:flex-row md:items-center">
+      <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center">
+        <Avatar className="h-16 w-16 self-center sm:self-start">
           <AvatarImage
             src={avatar}
             className="h-full w-full rounded-full object-cover"
@@ -35,21 +39,40 @@ export const StudentCard: React.FC<StudentCardProps> = ({
             {getInitials(name)}
           </AvatarFallback>
         </Avatar>
-        <div>
+
+        <div className="flex w-full flex-col justify-center text-center sm:justify-start sm:text-left">
           <h2 className="text-lg font-medium">{name}</h2>
           <p className="text-sm text-muted-foreground">{email}</p>
         </div>
-      </div>
 
-      {/* BUTTONS EDIT AND DELETE */}
-      <div className="mr-2 flex gap-3">
-        <Button size="icon" onClick={onEdit}>
+        <div className="flex flex-col items-center space-y-1 sm:ml-auto sm:items-start">
+          <span
+            className={cn(
+              'text-nowrap rounded-full px-2 py-1 text-xs font-medium',
+              status === 'EM DIA' && 'bg-green-100 text-green-800',
+              status === 'PENDENTE' && 'bg-yellow-100 text-yellow-800',
+              status === 'ATRASADO' && 'bg-red-100 text-red-800',
+            )}
+          >
+            {status}
+          </span>
+        </div>
+      </div>
+      {/* Separator adaptável */}
+      <Separator orientation="vertical" className="hidden h-12 md:block" />
+      <Separator orientation="horizontal" className="block md:hidden" />
+
+      {/* BOTÕES */}
+      <div className="flex w-full justify-center gap-3 md:w-auto md:justify-end">
+        <Button size="icon" onClick={onEdit} className="w-fit px-4">
+          <span className="block md:hidden">Editar</span>
           <Edit2 className="h-4 w-4" />
         </Button>
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="icon">
+            <Button variant="destructive" size="icon" className="w-fit px-4">
+              <span className="block md:hidden">Deletar</span>
               <Trash2 className="h-4 w-4" />
             </Button>
           </AlertDialogTrigger>

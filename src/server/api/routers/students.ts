@@ -16,6 +16,7 @@ export const studentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const birthDateFormatted = convertToDate(input.birthDate);
+      const startDate = new Date(input.startDate);
 
       if (!userId) {
         throw new TRPCError({
@@ -36,6 +37,18 @@ export const studentRouter = createTRPCRouter({
           });
         }
 
+        const plan = await ctx.prisma.plan.findUnique({
+          where: { id: input.planId },
+        });
+
+        if (!plan) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Plano não encontrado',
+          });
+        }
+
+        // 1. Criação do aluno
         const createdStudent = await ctx.prisma.student.create({
           data: {
             email: input.email,
@@ -46,12 +59,41 @@ export const studentRouter = createTRPCRouter({
           },
         });
 
+        // 2. Criação da matrícula
+        await ctx.prisma.enrollment.create({
+          data: {
+            studentId: createdStudent.id,
+            planId: plan.id,
+            startDate,
+            endDate: new Date(
+              new Date(startDate).setMonth(
+                startDate.getMonth() + plan.duration,
+              ),
+            ),
+          },
+        });
+
+        // 3. Geração dos pagamentos com base no plano
+        const payments = Array.from({ length: plan.duration }).map((_, i) => {
+          const dueDate = new Date(startDate);
+          dueDate.setMonth(dueDate.getMonth() + i);
+          return {
+            studentId: createdStudent.id,
+            amount: plan.price,
+            dueDate,
+          };
+        });
+
+        await ctx.prisma.payment.createMany({
+          data: payments,
+        });
+
         return {
           ok: true,
           data: createdStudent,
         };
       } catch (error) {
-        console.log(error);
+        console.error(error);
 
         if (error instanceof TRPCError) {
           throw error;
@@ -162,13 +204,42 @@ export const studentRouter = createTRPCRouter({
             orderBy: {
               createdAt: 'desc',
             },
+            include: {
+              payments: true,
+            },
           }),
           ctx.prisma.student.count(),
         ]);
 
+        const result = students.map((student) => {
+          const now = new Date();
+          const hasOverdue = student.payments.some(
+            (p) => p.status === 'PENDING' && p.dueDate < now,
+          );
+
+          const hasPending = student.payments.some(
+            (p) => p.status === 'PENDING' && p.dueDate >= now,
+          );
+
+          let status: 'EM DIA' | 'PENDENTE' | 'ATRASADO';
+
+          if (hasOverdue) {
+            status = 'ATRASADO';
+          } else if (hasPending) {
+            status = 'PENDENTE';
+          } else {
+            status = 'EM DIA';
+          }
+
+          return {
+            ...student,
+            status,
+          };
+        });
+
         return {
           ok: true,
-          data: students,
+          data: result,
           pagination: {
             page,
             limit,

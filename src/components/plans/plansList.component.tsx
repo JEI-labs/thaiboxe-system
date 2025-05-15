@@ -3,13 +3,13 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { ICategoryList } from './categoryList.types';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { MdDelete } from 'react-icons/md';
 import { Edit2Icon } from 'lucide-react';
+import type { IPlanList } from './plansList.types';
 
-export const CategoriesList: React.FC<ICategoryList> = ({
-  categories,
+const PlansList: React.FC<IPlanList> = ({
+  plans,
   isLoading,
   onEdit,
   onDelete,
@@ -25,46 +25,48 @@ export const CategoriesList: React.FC<ICategoryList> = ({
   return (
     <div className="w-full">
       <div className="mt-4">
-        <h1 className="text-md font-semibold">Lista de Categorias</h1>
+        <h1 className="text-md font-semibold">Lista de Planos</h1>
       </div>
 
       <div className="mt-4 p-0">
         {isLoading ? (
-          <p className="py-4 text-center">Carregando categorias…</p>
-        ) : categories.length === 0 ? (
+          <p className="py-4 text-center">Carregando planos…</p>
+        ) : plans.length === 0 ? (
           <p className="py-4 text-center text-muted-foreground">
-            Não foram encontradas categorias.
+            Não foram encontrados planos.
           </p>
         ) : (
           <ScrollArea className="h-full w-full overflow-auto">
             <div className="space-y-2">
-              {categories.map((cat) => (
-                <div key={cat.id} className="overflow-hidden rounded-lg border">
+              {plans.map((plan) => (
+                <div
+                  key={plan.id}
+                  className="overflow-hidden rounded-lg border"
+                >
                   <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    {/* título + badge */}
+                    {/* título + preço */}
                     <div className="flex w-full items-center justify-between break-words">
-                      <h3 className="text-lg font-semibold">{cat.name}</h3>
-                      <Badge
-                        variant={
-                          cat.status === 'ACTIVE' ? 'success' : 'destructive'
-                        }
-                        className="mt-2"
-                      >
-                        {cat.status === 'ACTIVE' ? 'Ativa' : 'Inativa'}
+                      <h3 className="text-lg font-semibold">{plan.name}</h3>
+                      <Badge variant="secondary" className="mt-2">
+                        R$ {Number(plan.price).toFixed(2)}
                       </Badge>
                     </div>
 
-                    {/* descrição + data */}
+                    {/* descrição + duração */}
                     <div className="w-full text-sm text-muted-foreground">
-                      {cat.description && (
+                      {plan.description && (
                         <p className="break-words">
                           <span className="font-semibold">Descrição: </span>
-                          {cat.description}
+                          {plan.description}
                         </p>
                       )}
                       <p className="mt-2 text-xs">
-                        Criada em:{' '}
-                        {new Date(cat.createdAt).toLocaleDateString('pt-BR', {
+                        Duração: {plan.duration}{' '}
+                        {plan.duration === 1 ? 'mês' : 'meses'}
+                      </p>
+                      <p className="mt-1 text-xs">
+                        Criado em:{' '}
+                        {new Date(plan.createdAt).toLocaleDateString('pt-BR', {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
@@ -77,18 +79,14 @@ export const CategoriesList: React.FC<ICategoryList> = ({
                       <Button
                         variant="default"
                         size="icon"
-                        onClick={() => {
-                          handleEdit(cat.id);
-                        }}
+                        onClick={() => handleEdit(plan.id)}
                       >
                         <Edit2Icon size={18} />
                       </Button>
                       <Button
                         variant="destructive"
                         size="icon"
-                        onClick={() => {
-                          handleDelete(cat.id);
-                        }}
+                        onClick={() => handleDelete(plan.id)}
                       >
                         <MdDelete size={18} />
                       </Button>
@@ -104,4 +102,4 @@ export const CategoriesList: React.FC<ICategoryList> = ({
   );
 };
 
-export default CategoriesList;
+export default PlansList;

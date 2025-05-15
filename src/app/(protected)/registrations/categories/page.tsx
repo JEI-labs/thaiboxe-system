@@ -47,7 +47,7 @@ export default function CategoriesPage() {
 
   // paginação
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(6);
 
   const { data, isLoading, refetch } = api.category.getAll.useQuery(
     {
@@ -80,7 +80,7 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full pb-[100px]">
       <BreadcrumbUpdater items={breadcrumbItems} />
 
       <main className="flex flex-col gap-4">
@@ -97,6 +97,7 @@ export default function CategoriesPage() {
         </div>
 
         <h1 className="mt-4 text-lg font-semibold">Filtros</h1>
+
         <div className="flex gap-2">
           <AdvancedFilterDatePicker
             title="Buscar datas"
@@ -133,20 +134,18 @@ export default function CategoriesPage() {
           />
         </div>
 
-        <div className="mt-2">
-          <CategoriesList
-            categories={categories}
-            isLoading={isLoading}
-            onEdit={(id) => {
-              setEditId(id);
-              setEditOpen(true);
-            }}
-            onDelete={(id) => {
-              handleDelete(id);
-              refetch();
-            }}
-          />
-        </div>
+        <CategoriesList
+          categories={categories}
+          isLoading={isLoading}
+          onEdit={(id) => {
+            setEditId(id);
+            setEditOpen(true);
+          }}
+          onDelete={(id) => {
+            handleDelete(id);
+            refetch();
+          }}
+        />
 
         <div className="w-full">
           <AppPagination

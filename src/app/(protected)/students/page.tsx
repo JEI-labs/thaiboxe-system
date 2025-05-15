@@ -71,16 +71,19 @@ export default function StudentsPage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          {studentsData?.data.map((student) => (
-            <StudentCard
-              key={student.id}
-              name={student.name}
-              avatar={student?.avatar || ''}
-              email={student.email}
-              onDelete={() => handleDeleteStudent(student.id)}
-              onEdit={() => handleEditStudent(student.id)}
-            />
-          ))}
+          {studentsData?.data.map((student) => {
+            return (
+              <StudentCard
+                key={student.id}
+                name={student.name}
+                avatar={student?.avatar || ''}
+                email={student.email}
+                status={student.status}
+                onDelete={() => handleDeleteStudent(student.id)}
+                onEdit={() => handleEditStudent(student.id)}
+              />
+            );
+          })}
         </div>
 
         {showSheetEdit && (
