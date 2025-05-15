@@ -18,8 +18,12 @@ import { FormInputComponent } from '@/components/forms/formInput/formInput.compo
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/trpc/react';
 import { ICreateSheetPlan } from './sheetCreatePlan.types';
-import { IUpdatePlan, updatePlanSchema } from '../editPlan/sheetEditPlan.types';
 import { maskDecimalWithAcronym, unmaskDecimal } from '@/utils/masksUtils';
+import {
+  createPlanSchema,
+  ICreatePlanSchema,
+} from '@/server/validations/plans';
+import { maskOnlyNumbersV2 } from '@/common/utils/mask';
 
 export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
   side,
@@ -30,23 +34,24 @@ export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
   const { toast } = useToast();
   const createPlan = api.plans.create.useMutation();
 
-  const form = useForm<IUpdatePlan>({
-    resolver: zodResolver(updatePlanSchema),
+  const form = useForm<ICreatePlanSchema>({
+    resolver: zodResolver(createPlanSchema),
     defaultValues: {
-      id: '',
       name: '',
       price: '0',
-      duration: 1,
+      duration: '1',
       description: '',
     },
     mode: 'onChange',
   });
 
-  const onSubmit = async (values: IUpdatePlan) => {
+  console.log(form.formState.errors);
+
+  const onSubmit = async (values: ICreatePlanSchema) => {
+    console.log('entrou aqui');
+
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, ...payload } = values; // remove id
-      await createPlan.mutateAsync(payload);
+      await createPlan.mutateAsync(values);
       toast({
         title: 'Sucesso',
         description: 'Plano criado com sucesso',
@@ -100,7 +105,6 @@ export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
               control={form.control}
               name="price"
               label="Preço (R$)"
-              step="0.01"
               placeholder="0.00"
               mask={maskDecimalWithAcronym}
               unmask={unmaskDecimal}
@@ -110,9 +114,9 @@ export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
               control={form.control}
               name="duration"
               label="Duração (meses)"
-              type="number"
               placeholder="1"
-              min={1}
+              maxLength={2}
+              mask={maskOnlyNumbersV2}
             />
 
             <div className="flex justify-end pt-4">

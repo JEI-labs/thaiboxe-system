@@ -1,5 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
-import { createPlanSchema } from '@/server/validations/plans';
+import { createPlanSchema, updatePlanSchema } from '@/server/validations/plans';
 import { Prisma } from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
@@ -17,7 +17,7 @@ export const plansRouter = createTRPCRouter({
       }
 
       const planExists = await ctx.prisma.plan.findFirst({
-        where: { name: input.name },
+        where: { name: input.name, userId },
       });
 
       if (planExists) {
@@ -31,8 +31,9 @@ export const plansRouter = createTRPCRouter({
         data: {
           name: input.name,
           description: input.description,
-          price: input.price,
-          duration: input.duration,
+          price: Number(input.price) * 100,
+          duration: Number(input.duration),
+          userId,
         },
       });
 
@@ -115,11 +116,7 @@ export const plansRouter = createTRPCRouter({
     }),
 
   update: protectedProcedure
-    .input(
-      createPlanSchema.extend({
-        id: z.string().uuid(),
-      }),
-    )
+    .input(updatePlanSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
@@ -130,11 +127,15 @@ export const plansRouter = createTRPCRouter({
         });
       }
 
-      const { id, ...data } = input;
+      const { id, duration, price, ...rest } = input;
 
       const updatedPlan = await ctx.prisma.plan.update({
-        where: { id },
-        data,
+        where: { id, userId },
+        data: {
+          ...rest,
+          price: Number(price) * 100,
+          duration: Number(duration),
+        },
       });
 
       return {

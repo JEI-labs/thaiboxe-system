@@ -31,6 +31,7 @@ import {
 import { FormFileInputComponent } from '@/components/forms/formFileInput/formFileInput.component';
 import { blobUrlToBase64 } from '@/common/utils/files';
 import { CameraCaptureButton } from '@/components/camera/camera.component';
+import { FormSelectComponent } from '@/components/forms/formSelectInput/formSelectInput.component';
 
 export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
   side,
@@ -39,6 +40,9 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
   refetch,
 }) => {
   const { toast } = useToast();
+
+  const plansApi = api.plans.getAll.useQuery({ page: 1, limit: 100 });
+  const { data: plansData } = plansApi;
 
   const createUser = api.student.create.useMutation();
   const updateUser = api.student.updateAvatar.useMutation();
@@ -169,6 +173,20 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
                   unmask={unmaskCellphone}
                   placeholder="(XX) XXXXX-XXXX"
                   maxLength={20}
+                />
+              </div>
+              <div className="col-span-4">
+                <FormSelectComponent
+                  control={form.control}
+                  name="planId"
+                  label="Plano"
+                  placeholder="Selecione"
+                  options={[
+                    ...(plansData?.data.map((plan) => ({
+                      value: plan.id,
+                      textValue: plan.name,
+                    })) ?? []),
+                  ]}
                 />
               </div>
             </div>

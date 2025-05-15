@@ -9,6 +9,7 @@ import { convertToDate } from '@/utils/converterUtils';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { del } from '@vercel/blob';
+import { PaymentStatus } from '@prisma/client';
 
 export const studentRouter = createTRPCRouter({
   create: protectedProcedure
@@ -16,7 +17,7 @@ export const studentRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       const birthDateFormatted = convertToDate(input.birthDate);
-      const startDate = new Date(input.startDate);
+      const startDate = new Date();
 
       if (!userId) {
         throw new TRPCError({
@@ -82,6 +83,7 @@ export const studentRouter = createTRPCRouter({
             studentId: createdStudent.id,
             amount: plan.price,
             dueDate,
+            status: i === 0 ? PaymentStatus.PAID : PaymentStatus.PENDING,
           };
         });
 
@@ -222,6 +224,12 @@ export const studentRouter = createTRPCRouter({
             },
             include: {
               payments: true,
+              enrollments: {
+                where: { isActive: true },
+                include: {
+                  plan: true,
+                },
+              },
             },
           }),
           ctx.prisma.student.count({
@@ -233,27 +241,55 @@ export const studentRouter = createTRPCRouter({
 
         const result = students.map((student) => {
           const now = new Date();
-          const hasOverdue = student.payments.some(
+
+          const activeEnrollment = student.enrollments.find((e) => e.isActive);
+          const enrollmentStart = activeEnrollment?.startDate ?? null;
+          const enrollmentEnd = activeEnrollment?.endDate ?? null;
+
+          const paymentsWithinEnrollment = student.payments.filter((p) => {
+            return (
+              (!enrollmentStart || p.dueDate >= enrollmentStart) &&
+              (!enrollmentEnd || p.dueDate <= enrollmentEnd)
+            );
+          });
+
+          const hasOverduePayment = paymentsWithinEnrollment.some(
             (p) => p.status === 'PENDING' && p.dueDate < now,
           );
 
-          const hasPending = student.payments.some(
-            (p) => p.status === 'PENDING' && p.dueDate >= now,
-          );
+          // Pendente se o vencimento for dentro de 3 dias
+          const hasUpcomingPayment = paymentsWithinEnrollment.some((p) => {
+            const diffMs = p.dueDate.getTime() - now.getTime();
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            return p.status === 'PENDING' && diffDays <= 3 && diffDays >= 0;
+          });
 
-          let status: 'EM DIA' | 'PENDENTE' | 'ATRASADO';
+          // Considera o vencimento da matrícula se não houver pagamentos pendentes
+          let enrollmentStatus: 'EM DIA' | 'PENDENTE' | 'ATRASADO' = 'EM DIA';
 
-          if (hasOverdue) {
-            status = 'ATRASADO';
-          } else if (hasPending) {
-            status = 'PENDENTE';
-          } else {
-            status = 'EM DIA';
+          if (!hasOverduePayment && !hasUpcomingPayment && enrollmentEnd) {
+            const diffMs = enrollmentEnd.getTime() - now.getTime();
+            const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+              enrollmentStatus = 'ATRASADO';
+            } else if (diffDays <= 3) {
+              enrollmentStatus = 'PENDENTE';
+            }
           }
+
+          const status: 'EM DIA' | 'PENDENTE' | 'ATRASADO' = hasOverduePayment
+            ? 'ATRASADO'
+            : hasUpcomingPayment
+              ? 'PENDENTE'
+              : enrollmentStatus;
+
+          const planName = activeEnrollment?.plan?.name ?? 'Sem plano';
 
           return {
             ...student,
             status,
+            planName,
           };
         });
 

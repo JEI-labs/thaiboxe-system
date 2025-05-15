@@ -9,8 +9,8 @@ import Search from '@/components/Search';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
 import PlansList from '@/components/plans/plansList.component';
-import { SheetEditPlan } from '@/components/modals/editPlan/sheetEditPlan.component';
-import { SheetCreatePlan } from '@/components/modals/createPlan/sheetCreatePlan.component';
+import { SheetEditPlan } from '@/components/modals/plans/editPlan/sheetEditPlan.component';
+import { SheetCreatePlan } from '@/components/modals/plans/createPlan/sheetCreatePlan.component';
 
 const breadcrumbItems = [
   { label: 'Home', href: '/dashboard' },

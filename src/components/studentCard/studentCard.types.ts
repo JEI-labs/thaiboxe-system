@@ -3,6 +3,7 @@ export interface StudentCardProps {
   avatar: string;
   email: string;
   status: string;
+  planName: string;
   onDelete?: () => void;
   onEdit?: () => void;
 }

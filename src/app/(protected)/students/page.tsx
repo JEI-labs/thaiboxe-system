@@ -79,6 +79,7 @@ export default function StudentsPage() {
                 avatar={student?.avatar || ''}
                 email={student.email}
                 status={student.status}
+                planName={student.planName}
                 onDelete={() => handleDeleteStudent(student.id)}
                 onEdit={() => handleEditStudent(student.id)}
               />

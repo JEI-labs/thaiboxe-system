@@ -6,7 +6,6 @@ export const createStudentSchema = z.object({
   email: z.string().email('Por favor, insira um endereço de email válido.'),
   phone: z.string().min(10, 'Por favor, insira um telefone válido'),
   planId: z.string().uuid(),
-  startDate: z.string(),
   avatarUrl: z.string().nullable(),
   birthDate: z.string().superRefine((val, ctx) => {
     if (!val || val.trim() === '') {
@@ -62,5 +61,6 @@ export const defaultCreateStudentValues = {
   email: '',
   phone: '',
   avatarUrl: '',
+  planId: '',
   birthDate: undefined,
 };

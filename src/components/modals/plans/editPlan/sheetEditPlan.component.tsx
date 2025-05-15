@@ -16,11 +16,11 @@ import { useToast } from '@/hooks/use-toast';
 import { FormInputComponent } from '@/components/forms/formInput/formInput.component';
 import { Separator } from '@/components/ui/separator';
 import { api } from '@/trpc/react';
+import { ISheetEditPlan } from './sheetEditPlan.types';
 import {
-  ISheetEditPlan,
-  IUpdatePlan,
+  IUpdatePlanSchema,
   updatePlanSchema,
-} from './sheetEditPlan.types';
+} from '@/server/validations/plans';
 
 export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
   side,
@@ -41,14 +41,14 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
     },
   });
 
-  const form = useForm<IUpdatePlan>({
+  const form = useForm<IUpdatePlanSchema>({
     resolver: zodResolver(updatePlanSchema),
     defaultValues: {
       id: '',
       name: '',
       description: '',
       price: '0',
-      duration: 1,
+      duration: '1',
     },
     mode: 'onChange',
   });
@@ -60,13 +60,13 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
         id: plan.id,
         name: plan.name,
         description: plan.description ?? '',
-        price: plan.price,
-        duration: plan.duration,
+        price: (plan.price / 100).toString(),
+        duration: plan.duration.toString(),
       });
     }
   }, [planQuery.data, form]);
 
-  const onSubmit = async (data: IUpdatePlan) => {
+  const onSubmit = async (data: IUpdatePlanSchema) => {
     try {
       await updatePlan.mutateAsync(data);
       toast({

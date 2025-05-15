@@ -47,7 +47,7 @@ model Plan {
   id          String       @id @default(uuid())
   name        String       @unique
   description String?
-  price       Decimal
+  price       Int
   duration    Int // Quantidade de meses
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
