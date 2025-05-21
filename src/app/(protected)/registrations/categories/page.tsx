@@ -47,7 +47,7 @@ export default function CategoriesPage() {
 
   // paginação
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(6);
+  const [limit, setLimit] = useState(10);
 
   const { data, isLoading, refetch } = api.category.getAll.useQuery(
     {
@@ -60,7 +60,7 @@ export default function CategoriesPage() {
       from: dateFrom || undefined,
       to: dateTo || undefined,
     },
-    { staleTime: 5000 },
+    { staleTime: 5000 }, //5s de cache para evitar requests desnecessários
   );
 
   const deleteMutation = api.category.delete.useMutation();

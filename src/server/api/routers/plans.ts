@@ -31,7 +31,7 @@ export const plansRouter = createTRPCRouter({
         data: {
           name: input.name,
           description: input.description,
-          price: Number(input.price) * 100,
+          price: parseFloat(input.price) / 100,
           duration: Number(input.duration),
           userId,
         },
@@ -133,7 +133,7 @@ export const plansRouter = createTRPCRouter({
         where: { id, userId },
         data: {
           ...rest,
-          price: Number(price) * 100,
+          price: parseFloat(price) / 100,
           duration: Number(duration),
         },
       });

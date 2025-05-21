@@ -45,11 +45,7 @@ export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
     mode: 'onChange',
   });
 
-  console.log(form.formState.errors);
-
   const onSubmit = async (values: ICreatePlanSchema) => {
-    console.log('entrou aqui');
-
     try {
       await createPlan.mutateAsync(values);
       toast({
