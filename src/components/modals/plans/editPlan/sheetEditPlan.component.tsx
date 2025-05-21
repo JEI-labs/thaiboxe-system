@@ -21,6 +21,8 @@ import {
   IUpdatePlanSchema,
   updatePlanSchema,
 } from '@/server/validations/plans';
+import { maskDecimalWithAcronym, unmaskDecimal } from '@/utils/masksUtils';
+import { maskOnlyNumbersV2 } from '@/common/utils/mask';
 
 export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
   side,
@@ -60,11 +62,13 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
         id: plan.id,
         name: plan.name,
         description: plan.description ?? '',
-        price: (plan.price / 100).toString(),
+        price: (Number(plan.price) * 100).toString(),
         duration: plan.duration.toString(),
       });
     }
   }, [planQuery.data, form]);
+
+  console.log(planQuery.data?.data.price);
 
   const onSubmit = async (data: IUpdatePlanSchema) => {
     try {
@@ -123,6 +127,7 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
                   label="Descrição"
                   type="text"
                   placeholder="(opcional)"
+                  maxLength={50}
                 />
               </div>
               <div className="col-span-2">
@@ -130,9 +135,10 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
                   control={form.control}
                   name="price"
                   label="Preço (R$)"
-                  type="number"
-                  step="0.01"
                   placeholder="0.00"
+                  mask={maskDecimalWithAcronym}
+                  unmask={unmaskDecimal}
+                  maxLength={10}
                 />
               </div>
               <div className="col-span-2">
@@ -140,8 +146,8 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
                   control={form.control}
                   name="duration"
                   label="Duração (meses)"
-                  type="number"
                   placeholder="1"
+                  mask={maskOnlyNumbersV2}
                   min={1}
                 />
               </div>

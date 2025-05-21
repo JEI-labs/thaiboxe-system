@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { MdDelete } from 'react-icons/md';
 import { Edit2Icon } from 'lucide-react';
 import type { IPlanList } from './plansList.types';
+import ConfirmDeleteDialog from '../confirmDeleteDialog/confirmDeleteDialog.component';
 
 const PlansList: React.FC<IPlanList> = ({
   plans,
@@ -14,12 +15,22 @@ const PlansList: React.FC<IPlanList> = ({
   onEdit,
   onDelete,
 }) => {
-  const handleDelete = (id: string) => {
-    onDelete(id);
-  };
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
 
   const handleEdit = (id: string) => {
     onEdit(id);
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setSelectedPlanId(id);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async (id: string) => {
+    await onDelete(id);
+    setOpenDeleteDialog(false);
+    setSelectedPlanId(null);
   };
 
   return (
@@ -86,7 +97,7 @@ const PlansList: React.FC<IPlanList> = ({
                       <Button
                         variant="destructive"
                         size="icon"
-                        onClick={() => handleDelete(plan.id)}
+                        onClick={() => handleDeleteClick(plan.id)}
                       >
                         <MdDelete size={18} />
                       </Button>
@@ -98,6 +109,15 @@ const PlansList: React.FC<IPlanList> = ({
           </ScrollArea>
         )}
       </div>
+
+      {selectedPlanId && (
+        <ConfirmDeleteDialog
+          item={selectedPlanId}
+          open={openDeleteDialog}
+          onOpenChange={setOpenDeleteDialog}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
     </div>
   );
 };

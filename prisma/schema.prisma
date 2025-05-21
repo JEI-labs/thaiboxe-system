@@ -13,89 +13,6 @@ enum PaymentStatus {
   OVERDUE
 }
 
-model User {
-  id           String         @id @default(uuid())
-  name         String
-  email        String         @unique
-  password     String
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  FinanceEntry FinanceEntry[]
-  Category     Category[]
-  Plan         Plan[]
-  Student      Student[]
-}
-
-model Student {
-  id          String       @id @default(uuid())
-  name        String
-  email       String       @unique
-  phone       String
-  avatar      String?
-  birthDate   DateTime?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  enrollments Enrollment[]
-  payments    Payment[]
-
-  //
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Plan {
-  id          String       @id @default(uuid())
-  name        String       @unique
-  description String?
-  price       Int
-  duration    Int // Quantidade de meses
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  enrollments Enrollment[]
-  //
-  userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Enrollment {
-  id        String   @id @default(uuid())
-  studentId String
-  planId    String
-  startDate DateTime @default(now())
-  endDate   DateTime
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  //
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  plan      Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
-}
-
-model Payment {
-  id          String        @id @default(uuid())
-  amount      Decimal
-  paymentDate DateTime      @default(now())
-  dueDate     DateTime
-  status      PaymentStatus @default(PENDING)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  //
-  studentId   String
-  student     Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
-}
-
-model Expense {
-  id         String   @id @default(uuid())
-  title      String
-  amount     Decimal
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  //
-  categoryId String
-  Category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-}
-
-// ----------------------------------- FINANCEIRO --------------------------------
 enum EFinanceEntryStatus {
   PENDING
   PAID
@@ -116,6 +33,101 @@ enum EPaymentMethod {
   BOLETO
 }
 
+enum ECategoryStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  FinanceEntry FinanceEntry[]
+  Category     Category[]
+  Plan         Plan[]
+  Student      Student[]
+  Supplier     Supplier[]
+}
+
+model Student {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  phone     String
+  avatar    String?
+  birthDate DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  enrollments Enrollment[]
+  payments    Payment[]
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Plan {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  price       Float
+  duration    Int // Quantidade de meses
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  enrollments Enrollment[]
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Enrollment {
+  id        String   @id @default(uuid())
+  studentId String
+  planId    String
+  startDate DateTime @default(now())
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  plan    Plan    @relation(fields: [planId], references: [id], onDelete: Cascade)
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  amount      Decimal
+  paymentDate DateTime      @default(now())
+  dueDate     DateTime
+  status      PaymentStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Expense {
+  id        String   @id @default(uuid())
+  title     String
+  amount    Decimal
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  categoryId String
+  Category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  supplierId String?
+  Supplier   Supplier? @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+}
+
+// ----------------------------------- FINANCEIRO --------------------------------
+
 model FinanceEntry {
   id            String              @id @default(cuid())
   date          DateTime
@@ -129,10 +141,9 @@ model FinanceEntry {
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 
-  //
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  //
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
@@ -140,24 +151,34 @@ model FinanceEntry {
   @@index([userId, status])
 }
 
-// ----------------------------------------------------------------------------
-// CATEGORIAS
-enum ECategoryStatus {
-  ACTIVE
-  INACTIVE
-}
-
 model Category {
-  id           String          @id @default(uuid())
-  name         String
-  status       ECategoryStatus
-  description  String?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  id          String          @id @default(uuid())
+  name        String
+  status      ECategoryStatus
+  description String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
   Expense      Expense[]
   FinanceEntry FinanceEntry[]
 
-  //
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Supplier {
+  id     String  @id @default(uuid())
+  name   String
+  phone  String?
+  street String?
+  city   String?
+  state  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expenses Expense[]
 }

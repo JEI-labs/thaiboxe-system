@@ -11,6 +11,7 @@ import { useDebounce } from '@/hooks/useDebounce/useDebounce';
 import PlansList from '@/components/plans/plansList.component';
 import { SheetEditPlan } from '@/components/modals/plans/editPlan/sheetEditPlan.component';
 import { SheetCreatePlan } from '@/components/modals/plans/createPlan/sheetCreatePlan.component';
+import { toast } from '@/hooks/use-toast';
 
 const breadcrumbItems = [
   { label: 'Home', href: '/dashboard' },
@@ -27,7 +28,7 @@ export default function PlansPage() {
   const debouncedSearch = useDebounce(searchTerm, 500);
 
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(6);
+  const [limit, setLimit] = useState(10);
 
   const { data, isLoading, refetch } = api.plans.getAll.useQuery(
     {
@@ -51,6 +52,10 @@ export default function PlansPage() {
     await deleteMutation.mutateAsync({ id });
     setEditId(null);
     await refetch();
+    toast({
+      title: 'Sucesso',
+      description: 'Plano deletado com sucesso',
+    });
   };
 
   return (

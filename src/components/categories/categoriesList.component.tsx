@@ -1,12 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { ICategoryList } from './categoryList.types';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { MdDelete } from 'react-icons/md';
 import { Edit2Icon } from 'lucide-react';
+import ConfirmDeleteDialog from '../confirmDeleteDialog/confirmDeleteDialog.component';
 
 export const CategoriesList: React.FC<ICategoryList> = ({
   categories,
@@ -14,12 +15,24 @@ export const CategoriesList: React.FC<ICategoryList> = ({
   onEdit,
   onDelete,
 }) => {
-  const handleDelete = (id: string) => {
-    onDelete(id);
-  };
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    null,
+  );
 
   const handleEdit = (id: string) => {
     onEdit(id);
+  };
+
+  const handleDeleteClick = (id: string) => {
+    setSelectedCategoryId(id);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async (id: string) => {
+    await onDelete(id);
+    setOpenDeleteDialog(false);
+    setSelectedCategoryId(null);
   };
 
   return (
@@ -63,7 +76,9 @@ export const CategoriesList: React.FC<ICategoryList> = ({
                         </p>
                       )}
                       <p className="mt-2 text-xs">
-                        Criada em:{' '}
+                        <span className="text-sm font-semibold">
+                          Criada em:&nbsp;
+                        </span>
                         {new Date(cat.createdAt).toLocaleDateString('pt-BR', {
                           day: '2-digit',
                           month: '2-digit',
@@ -77,18 +92,14 @@ export const CategoriesList: React.FC<ICategoryList> = ({
                       <Button
                         variant="default"
                         size="icon"
-                        onClick={() => {
-                          handleEdit(cat.id);
-                        }}
+                        onClick={() => handleEdit(cat.id)}
                       >
                         <Edit2Icon size={18} />
                       </Button>
                       <Button
                         variant="destructive"
                         size="icon"
-                        onClick={() => {
-                          handleDelete(cat.id);
-                        }}
+                        onClick={() => handleDeleteClick(cat.id)}
                       >
                         <MdDelete size={18} />
                       </Button>
@@ -100,6 +111,15 @@ export const CategoriesList: React.FC<ICategoryList> = ({
           </ScrollArea>
         )}
       </div>
+
+      {selectedCategoryId && (
+        <ConfirmDeleteDialog
+          item={selectedCategoryId}
+          open={openDeleteDialog}
+          onOpenChange={setOpenDeleteDialog}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
     </div>
   );
 };
