@@ -1,5 +1,5 @@
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
-import { paginationSchema } from '@/server/validations/pagination';
+
 import {
   createStudentSchema,
   updateAvatarSchema,
@@ -10,6 +10,7 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { del } from '@vercel/blob';
 import { PaymentStatus } from '@prisma/client';
+import { getAllStudentInputSchema } from '@/server/validations/pagination';
 
 export const studentRouter = createTRPCRouter({
   create: protectedProcedure
@@ -197,7 +198,7 @@ export const studentRouter = createTRPCRouter({
     }),
 
   getAll: protectedProcedure
-    .input(paginationSchema)
+    .input(getAllStudentInputSchema)
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
 
@@ -208,40 +209,58 @@ export const studentRouter = createTRPCRouter({
         });
       }
 
-      const { page, limit } = input;
+      const { page, limit, search, status, from, to } = input;
       const skip = (page - 1) * limit;
 
       try {
-        const [students, total] = await Promise.all([
+        // Construir filtro dinâmico
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const whereConditions: any = {
+          userId,
+        };
+
+        // Pesquisa por nome do aluno (case insensitive)
+        if (search && search.trim() !== '') {
+          whereConditions.name = {
+            contains: search.trim(),
+            mode: 'insensitive',
+          };
+        }
+
+        // Filtrar por status customizado
+        // Como status é calculado no backend, não existe coluna direta na tabela,
+        // então para filtro por status vamos precisar filtrar após a query,
+        // ou adaptar a consulta (complexo). Para simplificar, fazemos filtro frontend.
+
+        // Filtros de data (data de criação do aluno)
+        if (from || to) {
+          whereConditions.createdAt = {};
+          if (from) whereConditions.createdAt.gte = new Date(from);
+          if (to) whereConditions.createdAt.lte = new Date(to);
+        }
+
+        const [students] = await Promise.all([
           ctx.prisma.student.findMany({
-            where: {
-              userId,
-            },
+            where: whereConditions,
             skip,
             take: limit,
-            orderBy: {
-              createdAt: 'desc',
-            },
+            orderBy: { createdAt: 'desc' },
             include: {
               payments: true,
               enrollments: {
                 where: { isActive: true },
-                include: {
-                  plan: true,
-                },
+                include: { plan: true },
               },
             },
           }),
           ctx.prisma.student.count({
-            where: {
-              userId,
-            },
+            where: whereConditions,
           }),
         ]);
 
+        // Montar status calculado para cada aluno
+        const now = new Date();
         const result = students.map((student) => {
-          const now = new Date();
-
           const activeEnrollment = student.enrollments.find((e) => e.isActive);
           const enrollmentStart = activeEnrollment?.startDate ?? null;
           const enrollmentEnd = activeEnrollment?.endDate ?? null;
@@ -257,25 +276,20 @@ export const studentRouter = createTRPCRouter({
             (p) => p.status === 'PENDING' && p.dueDate < now,
           );
 
-          // Pendente se o vencimento for dentro de 3 dias
           const hasUpcomingPayment = paymentsWithinEnrollment.some((p) => {
             const diffMs = p.dueDate.getTime() - now.getTime();
             const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
             return p.status === 'PENDING' && diffDays <= 3 && diffDays >= 0;
           });
 
-          // Considera o vencimento da matrícula se não houver pagamentos pendentes
           let enrollmentStatus: 'EM DIA' | 'PENDENTE' | 'ATRASADO' = 'EM DIA';
 
           if (!hasOverduePayment && !hasUpcomingPayment && enrollmentEnd) {
             const diffMs = enrollmentEnd.getTime() - now.getTime();
             const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
-            if (diffDays < 0) {
-              enrollmentStatus = 'ATRASADO';
-            } else if (diffDays <= 3) {
-              enrollmentStatus = 'PENDENTE';
-            }
+            if (diffDays < 0) enrollmentStatus = 'ATRASADO';
+            else if (diffDays <= 3) enrollmentStatus = 'PENDENTE';
           }
 
           const status: 'EM DIA' | 'PENDENTE' | 'ATRASADO' = hasOverduePayment
@@ -284,31 +298,35 @@ export const studentRouter = createTRPCRouter({
               ? 'PENDENTE'
               : enrollmentStatus;
 
-          const planName = activeEnrollment?.plan?.name ?? 'Sem plano';
-
           return {
             ...student,
             status,
-            planName,
+            planName: activeEnrollment?.plan?.name ?? 'Sem plano',
           };
         });
 
+        // Se filtro por status foi passado, filtra após o map
+        const filteredResult =
+          status && status.length > 0
+            ? result.filter((student) => status.includes(student.status))
+            : result;
+
+        const filteredTotal = filteredResult.length;
+        const paginatedResult = filteredResult.slice(0, limit);
+
         return {
           ok: true,
-          data: result,
+          data: paginatedResult,
           pagination: {
             page,
             limit,
-            total,
-            totalPages: Math.ceil(total / limit),
+            total: filteredTotal,
+            totalPages: Math.ceil(filteredTotal / limit),
           },
         };
       } catch (error) {
         console.log(error);
-
-        if (error instanceof TRPCError) {
-          throw error;
-        }
+        if (error instanceof TRPCError) throw error;
 
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
