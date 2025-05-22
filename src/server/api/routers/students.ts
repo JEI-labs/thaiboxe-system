@@ -254,7 +254,7 @@ export const studentRouter = createTRPCRouter({
             },
           }),
           ctx.prisma.student.count({
-            where: whereConditions,
+            where: { userId },
           }),
         ]);
 
