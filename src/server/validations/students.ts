@@ -45,7 +45,7 @@ export const createStudentSchema = z.object({
 });
 
 export const updateAvatarSchema = z.object({
-  avatarUrl: z.string().min(1, 'Por favor, insira uma imagem válida'),
+  avatarUrl: z.string().nullable(),
   studentId: z.string().min(1, 'Por favor, insira um ID válido'),
 });
 

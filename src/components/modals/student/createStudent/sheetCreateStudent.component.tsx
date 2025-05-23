@@ -161,7 +161,7 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
                   type="text"
                   mask={maskDate}
                   placeholder="DD/MM/AAAA"
-                  maxLength={20}
+                  maxLength={10}
                 />
               </div>
               <div className="col-span-2">
@@ -172,7 +172,7 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
                   mask={maskCellphone}
                   unmask={unmaskCellphone}
                   placeholder="(XX) XXXXX-XXXX"
-                  maxLength={20}
+                  maxLength={15}
                 />
               </div>
               <div className="col-span-4">

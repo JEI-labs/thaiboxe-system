@@ -4,6 +4,7 @@ export interface StudentCardProps {
   email: string;
   status: string;
   planName: string;
+  createdAt: Date;
   onDelete?: () => void;
   onEdit?: () => void;
 }
