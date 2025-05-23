@@ -169,6 +169,12 @@ export default function StudentsPage() {
               ))}
             </div>
 
+            {!isLoading && studentsData?.data.length === 0 && (
+              <div className="flex items-center justify-center p-4 text-lg">
+                Nenhuma categoria encontrada
+              </div>
+            )}
+
             <div className="mt-6 w-full">
               <AppPagination
                 totalItems={studentsData?.pagination.total ?? 0}

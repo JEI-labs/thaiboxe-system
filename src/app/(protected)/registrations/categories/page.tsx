@@ -147,6 +147,12 @@ export default function CategoriesPage() {
           }}
         />
 
+        {!isLoading && categories.length === 0 && (
+          <div className="flex items-center justify-center p-4 text-lg">
+            Nenhuma categoria encontrada
+          </div>
+        )}
+
         <div className="w-full">
           <AppPagination
             totalItems={totalItems}

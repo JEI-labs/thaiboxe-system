@@ -9,7 +9,7 @@ import { convertToDate } from '@/utils/converterUtils';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { del } from '@vercel/blob';
-import { PaymentStatus } from '@prisma/client';
+import { PaymentStatus, Prisma } from '@prisma/client';
 import { getAllStudentInputSchema } from '@/server/validations/pagination';
 
 export const studentRouter = createTRPCRouter({
@@ -215,7 +215,7 @@ export const studentRouter = createTRPCRouter({
       try {
         // Construir filtro dinâmico
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const whereConditions: any = {
+        const whereConditions: Prisma.StudentWhereInput = {
           userId,
         };
 
@@ -227,11 +227,6 @@ export const studentRouter = createTRPCRouter({
           };
         }
 
-        // Filtrar por status customizado
-        // Como status é calculado no backend, não existe coluna direta na tabela,
-        // então para filtro por status vamos precisar filtrar após a query,
-        // ou adaptar a consulta (complexo). Para simplificar, fazemos filtro frontend.
-
         // Filtros de data (data de criação do aluno)
         if (from || to) {
           whereConditions.createdAt = {};
@@ -239,7 +234,7 @@ export const studentRouter = createTRPCRouter({
           if (to) whereConditions.createdAt.lte = new Date(to);
         }
 
-        const [students] = await Promise.all([
+        const [students, total] = await Promise.all([
           ctx.prisma.student.findMany({
             where: whereConditions,
             skip,
@@ -311,7 +306,8 @@ export const studentRouter = createTRPCRouter({
             ? result.filter((student) => status.includes(student.status))
             : result;
 
-        const filteredTotal = filteredResult.length;
+        const filteredTotal =
+          status && status.length > 0 ? filteredResult.length : total;
         const paginatedResult = filteredResult.slice(0, limit);
 
         return {
