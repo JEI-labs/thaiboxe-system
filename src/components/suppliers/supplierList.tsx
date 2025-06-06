@@ -42,7 +42,7 @@ const SuppliersList: React.FC<ISupplierList> = ({
 
   return (
     <>
-      <ScrollArea className="h-full w-full overflow-auto">
+      <ScrollArea className="mt-8 h-full w-full overflow-auto">
         <div className="space-y-2">
           {suppliers.map((sup) => (
             <div

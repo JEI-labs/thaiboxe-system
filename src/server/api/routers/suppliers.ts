@@ -100,6 +100,7 @@ export const supplierRouter = createTRPCRouter({
     .input(
       paginationSchema.extend({
         search: z.string().optional(),
+        state: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -111,7 +112,7 @@ export const supplierRouter = createTRPCRouter({
         });
       }
 
-      const { page, limit, search } = input;
+      const { page, limit, search, state } = input;
       const skip = (page - 1) * limit;
 
       const where: Prisma.SupplierWhereInput = {
@@ -124,9 +125,10 @@ export const supplierRouter = createTRPCRouter({
               },
             }
           : {}),
+        ...(state ? { state } : {}),
       };
 
-      const [data, total] = await Promise.all([
+      const [data, total, states] = await Promise.all([
         ctx.prisma.supplier.findMany({
           where,
           skip,
@@ -134,6 +136,10 @@ export const supplierRouter = createTRPCRouter({
           orderBy: { createdAt: 'desc' },
         }),
         ctx.prisma.supplier.count({ where }),
+        ctx.prisma.supplier.findMany({
+          distinct: ['state'],
+          select: { state: true },
+        }),
       ]);
 
       return {
@@ -145,6 +151,7 @@ export const supplierRouter = createTRPCRouter({
           total,
           totalPages: Math.ceil(total / limit),
         },
+        states: states.map((state) => state.state),
       };
     }),
 
