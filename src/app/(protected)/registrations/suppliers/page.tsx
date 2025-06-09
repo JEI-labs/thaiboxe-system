@@ -74,7 +74,7 @@ export default function SuppliersPage() {
 
         <div className="mt-4 flex items-center justify-between">
           <Search
-            className="mr-4 w-1/2"
+            className="mr-4 max-sm:w-[215px]"
             placeholder="Buscar fornecedores..."
             onSearch={setSearchTerm}
           />

@@ -7,6 +7,7 @@ import { MdDelete } from 'react-icons/md';
 import { Edit2Icon } from 'lucide-react';
 import { ISupplierList } from './supplierList.types';
 import ConfirmDeleteDialog from '../confirmDeleteDialog/confirmDeleteDialog.component';
+import { maskCellphone } from '@/utils/masksUtils';
 
 const SuppliersList: React.FC<ISupplierList> = ({
   suppliers,
@@ -50,11 +51,28 @@ const SuppliersList: React.FC<ISupplierList> = ({
               className="flex items-center justify-between rounded-lg border p-4"
             >
               <div>
-                <h3 className="text-lg font-semibold">{sup.name}</h3>
+                <h3 className="mb-2 text-lg font-semibold">{sup.name}</h3>
                 {(sup.city || sup.state) && (
                   <p className="text-sm text-muted-foreground">
                     {sup.city}, {sup.state}
                   </p>
+                )}
+                {sup.phone && (
+                  <div className="mt-4 flex items-center gap-2">
+                    <span className="text-sm">Telefone: </span>
+                    <p className="text-sm text-muted-foreground">
+                      {maskCellphone(sup.phone)}
+                    </p>
+                  </div>
+                )}
+                {sup.street && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">Endereço: </span>
+                    <p className="text-sm text-muted-foreground">
+                      {' '}
+                      {sup.street}
+                    </p>
+                  </div>
                 )}
               </div>
               <div className="flex gap-2">

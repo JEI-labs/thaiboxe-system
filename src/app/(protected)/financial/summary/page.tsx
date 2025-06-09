@@ -36,8 +36,8 @@ export default function FinanceSummary() {
     let incomes = 0;
     let expenses = 0;
     entries?.data.forEach((e) => {
-      if (e.type === 'INCOME') incomes += e.amount;
-      else expenses += e.amount;
+      if (e.type === 'INCOME') incomes += e.amount / 100;
+      else expenses += e.amount / 100;
     });
     return { incomes, expenses, net: incomes - expenses };
   }, [entries]);

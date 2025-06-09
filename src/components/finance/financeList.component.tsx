@@ -48,21 +48,31 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
                             : 'Cancelado'}
                       </Badge>
                     </div>
+
                     <p className="text-lg font-semibold">
                       {categoriesData?.data.find(
                         (c) => c.id === entry.categoryId,
                       )?.name ?? '-'}
                     </p>
-                    {entry.referenceId && (
-                      <p className="text-sm text-muted-foreground">
-                        Ref: {entry.referenceId}
-                      </p>
-                    )}
-                    {entry.description && (
-                      <p className="text-sm text-muted-foreground">
-                        {entry.description}
-                      </p>
-                    )}
+
+                    <div className="flex flex-col">
+                      {entry.referenceId && (
+                        <div className="mt-4 flex items-center gap-2 text-sm">
+                          <span>Ref:</span>
+                          <p className="text-sm text-muted-foreground">
+                            {entry.referenceId}
+                          </p>
+                        </div>
+                      )}
+                      {entry.description && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-sm">Categoria: </span>
+                          <p className="text-sm text-muted-foreground">
+                            {entry.description}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="space-y-4 text-right">

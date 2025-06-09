@@ -33,8 +33,8 @@ export const SheetCreateFinanceEntry: React.FC<ICreateRevenues> = ({
   refetch,
 }) => {
   const { toast } = useToast();
-  const createEntry = api.finance.create.useMutation();
 
+  const createEntry = api.finance.create.useMutation();
   const getCategories = api.category.getAll.useQuery({}, { staleTime: 5000 });
 
   const form = useForm<ICreateFinanceEntry>({
@@ -153,6 +153,7 @@ export const SheetCreateFinanceEntry: React.FC<ICreateRevenues> = ({
               label="Referência"
               type="text"
               placeholder="Ex: NF12345"
+              mask={(value) => value.toUpperCase()}
               maxLength={20}
             />
 

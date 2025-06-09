@@ -22,6 +22,7 @@ enum EFinanceEntryStatus {
 enum EFinanceEntryType {
   INCOME
   EXPENSE
+  STUDENTS
 }
 
 enum EPaymentMethod {
@@ -129,7 +130,7 @@ model Expense {
 // ----------------------------------- FINANCEIRO --------------------------------
 
 model FinanceEntry {
-  id            String              @id @default(cuid())
+  id            String              @id @default(uuid())
   date          DateTime
   amount        Float
   paymentMethod EPaymentMethod?

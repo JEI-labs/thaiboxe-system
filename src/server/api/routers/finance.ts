@@ -88,7 +88,6 @@ export const financeRouter = createTRPCRouter({
       }
 
       const dateObj = convertToDate(input.date);
-      console.log(input.amount);
 
       try {
         const entry = await ctx.prisma.financeEntry.create({
