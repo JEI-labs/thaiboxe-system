@@ -1,5 +1,6 @@
 'use client';
 
+import { useForm } from 'react-hook-form';
 import { useState, useEffect } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,12 @@ import SuppliersList from '@/components/suppliers/supplierList';
 import { SheetCreateSupplier } from '@/components/modals/suppliers/createSupplier/createSupplier.component';
 import { SheetEditSupplier } from '@/components/modals/suppliers/editSupplier/editSupplier.component';
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
+import { FormSelectComponent } from '@/components/forms/formSelectInput/formSelectInput.component';
+import { Form } from '@/components/ui/form';
+
+interface ISupplierForm {
+  state: string | null;
+}
 
 const breadcrumbItems = [
   { label: 'Home', href: '/dashboard' },
@@ -27,13 +34,16 @@ export default function SuppliersPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
+  const [selectedState, setSelectedState] = useState<string | null>(null);
+
   const { data, isLoading, refetch } = api.supplier.getAll.useQuery({
     page,
     limit,
     search: debounced,
+    state: selectedState || undefined,
   });
+  const statesOptions = data?.states ?? [];
 
-  // reset page on search/limit change
   useEffect(() => setPage(1), [debounced, limit]);
 
   const deleteMutation = api.supplier.delete.useMutation();
@@ -43,8 +53,20 @@ export default function SuppliersPage() {
     await refetch();
   };
 
+  const form = useForm<ISupplierForm>({
+    defaultValues: {
+      state: selectedState,
+    },
+  });
+
+  const handleStateChange = (value: string) => {
+    setSelectedState(value);
+    form.setValue('state', value);
+    refetch();
+  };
+
   return (
-    <div className="w-full pb-[100px]">
+    <div className="w-full">
       <BreadcrumbUpdater items={breadcrumbItems} />
 
       <main className="flex flex-col gap-4">
@@ -52,12 +74,34 @@ export default function SuppliersPage() {
 
         <div className="mt-4 flex items-center justify-between">
           <Search
-            className="mr-4 w-1/2"
+            className="mr-4 max-sm:w-[215px]"
             placeholder="Buscar fornecedores..."
             onSearch={setSearchTerm}
           />
           <Button onClick={() => setCreateOpen(true)}>Novo fornecedor</Button>
         </div>
+
+        <h1 className="mt-4 text-lg font-semibold">Filtros</h1>
+
+        <Form {...form}>
+          <div className="mt-4 w-1/4 max-sm:w-1/2">
+            <FormSelectComponent
+              name="state"
+              label="Estado"
+              options={statesOptions
+                .filter((state): state is string => typeof state === 'string')
+                .map((state) => ({
+                  value: state,
+                  textValue: state,
+                }))}
+              placeholder="Selecione o estado"
+              onValueChange={handleStateChange}
+              defaultValue={selectedState || ''}
+              disabled={isLoading}
+              control={form.control}
+            />
+          </div>
+        </Form>
 
         <SuppliersList
           suppliers={data?.data ?? []}

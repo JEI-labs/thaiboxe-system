@@ -1,13 +1,11 @@
 import React from 'react';
 import { ArrowUpRight, ArrowDownRight, DollarSign } from 'lucide-react';
 import { IFinancialSummary } from './financeSummary.types';
+import { maskBRL } from '@/utils/masksUtils';
 
 export const FinancialSummary: React.FC<IFinancialSummary> = (
   data: IFinancialSummary,
 ) => {
-  const formatCurrency = (value: number) =>
-    `R$ ${Math.abs(value).toFixed(2).replace('.', ',')}`;
-
   return (
     <div className="grid grid-cols-3 gap-4">
       {/* Receitas */}
@@ -15,10 +13,10 @@ export const FinancialSummary: React.FC<IFinancialSummary> = (
         <ArrowUpRight className="h-6 w-6 text-green-600" />
         <div>
           <span className="block text-sm text-muted-foreground">
-            Total de Receitas
+            Total de Receitas Pagas
           </span>
           <span className="text-lg font-semibold text-green-600">
-            {formatCurrency(data.incomes)}
+            {maskBRL(data.incomes, true)}
           </span>
         </div>
       </div>
@@ -28,10 +26,10 @@ export const FinancialSummary: React.FC<IFinancialSummary> = (
         <ArrowDownRight className="h-6 w-6 text-red-600" />
         <div>
           <span className="block text-sm text-muted-foreground">
-            Total de Despesas
+            Total de Despesas Pagas
           </span>
           <span className="text-lg font-semibold text-red-600">
-            {formatCurrency(data.expenses)}
+            {maskBRL(data.expenses, true)}
           </span>
         </div>
       </div>
@@ -49,7 +47,7 @@ export const FinancialSummary: React.FC<IFinancialSummary> = (
             }`}
           >
             {data.net >= 0 ? '' : '-'}
-            {formatCurrency(data.net)}
+            {maskBRL(Math.abs(data.net), true)}
           </span>
         </div>
       </div>

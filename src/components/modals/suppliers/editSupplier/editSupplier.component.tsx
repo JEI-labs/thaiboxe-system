@@ -23,6 +23,7 @@ import { FormInputComponent } from '@/components/forms/formInput/formInput.compo
 import { FormSelectComponent } from '@/components/forms/formSelectInput/formSelectInput.component';
 import { IEditSheetSupplier } from './editSupplier.types';
 import { useStateCityOptions } from '@/hooks/useStateCityOptions';
+import { maskCellphone, unmaskCellphone } from '@/utils/masksUtils';
 
 export const SheetEditSupplier: React.FC<IEditSheetSupplier> = ({
   isOpen,
@@ -66,12 +67,20 @@ export const SheetEditSupplier: React.FC<IEditSheetSupplier> = ({
         city: d.city ?? '',
       });
     }
-  }, [data, form]);
+  }, [data?.data, form]);
 
   const selectedState = form.watch('state');
 
   const { statesOptions, citiesOptions, loadingStates, loadingCities } =
     useStateCityOptions(selectedState || '', data?.data?.state || '');
+
+  useEffect(() => {
+    if (selectedState && !loadingStates) {
+      if (data?.data?.state === selectedState) {
+        form.setValue('city', data?.data?.city ?? '');
+      }
+    }
+  }, [selectedState, loadingStates, form, data?.data]);
 
   const onSubmit = async (vals: IUpdateSupplier) => {
     try {
@@ -109,16 +118,21 @@ export const SheetEditSupplier: React.FC<IEditSheetSupplier> = ({
               control={form.control}
               name="name"
               label="Nome"
+              maxLength={50}
             />
             <FormInputComponent
               control={form.control}
               name="phone"
               label="Telefone"
+              mask={maskCellphone}
+              unmask={unmaskCellphone}
+              maxLength={15}
             />
             <FormInputComponent
               control={form.control}
               name="street"
               label="Rua"
+              maxLength={100}
             />
 
             <FormSelectComponent
