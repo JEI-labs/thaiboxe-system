@@ -1,3 +1,4 @@
+// components/modals/expenses/createExpenses.component.tsx
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,19 +25,26 @@ import {
   maskDecimalWithAcronym,
   unmaskDecimal,
 } from '@/utils/masksUtils';
-import { ICreateRevenues } from './createRevenues.types';
-import { EFinanceEntryStatus, EPaymentMethod } from '@prisma/client';
+import {
+  EFinanceEntryStatus,
+  EFinanceEntryType,
+  EPaymentMethod,
+} from '@prisma/client';
+import { ICreateExpenses } from './createExpenses.types';
 
-export const SheetCreateFinanceEntry: React.FC<ICreateRevenues> = ({
+export const SheetCreateExpenseEntry: React.FC<ICreateExpenses> = ({
   side,
   isOpen,
   setIsOpen,
   refetch,
 }) => {
   const { toast } = useToast();
-
   const createEntry = api.finance.create.useMutation();
-  const getCategories = api.category.getAll.useQuery({}, { staleTime: 5000 });
+  const { data: categoriesQuery } = api.category.getAll.useQuery({
+    page: 1,
+    limit: 100,
+  });
+  const categories = categoriesQuery?.data ?? [];
 
   const form = useForm<ICreateFinanceEntry>({
     resolver: zodResolver(createFinanceEntrySchema),
@@ -45,8 +53,8 @@ export const SheetCreateFinanceEntry: React.FC<ICreateRevenues> = ({
       amount: '0',
       category: '',
       description: '',
-      type: 'INCOME',
-      status: 'PENDING',
+      type: EFinanceEntryType.EXPENSE,
+      status: EFinanceEntryStatus.PAID,
       paymentMethod: undefined,
       referenceId: '',
       currency: 'BRL',
@@ -57,16 +65,13 @@ export const SheetCreateFinanceEntry: React.FC<ICreateRevenues> = ({
   const onSubmit = async (values: ICreateFinanceEntry) => {
     try {
       await createEntry.mutateAsync(values);
-      toast({
-        title: 'Sucesso',
-        description: 'Lançamento financeiro adicionado',
-      });
+      toast({ title: 'Sucesso', description: 'Despesa adicionada' });
       form.reset();
       setIsOpen(false);
       refetch?.();
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'Erro ao criar lançamento';
+        err instanceof Error ? err.message : 'Erro ao criar despesa';
       toast({ title: 'Erro', description: message, variant: 'destructive' });
     }
   };
@@ -80,12 +85,9 @@ export const SheetCreateFinanceEntry: React.FC<ICreateRevenues> = ({
             className="space-y-6 p-4"
           >
             <SheetHeader>
-              <SheetTitle>Novo Lançamento</SheetTitle>
-              <SheetDescription>
-                Preencha os dados do lançamento financeiro
-              </SheetDescription>
+              <SheetTitle>Nova Despesa</SheetTitle>
+              <SheetDescription>Preencha os dados da despesa</SheetDescription>
             </SheetHeader>
-
             <Separator />
 
             <div className="grid grid-cols-2 gap-4">
@@ -132,7 +134,10 @@ export const SheetCreateFinanceEntry: React.FC<ICreateRevenues> = ({
                 options={[
                   { value: EPaymentMethod.CASH, textValue: 'Dinheiro' },
                   { value: EPaymentMethod.PIX, textValue: 'Pix' },
-                  { value: EPaymentMethod.CREDIT_CARD, textValue: 'Cartão' },
+                  {
+                    value: EPaymentMethod.CREDIT_CARD,
+                    textValue: 'Cartão de Crédito',
+                  },
                   { value: EPaymentMethod.BOLETO, textValue: 'Boleto' },
                   {
                     value: EPaymentMethod.DEBIT_CARD,
@@ -147,12 +152,10 @@ export const SheetCreateFinanceEntry: React.FC<ICreateRevenues> = ({
               name="category"
               label="Categoria"
               placeholder="Selecione"
-              options={[
-                ...(getCategories.data?.data.map((category) => ({
-                  value: category.id,
-                  textValue: category.name,
-                })) ?? []),
-              ]}
+              options={categories.map((cat) => ({
+                value: cat.id,
+                textValue: cat.name,
+              }))}
             />
 
             <FormInputComponent
@@ -161,7 +164,7 @@ export const SheetCreateFinanceEntry: React.FC<ICreateRevenues> = ({
               label="Referência"
               type="text"
               placeholder="Ex: NF12345"
-              mask={(value) => value.toUpperCase()}
+              mask={(v) => v.toUpperCase()}
               maxLength={20}
             />
 
@@ -179,7 +182,7 @@ export const SheetCreateFinanceEntry: React.FC<ICreateRevenues> = ({
                 type="submit"
                 disabled={createEntry.isPending || form.formState.isSubmitting}
               >
-                {createEntry.isPending ? 'Salvando...' : 'Adicionar Lançamento'}
+                {createEntry.isPending ? 'Salvando...' : 'Adicionar Despesa'}
               </Button>
             </div>
           </form>

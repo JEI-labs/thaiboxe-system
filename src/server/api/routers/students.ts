@@ -87,7 +87,6 @@ export const studentRouter = createTRPCRouter({
             status: i === 0 ? PaymentStatus.PAID : PaymentStatus.PENDING,
           };
         });
-
         await ctx.prisma.payment.createMany({
           data: payments,
         });
@@ -219,7 +218,6 @@ export const studentRouter = createTRPCRouter({
           userId,
         };
 
-        // Pesquisa por nome do aluno (case insensitive)
         if (search && search.trim() !== '') {
           whereConditions.name = {
             contains: search.trim(),

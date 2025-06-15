@@ -4,7 +4,7 @@ import {
   BarChart2,
   Boxes,
   DollarSign,
-  LayoutDashboard,
+  // LayoutDashboard,
   Package,
   ReceiptCentIcon,
   ReceiptText,
@@ -88,11 +88,11 @@ const footerItems: Array<SidebarItem> = [
 ];
 
 const sidebarItems: Array<SidebarRootItem> = [
-  {
-    title: 'Dashboard',
-    icon: LayoutDashboard,
-    url: '/dashboard',
-  },
+  // {
+  //   title: 'Dashboard',
+  //   icon: LayoutDashboard,
+  //   url: '/dashboard',
+  // },
   {
     title: 'Alunos',
     url: '/students',

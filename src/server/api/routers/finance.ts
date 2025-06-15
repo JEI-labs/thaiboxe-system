@@ -5,18 +5,17 @@ import { paginationSchema } from '@/server/validations/pagination';
 import { convertToDate } from '@/utils/converterUtils';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
-import { EFinanceEntryType } from '@prisma/client';
+import { EFinanceEntryStatus, EFinanceEntryType, Prisma } from '@prisma/client';
 
 export const financeRouter = createTRPCRouter({
-  /**
-   * Retorna lançamentos financeiros do usuário autenticado,
-   * com paginação, filtro por tipo e busca por texto.
-   */
   getAll: protectedProcedure
     .input(
       paginationSchema.extend({
         search: z.string().optional(),
         type: z.nativeEnum(EFinanceEntryType).optional(),
+        status: z.array(z.nativeEnum(EFinanceEntryStatus)).optional(),
+        from: z.string().optional(),
+        to: z.string().optional(),
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -28,18 +27,23 @@ export const financeRouter = createTRPCRouter({
         });
       }
 
-      const { page, limit, search, type } = input;
+      const { page, limit, search, type, from, to, status } = input;
       const skip = (page - 1) * limit;
 
-      // monta filtro dinâmico
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const where: any = { userId };
+      const where: Prisma.FinanceEntryWhereInput = { userId };
       if (type) where.type = type;
+      if (status) where.status = { in: status };
       if (search) {
         where.OR = [
           { description: { contains: search, mode: 'insensitive' } },
           { referenceId: { contains: search, mode: 'insensitive' } },
         ];
+      }
+      if (from || to) {
+        where.date = {
+          ...(from ? { gte: new Date(from) } : {}),
+          ...(to ? { lte: new Date(to) } : {}),
+        };
       }
 
       try {
@@ -73,9 +77,6 @@ export const financeRouter = createTRPCRouter({
       }
     }),
 
-  /**
-   * Cria um novo lançamento financeiro com todos os campos do schema.
-   */
   create: protectedProcedure
     .input(createFinanceEntrySchema)
     .mutation(async ({ ctx, input }) => {
@@ -88,7 +89,6 @@ export const financeRouter = createTRPCRouter({
       }
 
       const dateObj = convertToDate(input.date);
-      console.log(input.amount);
 
       try {
         const entry = await ctx.prisma.financeEntry.create({
@@ -114,5 +114,77 @@ export const financeRouter = createTRPCRouter({
           message: 'Não foi possível adicionar lançamento financeiro',
         });
       }
+    }),
+
+  update: protectedProcedure
+    .input(z.object({ id: z.string() }).merge(createFinanceEntrySchema))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
+      if (!userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Usuário não autenticado',
+        });
+      }
+
+      const existing = await ctx.prisma.financeEntry.findUnique({
+        where: { id: input.id },
+      });
+      if (!existing || existing.userId !== userId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Lançamento não encontrado',
+        });
+      }
+
+      const dateObj = convertToDate(input.date);
+      const updated = await ctx.prisma.financeEntry.update({
+        where: { id: input.id },
+        data: {
+          date: dateObj,
+          amount: Number(input.amount),
+          type: input.type,
+          status: input.status,
+          categoryId: input.category,
+          paymentMethod: input.paymentMethod ?? undefined,
+          referenceId: input.referenceId ?? undefined,
+          description: input.description ?? undefined,
+          currency: input.currency,
+        },
+      });
+      return { ok: true, data: updated };
+    }),
+
+  delete: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Usuário não autenticado',
+        });
+      }
+
+      const existing = await ctx.prisma.financeEntry.findUnique({
+        where: { id: input.id },
+      });
+      if (!existing || existing.userId !== userId) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Lançamento não encontrado',
+        });
+      }
+
+      await ctx.prisma.financeEntry.delete({
+        where: { id: input.id },
+      });
+
+      return { ok: true };
     }),
 });
