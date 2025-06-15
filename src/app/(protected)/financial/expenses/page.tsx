@@ -1,299 +1,210 @@
 'use client';
 
-import { Suspense, useMemo } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import Search from '@/components/Search';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Form } from '@/components/ui/form';
-import { FormInputComponent } from '@/components/forms/formInput/formInput.component';
-
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { AppPagination } from '@/components/appPagination/appPagination.component';
+import { useDebounce } from '@/hooks/useDebounce/useDebounce';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { api } from '@/trpc/react';
+import { useToast } from '@/hooks/use-toast';
+import { FinanceEntriesList } from '@/components/finance/financeList.component';
+import { AdvancedFilterDatePicker } from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
+import { AdvancedFilterCheckbox } from '@/components/forms/advancedFilterCheckbox/advancedFilterCheckbox.component';
+import { Calendar } from 'lucide-react';
 import {
-  maskDate,
-  maskDecimalWithAcronym,
-  unmaskDecimal,
-} from '@/utils/masksUtils';
-import {
-  createFinanceEntrySchema,
-  ICreateFinanceEntry,
-} from '@/server/validations/finance';
-import { FormSelectComponent } from '@/components/forms/formSelectInput/formSelectInput.component';
+  EFinanceEntryStatus,
+  EFinanceEntryType,
+  EPaymentMethod,
+  FinanceEntry,
+} from '@prisma/client';
+import { startOfDay, endOfDay } from 'date-fns';
+import { SheetEditExpenseEntry } from '@/components/modals/expenses/editExpenses/editExpenses.component';
+import { SheetCreateExpenseEntry } from '@/components/modals/expenses/createExpenses/createExpenses.component';
 
 const breadcrumbItems = [
   { label: 'Home', href: '/dashboard' },
   { label: 'Financeiro', href: '/financial' },
+  { label: 'Despesas', href: '/financial/expenses' },
+];
+
+const STATUS_OPTIONS = [
+  { id: EFinanceEntryStatus.PENDING, label: 'Pendente' },
+  { id: EFinanceEntryStatus.PAID, label: 'Pago' },
+  { id: EFinanceEntryStatus.CANCELLED, label: 'Cancelado' },
 ];
 
 export default function ExpensesPage() {
+  const isMobile = useIsMobile();
   const { toast } = useToast();
-  const { data: entries, refetch } = api.finance.getAll.useQuery({
-    page: 1,
-    limit: 10,
-    type: 'EXPENSE',
-  });
-  const createEntry = api.finance.create.useMutation();
 
-  const form = useForm<ICreateFinanceEntry>({
-    resolver: zodResolver(createFinanceEntrySchema),
-    defaultValues: {
-      date: '',
-      amount: '0',
-      category: '',
-      description: '',
-      type: 'INCOME',
-      status: 'PENDING',
-      paymentMethod: undefined,
-      referenceId: '',
-      currency: 'BRL',
-    },
-    mode: 'onChange',
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editEntry, setEditEntry] = useState<FinanceEntry | null>(null);
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
+  const [dateFrom, setDateFrom] = useState<string>('');
+  const [dateTo, setDateTo] = useState<string>('');
+  const debouncedFrom = useDebounce(dateFrom, 500);
+  const debouncedTo = useDebounce(dateTo, 500);
+
+  const [selectedStatuses, setSelectedStatuses] = useState<
+    Array<EFinanceEntryStatus>
+  >([]);
+
+  // paginação
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  // query TRPC
+  const financeQuery = api.finance.getAll.useQuery({
+    page,
+    limit,
+    search: debouncedSearch || undefined,
+    type: EFinanceEntryType.EXPENSE,
+    status: selectedStatuses.length > 0 ? selectedStatuses : undefined,
+    from: debouncedFrom || undefined,
+    to: debouncedTo || undefined,
   });
 
-  const onSubmit = async (values: ICreateFinanceEntry) => {
+  const deleteMutation = api.finance.delete.useMutation();
+
+  // handlers
+  const handleDelete = async (id: string) => {
     try {
-      await createEntry.mutateAsync(values);
+      await deleteMutation.mutateAsync({ id });
+      toast({ title: 'Sucesso', description: 'Despesa excluída' });
+      financeQuery.refetch();
+    } catch {
       toast({
-        title: 'Sucesso',
-        description: 'Lançamento financeiro adicionado',
-        variant: 'default',
+        title: 'Erro',
+        description: 'Não foi possível excluir',
+        variant: 'destructive',
       });
-      form.reset(undefined, { keepValues: false });
-      refetch();
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Erro ao criar lançamento';
-      toast({ title: 'Erro', description: message, variant: 'destructive' });
     }
   };
 
-  // calcula totais de receitas, despesas e saldo
-  const summary = useMemo(() => {
-    let incomes = 0;
-    let expenses = 0;
-    entries?.data.forEach((e) => {
-      if (e.type === 'INCOME') incomes += e.amount;
-      else expenses += e.amount;
-    });
-    return { incomes, expenses, net: incomes - expenses };
-  }, [entries]);
+  const handleEdit = (entry: FinanceEntry) => {
+    setEditEntry(entry);
+    setEditOpen(true);
+  };
+
+  // reset página ao mudar filtros
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, debouncedFrom, debouncedTo, selectedStatuses, limit]);
+
+  const entries = financeQuery.data?.data ?? [];
+  const totalItems = financeQuery.data?.pagination.total ?? 0;
+  const isLoading = financeQuery.isLoading;
 
   return (
-    <Suspense fallback={<div>Carregando...</div>}>
+    <Suspense fallback={<div>Carregando despesas…</div>}>
       <div className="w-full gap-6 py-6">
         <BreadcrumbUpdater items={breadcrumbItems} />
 
-        <h1 className="mb-8 text-2xl font-semibold">Financeiro</h1>
+        <h1 className="mb-8 text-2xl font-semibold">Lançamentos de Despesas</h1>
 
-        {/* Resumo financeiro */}
-        <div className="mb-8 grid grid-cols-3 gap-4">
-          <div className="rounded bg-muted p-4">
-            <span className="block">Total de Receitas</span>
-            <span className="font-bold text-green-600">
-              R$ {summary.incomes.toFixed(2).replace('.', ',')}
-            </span>
-          </div>
-          <div className="rounded bg-muted p-4">
-            <span className="block">Total de Despesas</span>
-            <span className="font-bold text-destructive">
-              R$ {summary.expenses.toFixed(2).replace('.', ',')}
-            </span>
-          </div>
-          <div className="rounded bg-muted p-4">
-            <span className="block">Saldo</span>
-            <span
-              className={`font-bold ${
-                summary.net >= 0 ? 'text-green-600' : 'text-red-600'
-              }`}
-            >
-              {summary.net >= 0 ? 'R$ ' : '-R$ '}
-              {Math.abs(summary.net).toFixed(2).replace('.', ',')}
-            </span>
-          </div>
+        <Search
+          className="w-full md:w-1/3"
+          placeholder="Buscar despesas..."
+          onSearch={setSearchTerm}
+        />
+
+        <div className="my-8 flex items-center gap-4">
+          <AdvancedFilterDatePicker
+            title="Intervalo de datas"
+            description="Filtrar por data"
+            numberOfMonths={1}
+            showDeleteButton={false}
+            rightIcon={<Calendar />}
+            onChange={({ from, to }) => {
+              setDateFrom(from ? startOfDay(from).toISOString() : '');
+              setDateTo(to ? endOfDay(to).toISOString() : '');
+            }}
+          />
+
+          <AdvancedFilterCheckbox
+            title="Status"
+            description="Filtrar por status"
+            options={STATUS_OPTIONS}
+            defaultValue={selectedStatuses.map((s) => ({
+              id: s,
+              label: STATUS_OPTIONS.find((o) => o.id === s)!.label,
+            }))}
+            onChange={(next) =>
+              setSelectedStatuses(next.map((o) => o.id as EFinanceEntryStatus))
+            }
+            onDelete={() => setSelectedStatuses([])}
+            showCounterIndicator
+            showDeleteButton={false}
+          />
         </div>
 
-        <Separator />
-
-        {/* Formulário de lançamento */}
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="mt-8 grid grid-cols-6 items-end gap-4"
-          >
-            <div className="col-span-3">
-              <FormInputComponent
-                control={form.control}
-                name="date"
-                label="Data"
-                type="text"
-                mask={maskDate}
-                placeholder="DD/MM/AAAA"
-              />
-            </div>
-            <div className="col-span-3">
-              <FormInputComponent
-                control={form.control}
-                name="amount"
-                label="Valor (R$)"
-                type="text"
-                mask={maskDecimalWithAcronym}
-                unmask={unmaskDecimal}
-                maxLength={10}
-                placeholder="0.00"
-              />
-            </div>
-            <div className="col-span-2">
-              <FormSelectComponent
-                control={form.control}
-                name="type"
-                label="Tipo"
-                placeholder="Selecione"
-                options={[
-                  { value: 'INCOME', textValue: 'Receita' },
-                  { value: 'EXPENSE', textValue: 'Despesa' },
-                ]}
-              />
-            </div>
-            <div className="col-span-2">
-              <FormSelectComponent
-                control={form.control}
-                name="status"
-                label="Status"
-                placeholder="Selecione"
-                options={[
-                  { value: 'PAID', textValue: 'Pago' },
-                  { value: 'PENDING', textValue: 'Pendente' },
-                  { value: 'CANCELED', textValue: 'Cancelado' },
-                ]}
-              />
-            </div>
-            <div className="col-span-2">
-              <FormSelectComponent
-                control={form.control}
-                name="paymentMethod"
-                label="Forma de Pagamento"
-                placeholder="Selecione"
-                options={[
-                  { value: 'CASH', textValue: 'Dinheiro' },
-                  { value: 'PIX', textValue: 'Pix' },
-                  { value: 'CARD', textValue: 'Cartão' },
-                  { value: 'BANK_SLIP', textValue: 'Boleto' },
-                ]}
-              />
-            </div>
-            <div className="col-span-1">
-              <FormInputComponent
-                control={form.control}
-                name="category"
-                label="Categoria"
-                type="text"
-                placeholder="Ex: Mensalidade"
-                maxLength={50}
-              />
-            </div>
-
-            <div className="col-span-2">
-              <FormInputComponent
-                control={form.control}
-                name="referenceId"
-                label="Referência"
-                type="text"
-                placeholder="Ex: NF12345"
-                maxLength={20}
-              />
-            </div>
-            <div className="col-span-3">
-              <FormInputComponent
-                control={form.control}
-                name="description"
-                label="Descrição"
-                type="text"
-                placeholder="Observações"
-                maxLength={200}
-              />
-            </div>
-
-            <div className="col-span-6 my-8 flex justify-end">
-              <Button
-                type="submit"
-                disabled={createEntry.isPending || form.formState.isSubmitting}
-              >
-                {createEntry.isPending ? 'Salvando...' : 'Adicionar Lançamento'}
-              </Button>
-            </div>
-          </form>
-        </Form>
-
-        <Separator />
-
-        {/* Lista de lançamentos */}
-        <div className="mt-8 gap-4">
-          {entries?.data.length ? (
-            entries.data.map((entry) => (
-              <div
-                key={entry.id}
-                className="flex items-center justify-between rounded border p-4"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant={
-                        entry.type === 'INCOME' ? 'default' : 'destructive'
-                      }
-                    >
-                      {entry.type === 'INCOME' ? 'Receita' : 'Despesa'}
-                    </Badge>
-                    <Badge variant="outline">
-                      {entry.status === 'PAID'
-                        ? 'Pago'
-                        : entry.status === 'PENDING'
-                          ? 'Pendente'
-                          : 'Cancelado'}
-                    </Badge>
-                  </div>
-                  <span className="font-medium">{entry.categoryId}</span>
-                  {entry.referenceId && (
-                    <span className="text-sm text-muted-foreground">
-                      Ref: {entry.referenceId}
-                    </span>
-                  )}
-                  {entry.description && (
-                    <p className="text-sm text-muted-foreground">
-                      {entry.description}
-                    </p>
-                  )}
-                </div>
-                <div className="flex flex-col items-end gap-1">
-                  <span className="text-sm">
-                    {entry.date.toLocaleDateString()}
-                  </span>
-                  <span
-                    className={`font-semibold ${
-                      entry.type === 'INCOME'
-                        ? 'text-green-600'
-                        : 'text-red-600'
-                    }`}
-                  >
-                    {entry.type === 'INCOME' ? '+ ' : '- '}
-                    R$ {entry.amount.toFixed(2).replace('.', ',')}
-                  </span>
-                  {entry.paymentMethod && (
-                    <span className="text-xs uppercase text-muted-foreground">
-                      {entry.paymentMethod.replace('_', ' ')}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Ainda não há lançamentos financeiros.
-            </p>
-          )}
+        <div className="mb-4 flex justify-end">
+          <Button size="sm" onClick={() => setCreateOpen(true)}>
+            Criar despesa
+          </Button>
         </div>
+
+        {/* listagem */}
+        <FinanceEntriesList
+          entries={entries}
+          isLoading={isLoading}
+          onEdit={(id) => {
+            const e = entries.find((x) => x.id === id);
+            if (e) handleEdit(e);
+          }}
+          onDelete={handleDelete}
+        />
+
+        {/* paginação */}
+        <div className="mt-6">
+          <AppPagination
+            totalItems={totalItems}
+            itemsPerPage={limit}
+            currentPage={page}
+            onPageChange={setPage}
+            onItemsPerPageChange={setLimit}
+          />
+        </div>
+
+        {/* sheets */}
+        {editEntry && (
+          <SheetEditExpenseEntry
+            side={isMobile ? 'bottom' : 'right'}
+            isOpen={editOpen}
+            setIsOpen={(open) => {
+              setEditOpen(open);
+              if (!open) setEditEntry(null);
+            }}
+            entry={{
+              ...editEntry,
+              type: EFinanceEntryType.EXPENSE,
+              category: editEntry.categoryId,
+              status: editEntry.status as EFinanceEntryStatus,
+              paymentMethod: editEntry.paymentMethod as EPaymentMethod,
+              currency: editEntry.currency ?? 'BRL',
+              date: editEntry.date.toISOString(),
+              amount: editEntry.amount.toString(),
+              description: editEntry.description ?? undefined,
+              referenceId: editEntry.referenceId ?? undefined,
+            }}
+            refetch={financeQuery.refetch}
+          />
+        )}
+
+        {createOpen && (
+          <SheetCreateExpenseEntry
+            side={isMobile ? 'bottom' : 'right'}
+            isOpen={createOpen}
+            setIsOpen={setCreateOpen}
+            refetch={financeQuery.refetch}
+          />
+        )}
       </div>
     </Suspense>
   );

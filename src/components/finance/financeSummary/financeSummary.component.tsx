@@ -13,7 +13,7 @@ export const FinancialSummary: React.FC<IFinancialSummary> = (
         <ArrowUpRight className="h-6 w-6 text-green-600" />
         <div>
           <span className="block text-sm text-muted-foreground">
-            Total de Receitas
+            Total de Receitas Pagas
           </span>
           <span className="text-lg font-semibold text-green-600">
             {maskBRL(data.incomes, true)}
@@ -26,7 +26,7 @@ export const FinancialSummary: React.FC<IFinancialSummary> = (
         <ArrowDownRight className="h-6 w-6 text-red-600" />
         <div>
           <span className="block text-sm text-muted-foreground">
-            Total de Despesas
+            Total de Despesas Pagas
           </span>
           <span className="text-lg font-semibold text-red-600">
             {maskBRL(data.expenses, true)}

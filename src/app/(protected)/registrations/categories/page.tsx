@@ -49,19 +49,16 @@ export default function CategoriesPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const { data, isLoading, refetch } = api.category.getAll.useQuery(
-    {
-      page,
-      limit,
-      search: debouncedSearch,
-      // só envia status se não for 'ALL'
-      status: selectedStatuses.length > 0 ? selectedStatuses : undefined,
-      // somente envie as datas se preenchidas
-      from: dateFrom || undefined,
-      to: dateTo || undefined,
-    },
-    { staleTime: 5000 }, //5s de cache para evitar requests desnecessários
-  );
+  const { data, isLoading, refetch } = api.category.getAll.useQuery({
+    page,
+    limit,
+    search: debouncedSearch,
+    // só envia status se não for 'ALL'
+    status: selectedStatuses.length > 0 ? selectedStatuses : undefined,
+    // somente envie as datas se preenchidas
+    from: dateFrom || undefined,
+    to: dateTo || undefined,
+  });
 
   const deleteMutation = api.category.delete.useMutation();
 
