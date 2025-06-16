@@ -11,6 +11,7 @@ import { useDebounce } from '@/hooks/useDebounce/useDebounce';
 import { AdvancedFilterDatePicker } from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
 import { Calendar } from 'lucide-react';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
+import { EFinanceEntryStatus, EFinanceEntryType } from '@prisma/client';
 
 const breadcrumbItems = [
   {
@@ -48,11 +49,22 @@ export default function FinanceSummary() {
   const summary = useMemo(() => {
     let incomes = 0;
     let expenses = 0;
+
     entries?.data.forEach((e) => {
-      if (e.type === 'INCOME' && e.status === 'PAID') incomes += e.amount / 100;
-      else if (e.type === 'EXPENSE' && e.status === 'PAID')
+      if (
+        (e.type === EFinanceEntryType.INCOME ||
+          e.type === EFinanceEntryType.STUDENTS) &&
+        e.status === EFinanceEntryStatus.PAID
+      ) {
+        incomes += e.amount / 100;
+      } else if (
+        e.type === EFinanceEntryType.EXPENSE &&
+        e.status === EFinanceEntryStatus.PAID
+      ) {
         expenses += e.amount / 100;
+      }
     });
+
     return { incomes, expenses, net: incomes - expenses };
   }, [entries]);
 

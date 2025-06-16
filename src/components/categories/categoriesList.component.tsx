@@ -20,9 +20,7 @@ export const CategoriesList: React.FC<ICategoryList> = ({
     null,
   );
 
-  const handleEdit = (id: string) => {
-    onEdit(id);
-  };
+  const handleEdit = (id: string) => onEdit(id);
 
   const handleDeleteClick = (id: string) => {
     setSelectedCategoryId(id);
@@ -51,24 +49,71 @@ export const CategoriesList: React.FC<ICategoryList> = ({
         ) : (
           <ScrollArea className="h-full w-full overflow-auto">
             <div className="space-y-2">
-              {categories.map((cat) => (
-                <div key={cat.id} className="overflow-hidden rounded-lg border">
-                  <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    {/* título + badge */}
-                    <div className="flex w-full items-center justify-between break-words">
-                      <h3 className="text-lg font-semibold">{cat.name}</h3>
-                      <Badge
-                        variant={
-                          cat.status === 'ACTIVE' ? 'success' : 'destructive'
-                        }
-                        className="mt-2"
-                      >
-                        {cat.status === 'ACTIVE' ? 'Ativa' : 'Inativa'}
-                      </Badge>
+              {categories.map((cat) =>
+                cat.isFixed ? (
+                  <div
+                    key={cat.id}
+                    className="mb-8 overflow-hidden rounded-lg border bg-muted/50"
+                  >
+                    <div className="p-2">
+                      <span className="text-sm text-muted-foreground">
+                        Categoria fixa do sistema
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex w-full items-center justify-between break-words">
+                        <h3 className="text-lg font-semibold">{cat.name}</h3>
+                        <Badge
+                          variant={
+                            cat.status === 'ACTIVE' ? 'success' : 'destructive'
+                          }
+                          className="mt-2"
+                        >
+                          {cat.status === 'ACTIVE' ? 'Ativa' : 'Inativa'}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    key={cat.id}
+                    className="overflow-hidden rounded-lg border"
+                  >
+                    <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex w-full items-center justify-between break-words">
+                        <h3 className="text-lg font-semibold">{cat.name}</h3>
+                        <Badge
+                          variant={
+                            cat.status === 'ACTIVE' ? 'success' : 'destructive'
+                          }
+                          className="mt-2"
+                        >
+                          {cat.status === 'ACTIVE' ? 'Ativa' : 'Inativa'}
+                        </Badge>
+                      </div>
+
+                      {/* botões */}
+                      <div className="flex w-full justify-end gap-2 sm:justify-end">
+                        <Button
+                          variant="default"
+                          size="icon"
+                          onClick={() => handleEdit(cat.id)}
+                        >
+                          <Edit2Icon size={18} />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => handleDeleteClick(cat.id)}
+                        >
+                          <MdDelete size={18} />
+                        </Button>
+                      </div>
                     </div>
 
                     {/* descrição + data */}
-                    <div className="w-full text-sm text-muted-foreground">
+                    <div className="w-full px-4 pb-4 pt-0 text-sm text-muted-foreground">
                       {cat.description && (
                         <p className="break-words">
                           <span className="font-semibold">Descrição: </span>
@@ -86,27 +131,9 @@ export const CategoriesList: React.FC<ICategoryList> = ({
                         })}
                       </p>
                     </div>
-
-                    {/* botões */}
-                    <div className="flex w-full justify-end gap-2 sm:justify-end">
-                      <Button
-                        variant="default"
-                        size="icon"
-                        onClick={() => handleEdit(cat.id)}
-                      >
-                        <Edit2Icon size={18} />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => handleDeleteClick(cat.id)}
-                      >
-                        <MdDelete size={18} />
-                      </Button>
-                    </div>
                   </div>
-                </div>
-              ))}
+                ),
+              )}
             </div>
           </ScrollArea>
         )}

@@ -82,7 +82,7 @@ export const SheetCreateCategory: React.FC<ICreateSheetCategory> = ({
             <FormInputComponent
               control={form.control}
               name="description"
-              label="Nome"
+              label="Descrição"
               type="text"
               placeholder="Descreva a categoria"
               maxLength={50}

@@ -93,7 +93,7 @@ export const financeRouter = createTRPCRouter({
       try {
         const entry = await ctx.prisma.financeEntry.create({
           data: {
-            userId: String(userId),
+            userId,
             date: dateObj,
             amount: Number(input.amount),
             type: input.type,

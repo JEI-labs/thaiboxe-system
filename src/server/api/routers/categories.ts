@@ -24,7 +24,13 @@ export const categoryRouter = createTRPCRouter({
 
       // 1) Verifica duplicata para este usuário
       const exists = await ctx.prisma.category.findFirst({
-        where: { userId, name: input.name },
+        where: {
+          userId,
+          name: {
+            equals: input.name,
+            mode: 'insensitive',
+          },
+        },
       });
       if (exists) {
         throw new TRPCError({

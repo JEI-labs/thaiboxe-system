@@ -9,7 +9,12 @@ import { convertToDate } from '@/utils/converterUtils';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { del } from '@vercel/blob';
-import { PaymentStatus, Prisma } from '@prisma/client';
+import {
+  EFinanceEntryType,
+  EPaymentMethod,
+  PaymentStatus,
+  Prisma,
+} from '@prisma/client';
 import { getAllStudentInputSchema } from '@/server/validations/pagination';
 
 export const studentRouter = createTRPCRouter({
@@ -17,9 +22,6 @@ export const studentRouter = createTRPCRouter({
     .input(createStudentSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      const birthDateFormatted = convertToDate(input.birthDate);
-      const startDate = new Date();
-
       if (!userId) {
         throw new TRPCError({
           code: 'UNAUTHORIZED',
@@ -27,81 +29,110 @@ export const studentRouter = createTRPCRouter({
         });
       }
 
+      // Formata datas e define início
+      const birthDateFormatted = convertToDate(input.birthDate);
+      const startDate = new Date();
+
+      // 1) Verifica e-mail duplicado
+      const emailExists = await ctx.prisma.student.findFirst({
+        where: { email: input.email, userId },
+      });
+
+      if (emailExists) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Email já cadastrado',
+        });
+      }
+
+      // 2) Carrega o plano
+      const plan = await ctx.prisma.plan.findUnique({
+        where: { id: input.planId },
+      });
+      if (!plan) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Plano não encontrado',
+        });
+      }
+
       try {
-        const emailExists = await ctx.prisma.student.findFirst({
-          where: { email: input.email, userId },
-        });
-
-        if (emailExists) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'Email já cadastrado',
+        const createdStudent = await ctx.prisma.$transaction(async (tx) => {
+          // 3. Criação do aluno
+          const student = await tx.student.create({
+            data: {
+              email: input.email,
+              name: input.name,
+              phone: input.phone,
+              birthDate: birthDateFormatted,
+              avatar: input.avatarUrl,
+              userId,
+            },
           });
-        }
 
-        const plan = await ctx.prisma.plan.findUnique({
-          where: { id: input.planId },
-        });
-
-        if (!plan) {
-          throw new TRPCError({
-            code: 'BAD_REQUEST',
-            message: 'Plano não encontrado',
-          });
-        }
-
-        // 1. Criação do aluno
-        const createdStudent = await ctx.prisma.student.create({
-          data: {
-            email: input.email,
-            name: input.name,
-            phone: input.phone,
-            birthDate: birthDateFormatted,
-            avatar: input.avatarUrl,
-            userId,
-          },
-        });
-
-        // 2. Criação da matrícula
-        await ctx.prisma.enrollment.create({
-          data: {
-            studentId: createdStudent.id,
-            planId: plan.id,
-            startDate,
-            endDate: new Date(
-              new Date(startDate).setMonth(
-                startDate.getMonth() + plan.duration,
+          // 4. Criação da matrícula
+          await tx.enrollment.create({
+            data: {
+              studentId: student.id,
+              planId: plan.id,
+              startDate,
+              endDate: new Date(
+                new Date(startDate).setMonth(
+                  startDate.getMonth() + plan.duration,
+                ),
               ),
-            ),
-          },
+            },
+          });
+
+          // 5. Geração dos pagamentos
+          const payments = Array.from({ length: plan.duration }).map((_, i) => {
+            const dueDate = new Date(startDate);
+            dueDate.setMonth(dueDate.getMonth() + i);
+            return {
+              studentId: student.id,
+              amount: plan.price,
+              dueDate,
+              status: i === 0 ? PaymentStatus.PAID : PaymentStatus.PENDING,
+            };
+          });
+          await tx.payment.createMany({ data: payments });
+
+          // 6. Busca da categoria fixa do usuário
+          const category = await tx.category.findFirst({
+            where: {
+              userId,
+              isFixed: true,
+              name: { equals: 'Alunos', mode: 'insensitive' },
+            },
+          });
+          if (!category?.id) {
+            throw new TRPCError({
+              code: 'NOT_FOUND',
+              message: 'Categoria fixa não encontrada para criação do aluno',
+            });
+          }
+
+          // 7. Criação da entrada financeira
+          await tx.financeEntry.create({
+            data: {
+              amount: plan.price,
+              date: startDate,
+              type: EFinanceEntryType.STUDENTS,
+              status: PaymentStatus.PAID,
+              currency: 'BRL',
+              paymentMethod: EPaymentMethod.CREDIT_CARD,
+              userId,
+              categoryId: category.id,
+            },
+          });
+
+          return student;
         });
 
-        // 3. Geração dos pagamentos com base no plano
-        const payments = Array.from({ length: plan.duration }).map((_, i) => {
-          const dueDate = new Date(startDate);
-          dueDate.setMonth(dueDate.getMonth() + i);
-          return {
-            studentId: createdStudent.id,
-            amount: plan.price,
-            dueDate,
-            status: i === 0 ? PaymentStatus.PAID : PaymentStatus.PENDING,
-          };
-        });
-        await ctx.prisma.payment.createMany({
-          data: payments,
-        });
-
-        return {
-          ok: true,
-          data: createdStudent,
-        };
+        return { ok: true, data: createdStudent };
       } catch (error) {
         console.error(error);
-
-        if (error instanceof TRPCError) {
-          throw error;
-        }
-
+        if (error instanceof TRPCError) throw error;
         throw new TRPCError({
           code: 'INTERNAL_SERVER_ERROR',
           message: 'Não foi possível cadastrar aluno',

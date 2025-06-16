@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { ECategoryStatus, PrismaClient } from '@prisma/client';
 import { hash } from 'argon2';
 
 const prisma = new PrismaClient();
@@ -15,21 +15,14 @@ async function main() {
     },
   });
 
-  console.log(`Usuário criado/atualizado: ${user.email}`);
-
-  // 2. Criar alunos com vínculo ao userId
-  const students = await prisma.student.createMany({
-    data: Array.from({ length: 10 }, (_, index) => ({
-      name: `Aluno ${index + 1}`,
-      email: `aluno${index + 1}@thaiboxe.com`,
-      phone: '1234567890',
-      birthDate: new Date('1990-01-01'),
-      userId: user.id, // <- vínculo com o user criado acima
-    })),
-    skipDuplicates: true,
+  await prisma.category.create({
+    data: {
+      name: 'Alunos',
+      status: ECategoryStatus.ACTIVE,
+      description: 'Alunos da Thaiboxe',
+      userId: user.id,
+    },
   });
-
-  console.log(`Alunos criados: ${students.count}`);
 }
 
 main()
