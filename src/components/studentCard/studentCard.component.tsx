@@ -1,4 +1,4 @@
-import { format } from 'date-fns'; // npm install date-fns
+import { format } from 'date-fns';
 import { Separator } from '../ui/separator';
 import { Button } from '../ui/button';
 import { Edit2, Trash2 } from 'lucide-react';
@@ -18,8 +18,11 @@ import { Card } from '../ui/card';
 import { StudentCardProps } from './studentCard.types';
 import { cn } from '@/lib/utils';
 import { getInitials } from '@/utils/masksUtils';
+import { StudentInstallmentsDropdown } from './StudentInstallmentsDropdown';
+import { api } from '@/trpc/react';
 
 export const StudentCard: React.FC<StudentCardProps> = ({
+  id,
   name,
   avatar,
   email,
@@ -32,6 +35,10 @@ export const StudentCard: React.FC<StudentCardProps> = ({
   const formattedDate = createdAt
     ? format(new Date(createdAt), 'dd/MM/yyyy')
     : 'Data indisponível';
+
+  const { data } = api.payment.getPaymentsByStudent.useQuery({
+    studentId: id,
+  });
 
   return (
     <Card className="flex flex-col justify-between gap-4 p-4 md:flex-row md:items-center">
@@ -84,7 +91,7 @@ export const StudentCard: React.FC<StudentCardProps> = ({
       <Separator orientation="vertical" className="hidden h-12 md:block" />
       <Separator orientation="horizontal" className="block md:hidden" />
 
-      <div className="flex w-full justify-center gap-3 md:w-auto md:justify-end">
+      <div className="flex w-full justify-center gap-4 md:w-auto md:items-center md:justify-end">
         <Button size="icon" onClick={onEdit} className="w-fit px-4">
           <span className="block md:hidden">Editar</span>
           <Edit2 className="h-4 w-4" />
@@ -115,6 +122,26 @@ export const StudentCard: React.FC<StudentCardProps> = ({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+      </div>
+
+      <div className="w-full">
+        <StudentInstallmentsDropdown
+          studentId={id}
+          paidInstallments={
+            data?.paid.map((item) => ({
+              date: format(new Date(item.dueDate), 'dd/MM/yyyy'),
+              rawDate: new Date(item.dueDate),
+              amount: Number(item.amount) * 100,
+            })) ?? []
+          }
+          pendingInstallments={
+            data?.pending.map((item) => ({
+              date: format(new Date(item.dueDate), 'dd/MM/yyyy'),
+              rawDate: new Date(item.dueDate),
+              amount: Number(item.amount) * 100,
+            })) ?? []
+          }
+        />
       </div>
     </Card>
   );

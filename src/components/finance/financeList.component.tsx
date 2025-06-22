@@ -17,7 +17,7 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
   onDelete,
 }) => {
   const { data: categoriesData, isLoading: isLoadingCategories } =
-    api.category.getAll.useQuery({ page: 1, limit: 50 }, { staleTime: 10_000 });
+    api.category.getAll.useQuery({ page: 1, limit: 50 });
 
   const loading = isLoading || isLoadingCategories;
 
@@ -47,16 +47,26 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
               entries.map((entry) => (
                 <div
                   key={entry.id}
-                  className="flex items-center justify-between rounded-lg border p-4 transition-shadow hover:shadow-lg"
+                  className={`flex items-center justify-between rounded-lg border p-4 transition-shadow hover:shadow-lg ${
+                    entry.type === EFinanceEntryType.STUDENTS
+                      ? 'border-l-4 border-blue-600'
+                      : ''
+                  }`}
                 >
                   <div className="space-y-1">
                     <div className="mb-4 flex items-center gap-2">
                       <Badge
                         variant={
-                          entry.type === 'INCOME' ? 'default' : 'destructive'
+                          entry.type === EFinanceEntryType.EXPENSE
+                            ? 'destructive'
+                            : 'default'
                         }
                       >
-                        {entry.type === 'INCOME' ? 'Receita' : 'Despesa'}
+                        {entry.type === EFinanceEntryType.INCOME
+                          ? 'Receita'
+                          : entry.type === EFinanceEntryType.STUDENTS
+                            ? 'Receita de Aluno'
+                            : 'Despesa'}
                       </Badge>
                       <Badge variant="outline">
                         {entry.status === EFinanceEntryStatus.PAID
@@ -74,8 +84,17 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
                     </p>
 
                     <div className="flex flex-col">
+                      {entry.type === EFinanceEntryType.STUDENTS &&
+                        entry.student?.name && (
+                          <div className="mt-2 flex items-center gap-2 text-sm">
+                            <span>Aluno:</span>
+                            <p className="text-sm text-muted-foreground">
+                              {entry.student.name}
+                            </p>
+                          </div>
+                        )}
                       {entry.referenceId && (
-                        <div className="mt-4 flex items-center gap-2 text-sm">
+                        <div className="mt-2 flex items-center gap-2 text-sm">
                           <span>Ref:</span>
                           <p className="text-sm text-muted-foreground">
                             {entry.referenceId}
@@ -99,12 +118,12 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
                     </p>
                     <p
                       className={`text-lg font-bold ${
-                        entry.type === EFinanceEntryType.INCOME
-                          ? 'text-green-600'
-                          : 'text-red-600'
+                        entry.type === EFinanceEntryType.EXPENSE
+                          ? 'text-red-600'
+                          : 'text-green-600'
                       }`}
                     >
-                      {entry.type === EFinanceEntryType.INCOME ? '+ ' : '- '}
+                      {entry.type === EFinanceEntryType.EXPENSE ? '- ' : '+ '}
                       {maskDecimalWithAcronym(entry.amount)}
                     </p>
                     {entry.paymentMethod && (

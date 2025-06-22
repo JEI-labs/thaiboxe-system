@@ -12,16 +12,12 @@ import { AdvancedFilterDatePicker } from '@/components/forms/advancedFilterDateP
 import { Calendar } from 'lucide-react';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import { EFinanceEntryStatus, EFinanceEntryType } from '@prisma/client';
+import { AdvancedFilterCheckbox } from '@/components/forms/advancedFilterCheckbox/advancedFilterCheckbox.component';
+import { STATUS_OPTIONS, TYPE_OPTIONS } from './utils';
 
 const breadcrumbItems = [
-  {
-    label: 'Home',
-    href: '/dashboard',
-  },
-  {
-    label: 'Dashboard',
-    href: '/dashboard',
-  },
+  { label: 'Home', href: '/dashboard' },
+  { label: 'Dashboard', href: '/dashboard' },
 ];
 
 export default function FinanceSummary() {
@@ -29,6 +25,12 @@ export default function FinanceSummary() {
   const [dateTo, setDateTo] = useState<string>('');
   const [page, setPage] = useState<number>(1);
   const [itensPerPage, setItensPerPage] = useState<number>(10);
+  const [selectedTypes, setSelectedTypes] = useState<Array<EFinanceEntryType>>(
+    [],
+  );
+  const [selectedStatuses, setSelectedStatuses] = useState<
+    Array<EFinanceEntryStatus>
+  >([]);
 
   const debouncedFrom = useDebounce(dateFrom, 500);
   const debouncedTo = useDebounce(dateTo, 500);
@@ -38,10 +40,12 @@ export default function FinanceSummary() {
     refetch,
     isLoading,
   } = api.finance.getAll.useQuery({
-    page: 1,
-    limit: 10,
+    page,
+    limit: itensPerPage,
     from: debouncedFrom || undefined,
     to: debouncedTo || undefined,
+    type: selectedTypes.length === 1 ? selectedTypes[0] : undefined,
+    status: selectedStatuses.length > 0 ? selectedStatuses : undefined,
   });
 
   const totalItems = entries?.pagination.total ?? 0;
@@ -49,29 +53,29 @@ export default function FinanceSummary() {
   const summary = useMemo(() => {
     let incomes = 0;
     let expenses = 0;
+    let studentIncomes = 0;
 
     entries?.data.forEach((e) => {
-      if (
-        (e.type === EFinanceEntryType.INCOME ||
-          e.type === EFinanceEntryType.STUDENTS) &&
-        e.status === EFinanceEntryStatus.PAID
-      ) {
-        incomes += e.amount / 100;
-      } else if (
-        e.type === EFinanceEntryType.EXPENSE &&
-        e.status === EFinanceEntryStatus.PAID
-      ) {
-        expenses += e.amount / 100;
+      const isPaid = e.status === EFinanceEntryStatus.PAID;
+
+      if (isPaid) {
+        if (e.type === EFinanceEntryType.STUDENTS) {
+          studentIncomes += e.amount / 100;
+          incomes += e.amount / 100;
+        } else if (e.type === EFinanceEntryType.INCOME) {
+          incomes += e.amount / 100;
+        } else if (e.type === EFinanceEntryType.EXPENSE) {
+          expenses += e.amount / 100;
+        }
       }
     });
 
-    return { incomes, expenses, net: incomes - expenses };
+    return { incomes, expenses, net: incomes - expenses, studentIncomes };
   }, [entries]);
 
   useEffect(() => {
-    refetch();
     setPage(1);
-  }, [debouncedFrom, debouncedTo, refetch]);
+  }, [debouncedFrom, debouncedTo, selectedTypes, selectedStatuses]);
 
   return (
     <Suspense fallback={<div>Carregando...</div>}>
@@ -81,8 +85,7 @@ export default function FinanceSummary() {
         <main className="flex flex-col">
           <div className="text-2xl font-semibold">Resumo Financeiro</div>
 
-          {/* filtros */}
-          <div className="my-4 flex items-center gap-2">
+          <div className="my-4 flex flex-wrap items-center gap-2">
             <AdvancedFilterDatePicker
               title="Filtrar por data"
               description="Data dos lançamentos"
@@ -93,6 +96,45 @@ export default function FinanceSummary() {
                 setDateFrom(from ? from.toISOString() : '');
                 setDateTo(to ? to.toISOString() : '');
               }}
+            />
+
+            <AdvancedFilterCheckbox
+              title="Tipo"
+              description="Filtrar por tipo de lançamento"
+              options={TYPE_OPTIONS}
+              defaultValue={selectedTypes.map((type) => ({
+                id: type,
+                label:
+                  TYPE_OPTIONS.find((opt) => opt.id === type)?.label || type,
+              }))}
+              onChange={(next) => {
+                setSelectedTypes(
+                  next.map((item) => item.id as EFinanceEntryType),
+                );
+              }}
+              onDelete={() => setSelectedTypes([])}
+              showCounterIndicator
+              showDeleteButton={false}
+            />
+
+            <AdvancedFilterCheckbox
+              title="Status"
+              description="Filtrar por status de pagamento"
+              options={STATUS_OPTIONS}
+              defaultValue={selectedStatuses.map((status) => ({
+                id: status,
+                label:
+                  STATUS_OPTIONS.find((opt) => opt.id === status)?.label ||
+                  status,
+              }))}
+              onChange={(next) => {
+                setSelectedStatuses(
+                  next.map((item) => item.id as EFinanceEntryStatus),
+                );
+              }}
+              onDelete={() => setSelectedStatuses([])}
+              showCounterIndicator
+              showDeleteButton={false}
             />
 
             <div className="my-4 flex justify-end gap-2">
@@ -107,6 +149,7 @@ export default function FinanceSummary() {
               expenses={summary.expenses}
               incomes={summary.incomes}
               net={summary.net}
+              studentIncomes={summary.studentIncomes}
             />
           </div>
 

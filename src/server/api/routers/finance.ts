@@ -53,6 +53,9 @@ export const financeRouter = createTRPCRouter({
             orderBy: { date: 'desc' },
             skip,
             take: limit,
+            include: {
+              student: true,
+            },
           }),
           ctx.prisma.financeEntry.count({ where }),
         ]);
