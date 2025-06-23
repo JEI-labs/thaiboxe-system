@@ -1,11 +1,11 @@
-import { FinanceEntry } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
-export interface IFinanceEntry {
-  data: FinanceEntry;
-}
+export type IFinanceEntryWithStudent = Prisma.FinanceEntryGetPayload<{
+  include: { student: true };
+}>;
 
 export interface IFinanceEntriesList {
-  entries: Array<FinanceEntry>;
+  entries: Array<IFinanceEntryWithStudent>;
   isLoading: boolean;
   onEdit?: (_id: string) => void;
   onDelete?: (_id: string) => void;

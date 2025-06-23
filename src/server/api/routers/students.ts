@@ -16,6 +16,8 @@ import {
   Prisma,
 } from '@prisma/client';
 import { getAllStudentInputSchema } from '@/server/validations/pagination';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 export const studentRouter = createTRPCRouter({
   create: protectedProcedure
@@ -112,17 +114,21 @@ export const studentRouter = createTRPCRouter({
             });
           }
 
+          const firstDueDate = format(startDate, 'MMMM/yyyy', { locale: ptBR });
+
           // 7. Criação da entrada financeira
           await tx.financeEntry.create({
             data: {
-              amount: plan.price,
+              amount: plan.price * 100,
               date: startDate,
               type: EFinanceEntryType.STUDENTS,
+              description: `Parcela 1 de ${student.name} com vencimento em ${firstDueDate}.`,
               status: PaymentStatus.PAID,
               currency: 'BRL',
               paymentMethod: EPaymentMethod.CREDIT_CARD,
               userId,
               categoryId: category.id,
+              studentId: student.id,
             },
           });
 
@@ -424,6 +430,12 @@ export const studentRouter = createTRPCRouter({
             console.error('Erro ao deletar avatar do Vercel Blob:', err);
           }
         }
+        await ctx.prisma.financeEntry.deleteMany({
+          where: {
+            userId,
+            studentId: student.id,
+          },
+        });
 
         await ctx.prisma.student.delete({
           where: { id: input.id, userId },

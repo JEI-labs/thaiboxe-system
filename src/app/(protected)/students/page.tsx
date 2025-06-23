@@ -30,7 +30,6 @@ const STATUS_OPTIONS: Array<AdvancedFilterCheckboxType> = [
 ];
 
 export default function StudentsPage() {
-  // Estados
   const [showSheet, setShowSheet] = useState(false);
   const [showSheetEdit, setShowSheetEdit] = useState(false);
   const [dataStudentSelectedID, setDataStudentSelectedID] = useState('');
@@ -73,12 +72,10 @@ export default function StudentsPage() {
 
   const { data: studentsData, isLoading } = studentsApi;
 
-  // Sempre volta à página 1 quando muda filtros
   useEffect(() => {
     setPage(1);
   }, [debouncedSearch, selectedStatuses, dateFrom, dateTo, limit]);
 
-  // Handlers
   const handleDeleteStudent = async (studentId: string) => {
     await deleteStudentApi.mutateAsync({ id: studentId });
     toast({
@@ -157,6 +154,7 @@ export default function StudentsPage() {
               {studentsData?.data.map((student) => (
                 <StudentCard
                   key={student.id}
+                  id={student.id}
                   name={student.name}
                   avatar={student?.avatar || ''}
                   email={student.email}
@@ -171,7 +169,7 @@ export default function StudentsPage() {
 
             {!isLoading && studentsData?.data.length === 0 && (
               <div className="flex items-center justify-center p-4 text-lg">
-                Nenhuma categoria encontrada
+                Nenhum aluno encontrado
               </div>
             )}
 

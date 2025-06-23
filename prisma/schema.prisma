@@ -67,8 +67,9 @@ model Student {
   enrollments Enrollment[]
   payments    Payment[]
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  FinanceEntry FinanceEntry[]
 }
 
 model Plan {
@@ -144,6 +145,9 @@ model FinanceEntry {
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  studentId String?
+  student   Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
 
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)

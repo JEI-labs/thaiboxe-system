@@ -53,6 +53,9 @@ export const financeRouter = createTRPCRouter({
             orderBy: { date: 'desc' },
             skip,
             take: limit,
+            include: {
+              student: true,
+            },
           }),
           ctx.prisma.financeEntry.count({ where }),
         ]);
@@ -186,5 +189,43 @@ export const financeRouter = createTRPCRouter({
       });
 
       return { ok: true };
+    }),
+
+  getAllMetrics: protectedProcedure
+    .input(
+      z.object({
+        from: z.string().optional(),
+        to: z.string().optional(),
+        type: z.nativeEnum(EFinanceEntryType).optional(),
+        status: z.array(z.nativeEnum(EFinanceEntryStatus)).optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Usuário não autenticado',
+        });
+      }
+
+      const { from, to, type, status } = input;
+
+      const where: Prisma.FinanceEntryWhereInput = { userId };
+      if (type) where.type = type;
+      if (status) where.status = { in: status };
+      if (from || to) {
+        where.date = {
+          ...(from ? { gte: new Date(from) } : {}),
+          ...(to ? { lte: new Date(to) } : {}),
+        };
+      }
+
+      const entries = await ctx.prisma.financeEntry.findMany({
+        where,
+        orderBy: { date: 'desc' },
+      });
+
+      return { ok: true, data: entries };
     }),
 });

@@ -30,14 +30,11 @@ export default function PlansPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
-  const { data, isLoading, refetch } = api.plans.getAll.useQuery(
-    {
-      page,
-      limit,
-      search: debouncedSearch,
-    },
-    { staleTime: 5000 },
-  );
+  const { data, isLoading, refetch } = api.plans.getAll.useQuery({
+    page,
+    limit,
+    search: debouncedSearch,
+  });
 
   const deleteMutation = api.plans.delete.useMutation();
 

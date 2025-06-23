@@ -1,5 +1,10 @@
 import React from 'react';
-import { ArrowUpRight, ArrowDownRight, DollarSign } from 'lucide-react';
+import {
+  ArrowUpRight,
+  ArrowDownRight,
+  DollarSign,
+  GraduationCap,
+} from 'lucide-react';
 import { IFinancialSummary } from './financeSummary.types';
 import { maskBRL } from '@/utils/masksUtils';
 
@@ -7,7 +12,7 @@ export const FinancialSummary: React.FC<IFinancialSummary> = (
   data: IFinancialSummary,
 ) => {
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <div className="grid gap-4 lg:grid-cols-4">
       {/* Receitas */}
       <div className="flex items-center gap-4 rounded-lg bg-muted p-4">
         <ArrowUpRight className="h-6 w-6 text-green-600" />
@@ -30,6 +35,19 @@ export const FinancialSummary: React.FC<IFinancialSummary> = (
           </span>
           <span className="text-lg font-semibold text-red-600">
             {maskBRL(data.expenses, true)}
+          </span>
+        </div>
+      </div>
+
+      {/* Receitas de Alunos */}
+      <div className="flex items-center gap-4 rounded-lg bg-muted p-4">
+        <GraduationCap className="h-6 w-6 text-blue-600" />
+        <div>
+          <span className="block text-sm text-muted-foreground">
+            Receitas Pagas de Alunos
+          </span>
+          <span className="text-lg font-semibold text-blue-600">
+            {maskBRL(data.studentIncomes || 0, true)}
           </span>
         </div>
       </div>

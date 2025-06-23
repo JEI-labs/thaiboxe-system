@@ -52,7 +52,7 @@ export default function LoginPage(): JSX.Element {
     if (result && result.status === 401) {
       setErrorMessage('E-mail ou senha incorreto.');
     } else if (result && result.status === 200) {
-      window.location.href = '/dashboard';
+      window.location.href = '/financial/summary';
       setErrorMessage('');
       form.reset();
     } else {
