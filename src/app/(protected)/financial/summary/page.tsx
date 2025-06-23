@@ -48,6 +48,17 @@ export default function FinanceSummary() {
     status: selectedStatuses.length > 0 ? selectedStatuses : undefined,
   });
 
+  const {
+    data: allEntries,
+    isLoading: loadingAllEntries,
+    refetch: refetchMetrics,
+  } = api.finance.getAllMetrics.useQuery({
+    from: debouncedFrom || undefined,
+    to: debouncedTo || undefined,
+    type: selectedTypes.length === 1 ? selectedTypes[0] : undefined,
+    status: selectedStatuses.length > 0 ? selectedStatuses : undefined,
+  });
+
   const totalItems = entries?.pagination.total ?? 0;
 
   const summary = useMemo(() => {
@@ -55,7 +66,7 @@ export default function FinanceSummary() {
     let expenses = 0;
     let studentIncomes = 0;
 
-    entries?.data.forEach((e) => {
+    allEntries?.data.forEach((e) => {
       const isPaid = e.status === EFinanceEntryStatus.PAID;
 
       if (isPaid) {
@@ -71,11 +82,17 @@ export default function FinanceSummary() {
     });
 
     return { incomes, expenses, net: incomes - expenses, studentIncomes };
-  }, [entries]);
+  }, [allEntries?.data]);
 
   useEffect(() => {
     setPage(1);
   }, [debouncedFrom, debouncedTo, selectedTypes, selectedStatuses]);
+
+  useEffect(() => {
+    refetch();
+    refetchMetrics();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Suspense fallback={<div>Carregando...</div>}>
@@ -138,8 +155,16 @@ export default function FinanceSummary() {
             />
 
             <div className="my-4 flex justify-end gap-2">
-              <Button size={'sm'} onClick={() => refetch()}>
-                {isLoading ? 'Atualizando...' : 'Atualizar'}
+              <Button
+                size={'sm'}
+                onClick={() => {
+                  refetch();
+                  refetchMetrics();
+                }}
+              >
+                {isLoading && loadingAllEntries
+                  ? 'Atualizando...'
+                  : 'Atualizar'}
               </Button>
             </div>
           </div>
