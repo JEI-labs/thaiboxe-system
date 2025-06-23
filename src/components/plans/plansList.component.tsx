@@ -58,9 +58,14 @@ const PlansList: React.FC<IPlanList> = ({
                     {/* título + preço */}
                     <div className="flex w-full items-center justify-between break-words">
                       <h3 className="text-lg font-semibold">{plan.name}</h3>
-                      <Badge variant="secondary" className="mt-2">
-                        R$ {Number(plan.price).toFixed(2)}
-                      </Badge>
+                      <div className="flex flex-col items-center">
+                        <span className="mb-1 text-xs text-muted-foreground">
+                          Valor da parcela do plano
+                        </span>
+                        <Badge variant="secondary">
+                          R$ {Number(plan.price).toFixed(2)}
+                        </Badge>
+                      </div>
                     </div>
 
                     {/* descrição + duração */}
