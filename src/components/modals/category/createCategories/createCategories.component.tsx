@@ -18,6 +18,7 @@ import { api } from '@/trpc/react';
 import {
   createCategorySchema,
   ICreateCategory,
+  ICreateCategoryInput,
 } from '@/server/validations/categories';
 import { ICreateSheetCategory } from './createCategories.types';
 
@@ -30,7 +31,7 @@ export const SheetCreateCategory: React.FC<ICreateSheetCategory> = ({
   const { toast } = useToast();
   const createCategory = api.category.create.useMutation();
 
-  const form = useForm<ICreateCategory>({
+  const form = useForm<ICreateCategoryInput, unknown, ICreateCategory>({
     resolver: zodResolver(createCategorySchema),
     defaultValues: { name: '', status: 'ACTIVE', description: '' },
     mode: 'onChange',

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
+import { useState, Suspense } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import Search from '@/components/Search';
 import { Button } from '@/components/ui/button';
@@ -88,9 +89,11 @@ export default function RevenuesPage() {
     setEditOpen(true);
   };
 
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, debouncedFrom, debouncedTo, selectedStatuses, limit]);
+  // reset página ao mudar filtros
+  useResetOnChange(
+    [debouncedSearch, debouncedFrom, debouncedTo, selectedStatuses, limit],
+    () => setPage(1),
+  );
 
   const entries = financeQuery.data?.data ?? [];
   const totalItems = financeQuery.data?.pagination.total ?? 0;

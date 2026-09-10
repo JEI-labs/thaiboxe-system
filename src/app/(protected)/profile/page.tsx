@@ -103,7 +103,7 @@ export default function Page() {
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="space-y-6 p-6">
                   <div className="flex items-center gap-4">
-                    <Avatar className="h-12 w-12 ring-2 ring-primary ring-offset-2 ring-offset-muted">
+                    <Avatar className="ring-primary ring-offset-muted h-12 w-12 ring-2 ring-offset-2">
                       <AvatarImage src={''} className="ring-0" />
                       <AvatarFallback className="bg-primary/40">
                         {userData?.name?.substring(0, 2).toUpperCase()}
@@ -144,7 +144,7 @@ export default function Page() {
                         onClick={() =>
                           setShowPassword((prev: boolean) => !prev)
                         }
-                        className="absolute bottom-2.5 right-3 z-10 text-muted-foreground hover:text-primary"
+                        className="text-muted-foreground hover:text-primary absolute right-3 bottom-2.5 z-10"
                         tabIndex={-1}
                       >
                         {showPassword ? (
@@ -168,7 +168,7 @@ export default function Page() {
                         onClick={() =>
                           setShowPassword((prev: boolean) => !prev)
                         }
-                        className="absolute bottom-2.5 right-3 z-10 text-muted-foreground hover:text-primary"
+                        className="text-muted-foreground hover:text-primary absolute right-3 bottom-2.5 z-10"
                         tabIndex={-1}
                       >
                         {showPassword ? (

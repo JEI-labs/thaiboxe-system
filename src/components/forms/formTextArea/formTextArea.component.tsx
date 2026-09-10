@@ -9,12 +9,16 @@ import {
 import { cn } from '@/lib/utils';
 import React from 'react';
 
-import type { FieldValues, UseControllerProps } from 'react-hook-form';
+import type {
+  FieldPath,
+  FieldValues,
+  UseControllerProps,
+} from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { FormTextAreaComponentProps } from './formTextArea.types';
 import { Textarea } from './TextArea';
 
-export const FormTextAreaComponent = <T extends FieldValues>({
+export const FormTextAreaComponent = <T extends FieldValues, TTransformed = T>({
   control,
   name,
   description,
@@ -23,7 +27,8 @@ export const FormTextAreaComponent = <T extends FieldValues>({
   unmask,
   hideErrors,
   ...props
-}: UseControllerProps<T> & FormTextAreaComponentProps): React.JSX.Element => {
+}: UseControllerProps<T, FieldPath<T>, TTransformed> &
+  FormTextAreaComponentProps): React.JSX.Element => {
   const handleRemoveMask = (value: string): string => {
     if (unmask) {
       return unmask(value).toString();
@@ -62,7 +67,7 @@ export const FormTextAreaComponent = <T extends FieldValues>({
                       value={mask ? mask(field.value) : field.value}
                       placeholder={props.placeholder}
                       onInput={(
-                        event: React.ChangeEvent<HTMLTextAreaElement>,
+                        event: React.InputEvent<HTMLTextAreaElement>,
                       ): void => {
                         const formattedValue = handleChangeText(
                           event.currentTarget.value,

@@ -18,7 +18,7 @@ export const StyledSwitchComponent = ({
           <span className="text-sm font-semibold">{props.title}</span>
         )}
         {props.topDescription && (
-          <span className="max-w-[90%] text-sm text-muted-foreground">
+          <span className="text-muted-foreground max-w-[90%] text-sm">
             {props.topDescription}
           </span>
         )}

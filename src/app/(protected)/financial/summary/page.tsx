@@ -1,5 +1,6 @@
 'use client';
 
+import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { FinancialSummary } from '@/components/finance/financeSummary/financeSummary.component';
@@ -84,9 +85,11 @@ export default function FinanceSummary() {
     return { incomes, expenses, net: incomes - expenses, studentIncomes };
   }, [allEntries?.data]);
 
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedFrom, debouncedTo, selectedTypes, selectedStatuses]);
+  // reset página ao mudar filtros
+  useResetOnChange(
+    [debouncedFrom, debouncedTo, selectedTypes, selectedStatuses],
+    () => setPage(1),
+  );
 
   useEffect(() => {
     refetch();

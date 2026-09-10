@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { Form } from '@/components/ui/form';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/trpc/react';
@@ -69,7 +69,7 @@ export const SheetEditSupplier: React.FC<IEditSheetSupplier> = ({
     }
   }, [data?.data, form]);
 
-  const selectedState = form.watch('state');
+  const selectedState = useWatch({ control: form.control, name: 'state' });
 
   const { statesOptions, citiesOptions, loadingStates, loadingCities } =
     useStateCityOptions(selectedState || '', data?.data?.state || '');

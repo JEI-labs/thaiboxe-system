@@ -29,11 +29,11 @@ export function AppPagination({
     <div className="flex w-full flex-row items-center justify-between gap-2">
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1 text-xs font-medium md:text-sm">
-          <span className="flex h-7 min-w-7 items-center justify-center rounded-md border border-input bg-background px-1 md:h-8 md:min-w-8">
+          <span className="border-input bg-background flex h-7 min-w-7 items-center justify-center rounded-md border px-1 md:h-8 md:min-w-8">
             {currentPage}
           </span>
           <span className="text-muted-foreground">de</span>
-          <span className="flex h-7 min-w-7 items-center justify-center rounded-md border border-input bg-background px-1 md:h-8 md:min-w-8">
+          <span className="border-input bg-background flex h-7 min-w-7 items-center justify-center rounded-md border px-1 md:h-8 md:min-w-8">
             {totalPages}
           </span>
         </div>
@@ -42,7 +42,7 @@ export function AppPagination({
       <div className="flex items-center gap-3">
         {onItemsPerPageChange && (
           <div className="flex items-center gap-2 whitespace-nowrap">
-            <span className="text-xs text-muted-foreground md:text-sm">
+            <span className="text-muted-foreground text-xs md:text-sm">
               {itemsPerPageLabel}
             </span>
             <Select

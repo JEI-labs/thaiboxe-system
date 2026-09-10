@@ -1,7 +1,10 @@
+import { PrismaPg } from '@prisma/adapter-pg';
 import { ECategoryStatus, PrismaClient } from '@prisma/client';
 import { hash } from 'argon2';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
+});
 
 async function main() {
   // 1. Criar ou atualizar o usuário administrador

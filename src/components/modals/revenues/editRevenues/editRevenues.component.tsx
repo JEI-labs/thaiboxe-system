@@ -18,6 +18,7 @@ import { api } from '@/trpc/react';
 import {
   createFinanceEntrySchema,
   ICreateFinanceEntry,
+  ICreateFinanceEntryInput,
 } from '@/server/validations/finance';
 import {
   maskDate,
@@ -40,7 +41,7 @@ export const SheetEditFinanceEntry: React.FC<IEditRevenues> = ({
   const updateEntry = api.finance.update.useMutation();
   const { data: categories } = api.category.getAll.useQuery({});
 
-  const form = useForm<ICreateFinanceEntry>({
+  const form = useForm<ICreateFinanceEntryInput, unknown, ICreateFinanceEntry>({
     resolver: zodResolver(createFinanceEntrySchema),
     defaultValues: {
       date: format(new Date(entry.date), 'dd/MM/yyyy'),

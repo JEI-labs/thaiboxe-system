@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
+import { useState } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -41,9 +42,8 @@ export default function PlansPage() {
   const plans = data?.data ?? [];
   const totalItems = data?.pagination.total ?? 0;
 
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, limit]);
+  // sempre volta à página 1 ao mudar busca ou limite
+  useResetOnChange([debouncedSearch, limit], () => setPage(1));
 
   const handleDelete = async (id: string) => {
     await deleteMutation.mutateAsync({ id });

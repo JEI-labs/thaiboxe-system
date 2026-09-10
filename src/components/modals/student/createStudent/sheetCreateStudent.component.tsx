@@ -131,7 +131,7 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
 
             <Separator />
 
-            <div className="mx-2 mb-12 mt-8 grid grid-cols-4 items-center gap-8">
+            <div className="mx-2 mt-8 mb-12 grid grid-cols-4 items-center gap-8">
               <div className="col-span-4">
                 <FormInputComponent
                   control={form.control}

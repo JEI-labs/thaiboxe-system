@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
+import { useState } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { UserPlus } from 'lucide-react';
@@ -72,9 +73,11 @@ export default function StudentsPage() {
 
   const { data: studentsData, isLoading } = studentsApi;
 
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, selectedStatuses, dateFrom, dateTo, limit]);
+  // sempre volta à página 1 ao mudar filtros
+  useResetOnChange(
+    [debouncedSearch, selectedStatuses, dateFrom, dateTo, limit],
+    () => setPage(1),
+  );
 
   const handleDeleteStudent = async (studentId: string) => {
     await deleteStudentApi.mutateAsync({ id: studentId });

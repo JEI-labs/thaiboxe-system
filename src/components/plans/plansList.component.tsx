@@ -43,7 +43,7 @@ const PlansList: React.FC<IPlanList> = ({
         {isLoading ? (
           <p className="py-4 text-center">Carregando planos…</p>
         ) : plans.length === 0 ? (
-          <p className="py-4 text-center text-muted-foreground">
+          <p className="text-muted-foreground py-4 text-center">
             Não foram encontrados planos.
           </p>
         ) : (
@@ -59,7 +59,7 @@ const PlansList: React.FC<IPlanList> = ({
                     <div className="flex w-full items-center justify-between break-words">
                       <h3 className="text-lg font-semibold">{plan.name}</h3>
                       <div className="flex flex-col items-center">
-                        <span className="mb-1 text-xs text-muted-foreground">
+                        <span className="text-muted-foreground mb-1 text-xs">
                           Valor da parcela do plano
                         </span>
                         <Badge variant="secondary">
@@ -69,7 +69,7 @@ const PlansList: React.FC<IPlanList> = ({
                     </div>
 
                     {/* descrição + duração */}
-                    <div className="w-full text-sm text-muted-foreground">
+                    <div className="text-muted-foreground w-full text-sm">
                       {plan.description && (
                         <p className="break-words">
                           <span className="font-semibold">Descrição: </span>

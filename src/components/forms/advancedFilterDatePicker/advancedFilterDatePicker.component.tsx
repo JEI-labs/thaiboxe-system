@@ -1,5 +1,6 @@
 'use client';
 
+import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
 import * as React from 'react';
 
 import { Trash2 } from 'lucide-react';
@@ -25,7 +26,7 @@ moment.locale('pt-br');
 export function AdvancedFilterDatePicker({
   showDeleteButton = true,
   ...props
-}: Readonly<AdvancedFilterDatePickerProps>): JSX.Element {
+}: Readonly<AdvancedFilterDatePickerProps>): React.JSX.Element {
   const open = useBoolean(props.open);
   const [date, setDate] = React.useState<
     AdvancedFilterDatePickerType | undefined
@@ -76,14 +77,16 @@ export function AdvancedFilterDatePicker({
     }
   };
 
-  React.useEffect(() => {
+  // Sincroniza com a prop durante o render em vez de num efeito, que
+  // confirmaria a data velha na tela antes de corrigi-la.
+  useResetOnChange([props.defaultValue], () => {
     const formattedDate = handleFormatDate(props.defaultValue);
 
     setDate({
       from: formattedDate.from ? formattedDate.from : undefined,
       to: formattedDate.to ? formattedDate.to : undefined,
     });
-  }, [props.defaultValue]);
+  });
 
   return (
     <DropdownMenu open={open.value} onOpenChange={open.actions.setValue}>
