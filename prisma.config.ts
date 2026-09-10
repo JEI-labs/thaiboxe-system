@@ -10,7 +10,9 @@ import { defineConfig } from 'prisma/config';
 export default defineConfig({
   schema: 'prisma/schema.prisma',
   datasource: {
-    url: process.env.DATABASE_URL,
+    // Migrations precisam de conexão direta ou pooler em session mode; o
+    // pooler em transaction mode não suporta o advisory lock do migrate.
+    url: process.env.DIRECT_URL ?? process.env.DATABASE_URL,
   },
   migrations: {
     seed: 'tsx prisma/seed.ts',
