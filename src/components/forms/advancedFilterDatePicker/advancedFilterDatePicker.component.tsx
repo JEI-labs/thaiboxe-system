@@ -25,7 +25,7 @@ moment.locale('pt-br');
 export function AdvancedFilterDatePicker({
   showDeleteButton = true,
   ...props
-}: Readonly<AdvancedFilterDatePickerProps>): JSX.Element {
+}: Readonly<AdvancedFilterDatePickerProps>): React.JSX.Element {
   const open = useBoolean(props.open);
   const [date, setDate] = React.useState<
     AdvancedFilterDatePickerType | undefined

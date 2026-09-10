@@ -1,6 +1,10 @@
 import React from 'react';
 import { Controller } from 'react-hook-form';
-import type { FieldValues, UseControllerProps } from 'react-hook-form';
+import type {
+  FieldPath,
+  FieldValues,
+  UseControllerProps,
+} from 'react-hook-form';
 import {
   FormControl,
   FormDescription,
@@ -13,12 +17,13 @@ import type { FormSwitchComponentProps } from './formSwitchInput.types';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 
-export const FormSwitchComponent = <T extends FieldValues>({
+export const FormSwitchComponent = <T extends FieldValues, TTransformed = T>({
   control,
   name,
   rules,
   ...props
-}: UseControllerProps<T> & FormSwitchComponentProps): React.JSX.Element => {
+}: UseControllerProps<T, FieldPath<T>, TTransformed> &
+  FormSwitchComponentProps): React.JSX.Element => {
   return (
     <Controller
       control={control}

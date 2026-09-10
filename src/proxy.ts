@@ -1,4 +1,3 @@
-/* eslint-disable consistent-return */
 import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -11,15 +10,14 @@ const authRoutes = '/auth/';
 const publicRoutes = ['/'];
 
 /**
- * Tudo que cair no matcher vai ser executado pelo middleware
+ * Tudo que cair no matcher vai ser executado pelo proxy
  * Rotas excluidas: /api/ /trcp/ /_next/ /public/ /favicon.ico
  */
 export const config = {
   matcher: ['/((?!\\bapi\\b|\\btrpc\\b|_next|.*\\..*|favicon.ico).*)'],
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { nextUrl } = request;
 
   const session = await getToken({

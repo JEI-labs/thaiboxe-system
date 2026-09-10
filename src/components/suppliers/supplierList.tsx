@@ -35,7 +35,7 @@ const SuppliersList: React.FC<ISupplierList> = ({
 
   if (suppliers.length === 0) {
     return (
-      <p className="py-4 text-center text-muted-foreground">
+      <p className="text-muted-foreground py-4 text-center">
         Nenhum fornecedor encontrado.
       </p>
     );
@@ -53,14 +53,14 @@ const SuppliersList: React.FC<ISupplierList> = ({
               <div>
                 <h3 className="mb-2 text-lg font-semibold">{sup.name}</h3>
                 {(sup.city || sup.state) && (
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {sup.city}, {sup.state}
                   </p>
                 )}
                 {sup.phone && (
                   <div className="mt-4 flex items-center gap-2">
                     <span className="text-sm">Telefone: </span>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {maskCellphone(sup.phone)}
                     </p>
                   </div>
@@ -68,7 +68,7 @@ const SuppliersList: React.FC<ISupplierList> = ({
                 {sup.street && (
                   <div className="flex items-center gap-2">
                     <span className="text-sm">Endereço: </span>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {' '}
                       {sup.street}
                     </p>

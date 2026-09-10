@@ -21,7 +21,7 @@ import { Form } from '@/components/ui/form';
 import { FormInputComponent } from '@/components/forms/formInput/formInput.component';
 import { AuthLayout } from '@/components/layout/AuthLayout';
 
-export default function LoginPage(): JSX.Element {
+export default function LoginPage(): React.JSX.Element {
   const [seePass, setSeePass] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -67,10 +67,10 @@ export default function LoginPage(): JSX.Element {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="grid w-full gap-6 pb-6">
             <div>
-              <h1 className="text-xl font-bold text-foreground">
+              <h1 className="text-foreground text-xl font-bold">
                 Bem vindo a Thai-Boxe Manager
               </h1>
-              <p className="text-sm text-muted-foreground">Team Sartorato</p>
+              <p className="text-muted-foreground text-sm">Team Sartorato</p>
             </div>
             <div className="grid gap-4">
               <FormInputComponent
@@ -86,7 +86,7 @@ export default function LoginPage(): JSX.Element {
                 icon={
                   <Mail
                     size={18}
-                    className="pointer-events-none absolute left-4 top-4 flex items-center text-muted-foreground"
+                    className="text-muted-foreground pointer-events-none absolute top-4 left-4 flex items-center"
                   />
                 }
               />
@@ -102,14 +102,14 @@ export default function LoginPage(): JSX.Element {
                 icon={
                   <PasswordIcon
                     size={18}
-                    className="absolute left-4 top-4 flex cursor-pointer items-center text-muted-foreground"
+                    className="text-muted-foreground absolute top-4 left-4 flex cursor-pointer items-center"
                     onClick={() => setSeePass(!seePass)}
                   />
                 }
               />
               <Link
                 href="/auth/forgotpassword"
-                className="text-xs text-primary hover:underline"
+                className="text-primary text-xs hover:underline"
               >
                 Esqueceu sua senha?
               </Link>
@@ -123,7 +123,7 @@ export default function LoginPage(): JSX.Element {
             </div>
 
             <Button
-              className="w-full bg-primary py-6 font-medium"
+              className="bg-primary w-full py-6 font-medium"
               type="submit"
               disabled={disabled}
             >

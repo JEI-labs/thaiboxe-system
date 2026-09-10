@@ -19,6 +19,7 @@ import { api } from '@/trpc/react';
 import {
   createFinanceEntrySchema,
   ICreateFinanceEntry,
+  ICreateFinanceEntryInput,
 } from '@/server/validations/finance';
 import {
   maskDate,
@@ -46,7 +47,7 @@ export const SheetCreateExpenseEntry: React.FC<ICreateExpenses> = ({
   });
   const categories = categoriesQuery?.data ?? [];
 
-  const form = useForm<ICreateFinanceEntry>({
+  const form = useForm<ICreateFinanceEntryInput, unknown, ICreateFinanceEntry>({
     resolver: zodResolver(createFinanceEntrySchema),
     defaultValues: {
       date: '',

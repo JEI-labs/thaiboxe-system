@@ -1,5 +1,9 @@
 import React from 'react';
-import type { FieldValues, UseControllerProps } from 'react-hook-form';
+import type {
+  FieldPath,
+  FieldValues,
+  UseControllerProps,
+} from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import type { FormSelectComponentProps } from './formSelectInput.component.types';
 import {
@@ -18,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-export const FormSelectComponent = <T extends FieldValues>({
+export const FormSelectComponent = <T extends FieldValues, TTransformed = T>({
   control,
   name,
   rules,
@@ -27,7 +31,8 @@ export const FormSelectComponent = <T extends FieldValues>({
   hasEmptyOption = true,
   description,
   ...props
-}: UseControllerProps<T> & FormSelectComponentProps): React.JSX.Element => {
+}: UseControllerProps<T, FieldPath<T>, TTransformed> &
+  FormSelectComponentProps): React.JSX.Element => {
   const extendedOptions = hasEmptyOption
     ? [
         { value: null, textValue: props.placeholder ?? '-', icon: null },
@@ -50,7 +55,7 @@ export const FormSelectComponent = <T extends FieldValues>({
                 <div className="flex flex-col">
                   <FormLabel>{props.label}</FormLabel>
                   {description && (
-                    <FormLabel className="text-xs text-muted-foreground">
+                    <FormLabel className="text-muted-foreground text-xs">
                       {description}
                     </FormLabel>
                   )}

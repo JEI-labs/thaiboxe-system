@@ -14,10 +14,10 @@ export const FinancialSummary: React.FC<IFinancialSummary> = (
   return (
     <div className="grid gap-4 lg:grid-cols-4">
       {/* Receitas */}
-      <div className="flex items-center gap-4 rounded-lg bg-muted p-4">
+      <div className="bg-muted flex items-center gap-4 rounded-lg p-4">
         <ArrowUpRight className="h-6 w-6 text-green-600" />
         <div>
-          <span className="block text-sm text-muted-foreground">
+          <span className="text-muted-foreground block text-sm">
             Total de Receitas Pagas
           </span>
           <span className="text-lg font-semibold text-green-600">
@@ -27,10 +27,10 @@ export const FinancialSummary: React.FC<IFinancialSummary> = (
       </div>
 
       {/* Despesas */}
-      <div className="flex items-center gap-4 rounded-lg bg-muted p-4">
+      <div className="bg-muted flex items-center gap-4 rounded-lg p-4">
         <ArrowDownRight className="h-6 w-6 text-red-600" />
         <div>
-          <span className="block text-sm text-muted-foreground">
+          <span className="text-muted-foreground block text-sm">
             Total de Despesas Pagas
           </span>
           <span className="text-lg font-semibold text-red-600">
@@ -40,10 +40,10 @@ export const FinancialSummary: React.FC<IFinancialSummary> = (
       </div>
 
       {/* Receitas de Alunos */}
-      <div className="flex items-center gap-4 rounded-lg bg-muted p-4">
+      <div className="bg-muted flex items-center gap-4 rounded-lg p-4">
         <GraduationCap className="h-6 w-6 text-blue-600" />
         <div>
-          <span className="block text-sm text-muted-foreground">
+          <span className="text-muted-foreground block text-sm">
             Receitas Pagas de Alunos
           </span>
           <span className="text-lg font-semibold text-blue-600">
@@ -53,12 +53,12 @@ export const FinancialSummary: React.FC<IFinancialSummary> = (
       </div>
 
       {/* Saldo */}
-      <div className="flex items-center gap-4 rounded-lg bg-muted p-4">
+      <div className="bg-muted flex items-center gap-4 rounded-lg p-4">
         <DollarSign
           className={`h-6 w-6 ${data.net >= 0 ? 'text-green-600' : 'text-red-600'}`}
         />
         <div>
-          <span className="block text-sm text-muted-foreground">Saldo</span>
+          <span className="text-muted-foreground block text-sm">Saldo</span>
           <span
             className={`text-lg font-semibold ${
               data.net >= 0 ? 'text-green-600' : 'text-red-600'

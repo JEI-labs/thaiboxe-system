@@ -43,7 +43,7 @@ export const CategoriesList: React.FC<ICategoryList> = ({
         {isLoading ? (
           <p className="py-4 text-center">Carregando categorias…</p>
         ) : categories.length === 0 ? (
-          <p className="py-4 text-center text-muted-foreground">
+          <p className="text-muted-foreground py-4 text-center">
             Não foram encontradas categorias.
           </p>
         ) : (
@@ -53,10 +53,10 @@ export const CategoriesList: React.FC<ICategoryList> = ({
                 cat.isFixed ? (
                   <div
                     key={cat.id}
-                    className="mb-8 overflow-hidden rounded-lg border bg-muted/50"
+                    className="bg-muted/50 mb-8 overflow-hidden rounded-lg border"
                   >
                     <div className="p-2">
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-muted-foreground text-sm">
                         Categoria fixa do sistema
                       </span>
                     </div>
@@ -113,7 +113,7 @@ export const CategoriesList: React.FC<ICategoryList> = ({
                     </div>
 
                     {/* descrição + data */}
-                    <div className="w-full px-4 pb-4 pt-0 text-sm text-muted-foreground">
+                    <div className="text-muted-foreground w-full px-4 pt-0 pb-4 text-sm">
                       {cat.description && (
                         <p className="break-words">
                           <span className="font-semibold">Descrição: </span>

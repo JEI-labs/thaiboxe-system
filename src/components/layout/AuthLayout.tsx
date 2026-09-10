@@ -1,12 +1,14 @@
+import * as React from 'react';
+
 import Image from 'next/image';
 import { ScrollArea } from '../ui/scroll-area';
 
 export function AuthLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>): JSX.Element {
+}: Readonly<{ children: React.ReactNode }>): React.JSX.Element {
   return (
     <div className="grid h-screen w-screen lg:grid-cols-2">
-      <div className="hidden h-screen w-full overflow-hidden bg-muted lg:block">
+      <div className="bg-muted hidden h-screen w-full overflow-hidden lg:block">
         <Image
           src="/images/thaiboxe.jpg"
           alt="Image"
@@ -17,7 +19,7 @@ export function AuthLayout({
       </div>
       <ScrollArea>
         <div className="flex min-h-screen w-full items-center">
-          <div className="mx-auto flex h-fit min-w-[40%] max-w-[70%] flex-col gap-8 py-4">
+          <div className="mx-auto flex h-fit max-w-[70%] min-w-[40%] flex-col gap-8 py-4">
             <div className="-mb-[30px] flex items-center justify-center">
               <Image
                 src="/images/logo.png"

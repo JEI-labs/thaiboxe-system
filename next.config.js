@@ -7,16 +7,23 @@ import './src/env.js';
 /** @type {import("next").NextConfig} */
 const config = {
   images: {
+    // `images.domains` was removed in Next 16 — everything is a remotePattern now.
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'my-blob-store.public.blob.vercel-storage.com',
         port: '',
       },
-    ],
-    domains: [
-      'i.pravatar.cc',
-      'yqmujiufpgt9jxbw.public.blob.vercel-storage.com',
+      {
+        protocol: 'https',
+        hostname: 'yqmujiufpgt9jxbw.public.blob.vercel-storage.com',
+        port: '',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.pravatar.cc',
+        port: '',
+      },
     ],
   },
 };

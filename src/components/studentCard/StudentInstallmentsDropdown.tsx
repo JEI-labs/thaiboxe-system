@@ -90,7 +90,7 @@ export const StudentInstallmentsDropdown: React.FC<
               </DropdownMenuItem>
             ))
           ) : (
-            <DropdownMenuItem className="italic text-muted-foreground">
+            <DropdownMenuItem className="text-muted-foreground italic">
               Nenhuma parcela paga
             </DropdownMenuItem>
           )}
@@ -113,7 +113,7 @@ export const StudentInstallmentsDropdown: React.FC<
               </DropdownMenuItem>
             ))
           ) : (
-            <DropdownMenuItem className="italic text-muted-foreground">
+            <DropdownMenuItem className="text-muted-foreground italic">
               Nenhuma pendente
             </DropdownMenuItem>
           )}

@@ -250,7 +250,7 @@ export const studentRouter = createTRPCRouter({
 
       try {
         // Construir filtro dinâmico
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         const whereConditions: Prisma.StudentWhereInput = {
           userId,
         };

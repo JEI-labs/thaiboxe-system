@@ -88,7 +88,7 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
                         entry.student?.name && (
                           <div className="mt-2 flex items-center gap-2 text-sm">
                             <span>Aluno:</span>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-muted-foreground text-sm">
                               {entry.student.name}
                             </p>
                           </div>
@@ -96,7 +96,7 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
                       {entry.referenceId && (
                         <div className="mt-2 flex items-center gap-2 text-sm">
                           <span>Ref:</span>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-muted-foreground text-sm">
                             {entry.referenceId}
                           </p>
                         </div>
@@ -104,7 +104,7 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
                       {entry.description && (
                         <div className="flex items-center gap-2 text-sm">
                           <span className="text-sm">Descrição:</span>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-muted-foreground text-sm">
                             {entry.description}
                           </p>
                         </div>
@@ -113,7 +113,7 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
                   </div>
 
                   <div className="flex flex-col items-end gap-2 text-right">
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {new Date(entry.date).toLocaleDateString('pt-BR')}
                     </p>
                     <p
@@ -127,7 +127,7 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
                       {maskDecimalWithAcronym(entry.amount)}
                     </p>
                     {entry.paymentMethod && (
-                      <p className="text-xs uppercase text-muted-foreground">
+                      <p className="text-muted-foreground text-xs uppercase">
                         {entry.paymentMethod.replace(/_/g, ' ')}
                       </p>
                     )}
@@ -156,7 +156,7 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
                 </div>
               ))
             ) : (
-              <p className="py-4 text-center text-muted-foreground">
+              <p className="text-muted-foreground py-4 text-center">
                 Ainda não há lançamentos financeiros.
               </p>
             )}

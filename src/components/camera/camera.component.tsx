@@ -66,7 +66,7 @@ export function CameraCaptureButton({ onCapture }: CameraCaptureButtonProps) {
           <button
             type="button"
             onClick={takePhoto}
-            className="mt-1 flex items-center justify-center gap-2 rounded bg-primary px-3 py-1 text-white"
+            className="bg-primary mt-1 flex items-center justify-center gap-2 rounded px-3 py-1 text-white"
           >
             <Camera className="h-5 w-5" />
             Tirar foto
@@ -76,7 +76,7 @@ export function CameraCaptureButton({ onCapture }: CameraCaptureButtonProps) {
         <button
           type="button"
           onClick={startCamera}
-          className="rounded bg-secondary px-3 py-1 text-white"
+          className="bg-secondary rounded px-3 py-1 text-white"
         >
           Usar Câmera
         </button>

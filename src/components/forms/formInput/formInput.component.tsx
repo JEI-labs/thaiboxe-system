@@ -1,6 +1,10 @@
 import React from 'react';
 
-import type { FieldValues, UseControllerProps } from 'react-hook-form';
+import type {
+  FieldPath,
+  FieldValues,
+  UseControllerProps,
+} from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 
 import type { FormInputComponentProps } from './formInput.component.types';
@@ -15,7 +19,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
-export const FormInputComponent = <T extends FieldValues>({
+export const FormInputComponent = <T extends FieldValues, TTransformed = T>({
   control,
   name,
   description,
@@ -24,7 +28,8 @@ export const FormInputComponent = <T extends FieldValues>({
   unmask,
   hideErrors,
   ...props
-}: UseControllerProps<T> & FormInputComponentProps): React.JSX.Element => {
+}: UseControllerProps<T, FieldPath<T>, TTransformed> &
+  FormInputComponentProps): React.JSX.Element => {
   const handleRemoveMask = (value: string): string => {
     if (unmask) {
       return unmask(value).toString();
