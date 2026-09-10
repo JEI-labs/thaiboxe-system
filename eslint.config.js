@@ -65,13 +65,6 @@ export default tseslint.config(
       'react/prop-types': 'off',
 
       'prettier/prettier': 'warn',
-
-      // New in eslint-plugin-react-hooks v6 (via eslint-config-next 16). These
-      // flag pre-existing patterns across the app rather than anything the
-      // dependency upgrade changed, so they are warnings pending a dedicated
-      // pass -- see the effects listed by `npm run lint`.
-      'react-hooks/set-state-in-effect': 'warn',
-      'react-hooks/immutability': 'warn',
     },
     settings: {
       react: { version: 'detect' },

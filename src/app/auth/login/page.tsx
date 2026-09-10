@@ -9,6 +9,7 @@ import {
   Mail,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -38,6 +39,8 @@ export default function LoginPage(): React.JSX.Element {
       .max(20, { message: 'A senha pode ter no máximo 20 caracteres.' }),
   });
 
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -52,9 +55,12 @@ export default function LoginPage(): React.JSX.Element {
     if (result && result.status === 401) {
       setErrorMessage('E-mail ou senha incorreto.');
     } else if (result && result.status === 200) {
-      window.location.href = '/financial/summary';
       setErrorMessage('');
       form.reset();
+      // client-side nav keeps the SPA transition; refresh re-runs server
+      // components so they see the session cookie signIn just set.
+      router.push('/financial/summary');
+      router.refresh();
     } else {
       setErrorMessage('Houve um erro inexperado, tente novamente mais tarde.');
     }

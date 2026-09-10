@@ -29,12 +29,6 @@ export async function proxy(request: NextRequest) {
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = nextUrl.pathname.startsWith(authRoutes);
 
-  console.log(
-    '================== middleware start\n',
-    session,
-    '\n================== middleware end',
-  );
-
   // Se for rota publica pode acessar
   if (isPublicRoute)
     return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, request.url));

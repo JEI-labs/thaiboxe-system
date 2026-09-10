@@ -1,7 +1,8 @@
 'use client';
 
+import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
 import { useForm } from 'react-hook-form';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { api } from '@/trpc/react';
@@ -44,7 +45,8 @@ export default function SuppliersPage() {
   });
   const statesOptions = data?.states ?? [];
 
-  useEffect(() => setPage(1), [debounced, limit]);
+  // sempre volta à página 1 ao mudar busca ou limite
+  useResetOnChange([debounced, limit], () => setPage(1));
 
   const deleteMutation = api.supplier.delete.useMutation();
 

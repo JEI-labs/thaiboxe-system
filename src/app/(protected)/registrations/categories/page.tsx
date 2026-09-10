@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
+import { useState } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import CategoriesList from '@/components/categories/categoriesList.component';
 import { Button } from '@/components/ui/button';
@@ -66,9 +67,7 @@ export default function CategoriesPage() {
   const totalItems = data?.pagination.total ?? 0;
 
   // sempre volta à página 1 ao mudar busca ou limite
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch, limit]);
+  useResetOnChange([debouncedSearch, limit], () => setPage(1));
 
   const handleDelete = async (id: string) => {
     await deleteMutation.mutateAsync({ id });
