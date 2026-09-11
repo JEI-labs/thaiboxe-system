@@ -20,6 +20,38 @@ mas hibernam por inatividade, e quando o processo dorme a sessão do WhatsApp
 cai e é preciso ler o QR de novo. Um VPS simples (Hetzner, Contabo) sai por
 ~R$25/mês e dá menos trabalho.
 
+## Criando a VM na Oracle
+
+Menu ☰ → **Compute** → **Instances** → **Create instance**.
+
+- **Image**: Ubuntu 22.04 ou 24.04 (o Oracle Linux exige mais ajuste de
+  firewall)
+- **Shape**: _Change shape_ → **Ampere** → `VM.Standard.A1.Flex`, com
+  **1 OCPU e 6 GB** — sobra para o Evolution e deixa margem do Always Free
+  para outra VM
+- **SSH keys**: salve a chave privada; sem ela não há como entrar
+- deixe criar a VCN automaticamente, com IP público
+
+> **A capacidade de ARM em São Paulo vive esgotada.** Se aparecer _"Out of
+> host capacity"_, as saídas são: tentar de novo mais tarde (libera em
+> ciclos), escolher outra região, ou usar o shape AMD
+> `VM.Standard.E2.1.Micro` — também Always Free, mas com 1 GB de RAM, o que
+> atende uma instância e pouco mais.
+
+### Liberando a porta
+
+Na VM criada → **Virtual cloud network** → **Security Lists** → _Default
+Security List_ → **Add Ingress Rule**:
+
+| Campo                  | Valor       |
+| ---------------------- | ----------- |
+| Source CIDR            | `0.0.0.0/0` |
+| IP Protocol            | TCP         |
+| Destination Port Range | `8080`      |
+
+Isso libera só no painel. O firewall **dentro** da VM continua fechado — ver
+o passo de `iptables` abaixo.
+
 ## Subindo o Evolution
 
 Na VM, com Docker:
