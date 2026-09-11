@@ -24,7 +24,7 @@ export function WhatsappConfigCard() {
   const { toast } = useToast();
   const { data, isLoading, refetch } = api.whatsapp.getConfig.useQuery();
 
-  const [provider, setProvider] = useState<EWhatsappProvider>('EVOLUTION');
+  const [provider, setProvider] = useState<EWhatsappProvider>('META');
   const [baseUrl, setBaseUrl] = useState('');
   const [instanceId, setInstanceId] = useState('');
   const [token, setToken] = useState('');
@@ -78,6 +78,7 @@ export function WhatsappConfigCard() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="META">Meta Cloud API (oficial)</SelectItem>
                 <SelectItem value="EVOLUTION">Evolution API</SelectItem>
                 <SelectItem value="ZAPI">Z-API</SelectItem>
               </SelectContent>
@@ -102,22 +103,34 @@ export function WhatsappConfigCard() {
             value={baseUrl}
             onChange={(event) => setBaseUrl(event.target.value)}
             placeholder={
-              provider === 'ZAPI'
-                ? 'https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN'
-                : 'https://sua-evolution.com'
+              provider === 'META'
+                ? 'https://graph.facebook.com/v21.0'
+                : provider === 'ZAPI'
+                  ? 'https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN'
+                  : 'https://sua-evolution.com'
             }
           />
         </div>
 
-        {provider === 'EVOLUTION' && (
+        {provider !== 'ZAPI' && (
           <div className="space-y-2">
-            <Label htmlFor="instanceId">Nome da instância</Label>
+            <Label htmlFor="instanceId">
+              {provider === 'META' ? 'Phone Number ID' : 'Nome da instância'}
+            </Label>
             <Input
               id="instanceId"
               value={instanceId}
               onChange={(event) => setInstanceId(event.target.value)}
-              placeholder="minha-instancia"
+              placeholder={
+                provider === 'META' ? '123456789012345' : 'minha-instancia'
+              }
             />
+            {provider === 'META' && (
+              <p className="text-muted-foreground text-xs">
+                Está no painel da Meta, em WhatsApp › Configuração da API. Não é
+                o número de telefone.
+              </p>
+            )}
           </div>
         )}
 
@@ -131,7 +144,9 @@ export function WhatsappConfigCard() {
             placeholder={
               data?.hasToken
                 ? 'Token salvo — preencha só para trocar'
-                : 'Token do provedor'
+                : provider === 'META'
+                  ? 'Token de acesso permanente'
+                  : 'Token do provedor'
             }
           />
           <p className="text-muted-foreground text-xs">
@@ -140,6 +155,18 @@ export function WhatsappConfigCard() {
             branco para manter o atual.
           </p>
         </div>
+
+        {provider === 'META' && (
+          <div className="bg-muted/50 rounded-md border p-3">
+            <p className="text-sm font-medium">Sobre a janela de 24 horas</p>
+            <p className="text-muted-foreground mt-1 text-xs">
+              A Meta só entrega texto livre nas 24h seguintes a uma mensagem
+              enviada pelo aluno. Fora disso é obrigatório usar um template
+              aprovado — informe o nome dele no modelo de mensagem. É o caso de
+              cobrança, aniversário e avisos, que partem de você.
+            </p>
+          </div>
+        )}
 
         <div className="flex items-center justify-between rounded-md border p-3">
           <div>

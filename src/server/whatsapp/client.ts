@@ -7,7 +7,10 @@ export interface SendResult {
   error?: string;
 }
 
-/** Deixa só dígitos e garante o DDI 55, que os dois provedores esperam. */
+/** Versão da Graph API usada quando o provedor é a Meta. */
+export const META_API_VERSION = 'v21.0';
+
+/** Deixa só dígitos e garante o DDI 55. */
 export function normalizeNumber(raw: string): string {
   const digits = raw.replace(/\D/g, '');
   if (!digits) return '';
@@ -27,26 +30,97 @@ export function renderTemplate(
   );
 }
 
+/**
+ * Ordem em que os placeholders aparecem no texto. A Meta não aceita
+ * parâmetros nomeados no corpo: são posicionais ({{1}}, {{2}}), então a
+ * ordem local precisa bater com a do template aprovado.
+ */
+export function extractPlaceholders(body: string): Array<string> {
+  const found = body.matchAll(/\{\{\s*([\w]+)\s*\}\}/g);
+  const seen: Array<string> = [];
+  for (const match of found) {
+    const key = match[1];
+    if (key && !seen.includes(key)) seen.push(key);
+  }
+  return seen;
+}
+
+export interface SendOptions {
+  /** Nome do template aprovado na Meta. Sem ele, vai como texto livre. */
+  metaTemplateName?: string | null;
+  metaLanguage?: string | null;
+  /** Valores dos placeholders, na ordem em que aparecem no corpo. */
+  parameters?: Array<string>;
+}
+
 interface ProviderRequest {
   url: string;
   headers: Record<string, string>;
   body: string;
 }
 
-/**
- * Z-API e Evolution recebem texto livre, mas em formatos diferentes.
- * Isolar aqui deixa trocar de provedor sem mexer no resto.
- */
+const jsonHeaders = { 'Content-Type': 'application/json' };
+
 function buildRequest(
   provider: EWhatsappProvider,
   config: WhatsappConfig,
   to: string,
   message: string,
+  options: SendOptions,
 ): ProviderRequest {
   const base = config.baseUrl.replace(/\/+$/, '');
-  // separado porque 'Content-Type' exige aspas e 'apikey' não: no mesmo
-  // objeto literal, prettier e quote-props se desfazem mutuamente
-  const jsonHeaders = { 'Content-Type': 'application/json' };
+
+  if (provider === 'META') {
+    // instanceId guarda o Phone Number ID — é ele que endereça o envio,
+    // não o número em si
+    const url = `${base}/${config.instanceId ?? ''}/messages`;
+    const headers = {
+      ...jsonHeaders,
+      Authorization: `Bearer ${config.token}`,
+    };
+
+    if (options.metaTemplateName) {
+      return {
+        url,
+        headers,
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          to,
+          type: 'template',
+          template: {
+            name: options.metaTemplateName,
+            language: { code: options.metaLanguage ?? 'pt_BR' },
+            ...(options.parameters?.length
+              ? {
+                  components: [
+                    {
+                      type: 'body',
+                      parameters: options.parameters.map((text) => ({
+                        type: 'text',
+                        text,
+                      })),
+                    },
+                  ],
+                }
+              : {}),
+          },
+        }),
+      };
+    }
+
+    // texto livre: a Meta só entrega dentro da janela de 24h desde a última
+    // mensagem do aluno
+    return {
+      url,
+      headers,
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        to,
+        type: 'text',
+        text: { body: message },
+      }),
+    };
+  }
 
   if (provider === 'ZAPI') {
     return {
@@ -59,15 +133,30 @@ function buildRequest(
   // EVOLUTION
   return {
     url: `${base}/message/sendText/${config.instanceId ?? ''}`,
-    headers: { 'Content-Type': 'application/json', 'apikey': config.token },
+    headers: { ...jsonHeaders, apikey: config.token },
     body: JSON.stringify({ number: to, text: message }),
   };
+}
+
+/** Extrai a mensagem de erro da Meta, que vem aninhada. */
+function describeError(status: number, raw: string): string {
+  try {
+    const parsed = JSON.parse(raw) as {
+      error?: { message?: string; error_user_msg?: string };
+    };
+    const detail = parsed.error?.error_user_msg ?? parsed.error?.message;
+    if (detail) return detail;
+  } catch {
+    // resposta não-JSON: cai no texto cru abaixo
+  }
+  return `Provedor respondeu ${status}. ${raw.slice(0, 200)}`;
 }
 
 export async function sendWhatsappMessage(
   config: WhatsappConfig,
   rawNumber: string,
   message: string,
+  options: SendOptions = {},
 ): Promise<SendResult> {
   if (!config.isActive) {
     return { ok: false, error: 'Integração de WhatsApp desativada.' };
@@ -76,10 +165,10 @@ export async function sendWhatsappMessage(
   const to = normalizeNumber(rawNumber);
   if (!to) return { ok: false, error: 'Aluno sem telefone válido.' };
 
-  const request = buildRequest(config.provider, config, to, message);
+  const request = buildRequest(config.provider, config, to, message, options);
 
   try {
-    // timeout explícito: sem ele uma instância fora do ar prenderia a
+    // timeout explícito: sem ele um provedor fora do ar prenderia a
     // requisição até o limite da função serverless
     const response = await fetch(request.url, {
       method: 'POST',
@@ -90,10 +179,7 @@ export async function sendWhatsappMessage(
 
     if (!response.ok) {
       const detail = await response.text().catch(() => '');
-      return {
-        ok: false,
-        error: `Provedor respondeu ${response.status}. ${detail.slice(0, 200)}`,
-      };
+      return { ok: false, error: describeError(response.status, detail) };
     }
 
     return { ok: true };

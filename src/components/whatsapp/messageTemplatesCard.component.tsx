@@ -39,6 +39,8 @@ const EMPTY = {
   event: 'PROMOTIONAL' as EMessageEvent,
   name: '',
   body: '',
+  providerTemplateName: '',
+  providerLanguage: 'pt_BR',
 };
 
 export function MessageTemplatesCard() {
@@ -80,6 +82,8 @@ export function MessageTemplatesCard() {
       event: template.event,
       name: template.name,
       body: template.body,
+      providerTemplateName: template.providerTemplateName ?? '',
+      providerLanguage: template.providerLanguage ?? 'pt_BR',
     });
     setOpen(true);
   };
@@ -116,6 +120,13 @@ export function MessageTemplatesCard() {
                   </Badge>
                   {MESSAGE_EVENTS[template.event].automatic && (
                     <Badge variant="outline">Automático</Badge>
+                  )}
+                  {template.providerTemplateName ? (
+                    <Badge variant="outline">
+                      {template.providerTemplateName}
+                    </Badge>
+                  ) : (
+                    <Badge variant="alert">Só dentro de 24h</Badge>
                   )}
                 </div>
                 <p className="text-muted-foreground line-clamp-2 text-sm whitespace-pre-wrap">
@@ -212,6 +223,29 @@ export function MessageTemplatesCard() {
                 {MESSAGE_PLACEHOLDERS.map((item) => item.token).join(', ')}
               </p>
             </div>
+
+            <div className="space-y-2 rounded-md border p-3">
+              <Label htmlFor="template-provider">
+                Nome do template na Meta
+              </Label>
+              <Input
+                id="template-provider"
+                value={draft.providerTemplateName}
+                onChange={(event) =>
+                  setDraft((prev) => ({
+                    ...prev,
+                    providerTemplateName: event.target.value,
+                  }))
+                }
+                placeholder="cobranca_amigavel"
+              />
+              <p className="text-muted-foreground text-xs">
+                Obrigatório para mensagens que partem de você: a Meta só entrega
+                texto livre dentro da janela de 24h. O texto acima precisa bater
+                com o template aprovado — os placeholders viram parâmetros na
+                ordem em que aparecem.
+              </p>
+            </div>
           </div>
 
           <DialogFooter>
@@ -226,6 +260,8 @@ export function MessageTemplatesCard() {
                   event: draft.event,
                   name: draft.name,
                   body: draft.body,
+                  providerTemplateName: draft.providerTemplateName || null,
+                  providerLanguage: draft.providerLanguage || 'pt_BR',
                   isActive: true,
                 })
               }

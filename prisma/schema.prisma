@@ -225,6 +225,7 @@ enum EDiscountType {
 enum EWhatsappProvider {
   ZAPI
   EVOLUTION
+  META
 }
 
 enum EMessageEvent {
@@ -279,13 +280,19 @@ model WhatsappConfig {
 
 /// Texto por tipo de evento, com placeholders tipo {{aluno}}.
 model MessageTemplate {
-  id        String        @id @default(uuid())
-  event     EMessageEvent
-  name      String
-  body      String
-  isActive  Boolean       @default(true)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  id                   String        @id @default(uuid())
+  event                EMessageEvent
+  name                 String
+  /// Texto com {{aluno}}. Na Meta serve de referência: o que vai ao ar é o
+  /// template aprovado, e os placeholders viram parâmetros posicionais.
+  body                 String
+  /// Nome do template aprovado na Meta. Vazio = envio como texto livre,
+  /// que a Meta só aceita dentro da janela de 24h.
+  providerTemplateName String?
+  providerLanguage     String?       @default("pt_BR")
+  isActive             Boolean       @default(true)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

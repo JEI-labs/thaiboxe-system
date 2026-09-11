@@ -3,7 +3,11 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
 import { createTRPCRouter, protectedProcedure } from '../trpc';
-import { renderTemplate, sendWhatsappMessage } from '@/server/whatsapp/client';
+import {
+  extractPlaceholders,
+  renderTemplate,
+  sendWhatsappMessage,
+} from '@/server/whatsapp/client';
 
 const configSchema = z.object({
   provider: z.nativeEnum(EWhatsappProvider),
@@ -94,6 +98,8 @@ export const whatsappRouter = createTRPCRouter({
         event: z.nativeEnum(EMessageEvent),
         name: z.string().min(1, 'Informe um nome'),
         body: z.string().min(1, 'Escreva a mensagem'),
+        providerTemplateName: z.string().nullable().optional(),
+        providerLanguage: z.string().nullable().optional(),
         isActive: z.boolean().default(true),
       }),
     )
@@ -108,6 +114,8 @@ export const whatsappRouter = createTRPCRouter({
             event: input.event,
             name: input.name,
             body: input.body,
+            providerTemplateName: input.providerTemplateName || null,
+            providerLanguage: input.providerLanguage || 'pt_BR',
             isActive: input.isActive,
           },
         });
@@ -125,6 +133,8 @@ export const whatsappRouter = createTRPCRouter({
           event: input.event,
           name: input.name,
           body: input.body,
+          providerTemplateName: input.providerTemplateName || null,
+          providerLanguage: input.providerLanguage || 'pt_BR',
           isActive: input.isActive,
           userId,
         },
@@ -166,12 +176,17 @@ export const whatsappRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
 
-      const [config, student] = await Promise.all([
+      const [config, student, template] = await Promise.all([
         ctx.prisma.whatsappConfig.findUnique({ where: { userId } }),
         ctx.prisma.student.findFirst({
           where: { id: input.studentId, userId },
           select: { id: true, name: true, phone: true },
         }),
+        input.templateId
+          ? ctx.prisma.messageTemplate.findFirst({
+              where: { id: input.templateId, userId },
+            })
+          : Promise.resolve(null),
       ]);
 
       if (!student) {
@@ -187,12 +202,24 @@ export const whatsappRouter = createTRPCRouter({
         });
       }
 
-      const body = renderTemplate(input.body, {
+      const values: Record<string, string> = {
         aluno: student.name,
         primeiro_nome: student.name.split(' ')[0] ?? student.name,
-      });
+      };
 
-      const result = await sendWhatsappMessage(config, student.phone, body);
+      const body = renderTemplate(input.body, values);
+
+      // a Meta usa parâmetros posicionais no corpo do template, então a
+      // ordem enviada tem de ser a ordem em que aparecem no texto
+      const parameters = extractPlaceholders(input.body).map(
+        (key) => values[key] ?? '',
+      );
+
+      const result = await sendWhatsappMessage(config, student.phone, body, {
+        metaTemplateName: template?.providerTemplateName,
+        metaLanguage: template?.providerLanguage,
+        parameters,
+      });
 
       // registra sucesso e falha: o histórico é o que explica um envio que
       // o aluno diz não ter recebido
