@@ -1,7 +1,7 @@
 'use client';
 
+import { GraduationCard } from '@/components/graduationBadge/graduationCard.component';
 import { GRADUATIONS } from '@/common/constants/graduations';
-import { GraduationBadge } from '@/components/graduationBadge/graduationBadge.component';
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
@@ -95,65 +95,74 @@ export default function StudentDetailPage({
         Voltar
       </Button>
 
-      {/* Cabeçalho */}
-      <Card className="mb-6">
-        <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-4">
-            <Avatar className="border-border h-24 w-24 shrink-0 border sm:h-28 sm:w-28">
-              <AvatarImage
-                src={student.avatar || undefined}
-                className="h-full w-full rounded-full object-cover"
-              />
-              <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-                {getInitials(student.name)}
-              </AvatarFallback>
-            </Avatar>
+      {/* Cabeçalho + graduação, lado a lado a partir de lg */}
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row">
+        <Card className="flex-1">
+          <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-4">
+              <Avatar className="border-border h-24 w-24 shrink-0 border sm:h-28 sm:w-28">
+                <AvatarImage
+                  src={student.avatar || undefined}
+                  className="h-full w-full rounded-full object-cover"
+                />
+                <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                  {getInitials(student.name)}
+                </AvatarFallback>
+              </Avatar>
 
-            <div>
-              <h1 className="text-2xl font-semibold">{student.name}</h1>
-              <div className="text-muted-foreground mt-1 flex flex-col gap-1 text-sm sm:flex-row sm:gap-4">
-                <span className="flex items-center gap-1">
-                  <Mail className="h-3 w-3" /> {student.email}
-                </span>
-                {student.phone && (
+              <div>
+                <h1 className="text-2xl font-semibold">{student.name}</h1>
+                <div className="text-muted-foreground mt-1 flex flex-col gap-1 text-sm sm:flex-row sm:gap-4">
                   <span className="flex items-center gap-1">
-                    <Phone className="h-3 w-3" /> {maskCellphone(student.phone)}
+                    <Mail className="h-3 w-3" /> {student.email}
                   </span>
-                )}
-              </div>
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span
-                  className={cn(
-                    'rounded-full px-2 py-1 text-xs font-medium',
-                    student.status === 'EM DIA' &&
-                      'bg-green-100 text-green-800',
-                    student.status === 'PENDENTE' &&
-                      'bg-yellow-100 text-yellow-800',
-                    student.status === 'ATRASADO' && 'bg-red-100 text-red-800',
+                  {student.phone && (
+                    <span className="flex items-center gap-1">
+                      <Phone className="h-3 w-3" />{' '}
+                      {maskCellphone(student.phone)}
+                    </span>
                   )}
-                >
-                  {student.status}
-                </span>
-                <Badge variant="secondary">{student.planName}</Badge>
-                <GraduationBadge graduation={student.graduation} />
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span
+                    className={cn(
+                      'rounded-full px-2 py-1 text-xs font-medium',
+                      student.status === 'EM DIA' &&
+                        'bg-green-100 text-green-800',
+                      student.status === 'PENDENTE' &&
+                        'bg-yellow-100 text-yellow-800',
+                      student.status === 'ATRASADO' &&
+                        'bg-red-100 text-red-800',
+                    )}
+                  >
+                    {student.status}
+                  </span>
+                  <Badge variant="secondary">{student.planName}</Badge>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button
-              onClick={() => router.push(`/students/${student.id}/payments`)}
-            >
-              <CreditCard className="mr-2 h-4 w-4" />
-              Pagamentos
-            </Button>
-            <Button variant="outline" onClick={() => setEditOpen(true)}>
-              <Edit2 className="mr-2 h-4 w-4" />
-              Editar
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                onClick={() => router.push(`/students/${student.id}/payments`)}
+              >
+                <CreditCard className="mr-2 h-4 w-4" />
+                Pagamentos
+              </Button>
+              <Button variant="outline" onClick={() => setEditOpen(true)}>
+                <Edit2 className="mr-2 h-4 w-4" />
+                Editar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <GraduationCard
+          studentId={student.id}
+          graduation={student.graduation}
+          onUpdated={refetch}
+        />
+      </div>
 
       {/* Resumo financeiro */}
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

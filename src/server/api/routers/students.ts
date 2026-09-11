@@ -11,6 +11,7 @@ import { z } from 'zod';
 import { del } from '@vercel/blob';
 import {
   EFinanceEntryType,
+  EGraduation,
   EPaymentMethod,
   PaymentStatus,
   Prisma,
@@ -234,6 +235,41 @@ export const studentRouter = createTRPCRouter({
         message: 'Aluno atualizado com sucesso',
         data: updated,
       };
+    }),
+
+  /** Só a graduação: a tela do aluno edita isso num modal à parte. */
+  updateGraduation: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        graduation: z.nativeEnum(EGraduation).nullable(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      const userId = ctx.session.user.id;
+
+      if (!userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Não autorizado',
+        });
+      }
+
+      // updateMany para o filtro por userId entrar no WHERE: um update
+      // simples por id deixaria alterar aluno de outro usuário
+      const result = await ctx.prisma.student.updateMany({
+        where: { id: input.id, userId },
+        data: { graduation: input.graduation },
+      });
+
+      if (result.count === 0) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Aluno não encontrado.',
+        });
+      }
+
+      return { message: 'Graduação atualizada com sucesso' };
     }),
 
   getAll: protectedProcedure
