@@ -24,7 +24,7 @@ export function WhatsappConfigCard() {
   const { toast } = useToast();
   const { data, isLoading, refetch } = api.whatsapp.getConfig.useQuery();
 
-  const [provider, setProvider] = useState<EWhatsappProvider>('ZAPI');
+  const [provider, setProvider] = useState<EWhatsappProvider>('EVOLUTION');
   const [baseUrl, setBaseUrl] = useState('');
   const [instanceId, setInstanceId] = useState('');
   const [token, setToken] = useState('');
@@ -78,8 +78,8 @@ export function WhatsappConfigCard() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ZAPI">Z-API</SelectItem>
                 <SelectItem value="EVOLUTION">Evolution API</SelectItem>
+                <SelectItem value="ZAPI">Z-API</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -44,14 +44,14 @@ function buildRequest(
   message: string,
 ): ProviderRequest {
   const base = config.baseUrl.replace(/\/+$/, '');
+  // separado porque 'Content-Type' exige aspas e 'apikey' não: no mesmo
+  // objeto literal, prettier e quote-props se desfazem mutuamente
+  const jsonHeaders = { 'Content-Type': 'application/json' };
 
   if (provider === 'ZAPI') {
     return {
       url: `${base}/send-text`,
-      headers: {
-        'Content-Type': 'application/json',
-        'Client-Token': config.token,
-      },
+      headers: { ...jsonHeaders, 'Client-Token': config.token },
       body: JSON.stringify({ phone: to, message }),
     };
   }

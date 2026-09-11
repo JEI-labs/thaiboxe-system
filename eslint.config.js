@@ -43,7 +43,10 @@ export default tseslint.config(
         },
       ],
       'object-shorthand': 'warn',
-      'quote-props': ['warn', 'as-needed'],
+      // 'consistent-as-needed' espelha o quoteProps: 'consistent' do prettier.
+      // Com 'as-needed' as duas ferramentas se desfaziam a cada commit em
+      // objetos que misturam chaves com e sem hífen.
+      'quote-props': ['warn', 'consistent-as-needed'],
 
       // TypeScript rules
       '@typescript-eslint/no-explicit-any': 'warn',
