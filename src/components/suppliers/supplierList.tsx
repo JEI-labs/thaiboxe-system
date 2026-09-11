@@ -1,5 +1,6 @@
 'use client';
 
+import { EmptyState } from '@/components/emptyState/emptyState.component';
 import React, { useState } from 'react';
 import { Edit2Icon, Trash2 } from 'lucide-react';
 
@@ -42,9 +43,10 @@ const SuppliersList: React.FC<ISupplierList> = ({
 
   if (suppliers.length === 0) {
     return (
-      <p className="text-muted-foreground py-4 text-center">
-        Nenhum fornecedor encontrado.
-      </p>
+      <EmptyState
+        title="Nenhum fornecedor encontrado"
+        description="Ajuste a busca e o filtro de estado, ou cadastre um fornecedor."
+      />
     );
   }
 

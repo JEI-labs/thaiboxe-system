@@ -1,5 +1,6 @@
 'use client';
 
+import { EmptyState } from '@/components/emptyState/emptyState.component';
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
@@ -200,22 +201,26 @@ export default function StudentPaymentsPage({
                   </TableBody>
                 </Table>
               ) : (
-                <p className="text-muted-foreground py-10 text-center text-sm">
-                  Nenhum pagamento encontrado para este filtro.
-                </p>
+                <EmptyState
+                  className="border-0"
+                  title="Nenhum pagamento encontrado"
+                  description="Não há parcelas com esse status para este aluno."
+                />
               )}
             </CardContent>
           </Card>
 
-          <div className="mt-4 w-full">
-            <AppPagination
-              totalItems={data?.pagination.total ?? 0}
-              itemsPerPage={limit}
-              currentPage={page}
-              onPageChange={setPage}
-              onItemsPerPageChange={setLimit}
-            />
-          </div>
+          {(data?.pagination.total ?? 0) > 0 && (
+            <div className="mt-4 w-full">
+              <AppPagination
+                totalItems={data?.pagination.total ?? 0}
+                itemsPerPage={limit}
+                currentPage={page}
+                onPageChange={setPage}
+                onItemsPerPageChange={setLimit}
+              />
+            </div>
+          )}
         </>
       )}
     </div>

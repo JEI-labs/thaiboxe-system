@@ -171,15 +171,17 @@ export default function ExpensesPage() {
         />
 
         {/* paginação */}
-        <div className="mt-4">
-          <AppPagination
-            totalItems={totalItems}
-            itemsPerPage={limit}
-            currentPage={page}
-            onPageChange={setPage}
-            onItemsPerPageChange={setLimit}
-          />
-        </div>
+        {totalItems > 0 && (
+          <div className="mt-4">
+            <AppPagination
+              totalItems={totalItems}
+              itemsPerPage={limit}
+              currentPage={page}
+              onPageChange={setPage}
+              onItemsPerPageChange={setLimit}
+            />
+          </div>
+        )}
 
         {/* sheets */}
         {editEntry && (

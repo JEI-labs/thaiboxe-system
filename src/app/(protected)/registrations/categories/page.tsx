@@ -148,21 +148,17 @@ export default function CategoriesPage() {
           }}
         />
 
-        {!isLoading && categories.length === 0 && (
-          <div className="flex items-center justify-center p-4 text-lg">
-            Nenhuma categoria encontrada
+        {totalItems > 0 && (
+          <div className="w-full">
+            <AppPagination
+              totalItems={totalItems}
+              itemsPerPage={limit}
+              currentPage={page}
+              onPageChange={(p) => setPage(p)}
+              onItemsPerPageChange={(newLimit) => setLimit(newLimit)}
+            />
           </div>
         )}
-
-        <div className="w-full">
-          <AppPagination
-            totalItems={totalItems}
-            itemsPerPage={limit}
-            currentPage={page}
-            onPageChange={(p) => setPage(p)}
-            onItemsPerPageChange={(newLimit) => setLimit(newLimit)}
-          />
-        </div>
 
         {editOpen && (
           <SheetEditCategory

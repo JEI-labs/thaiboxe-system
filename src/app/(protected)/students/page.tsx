@@ -167,21 +167,17 @@ export default function StudentsPage() {
               />
             </div>
 
-            {!isLoading && studentsData?.data.length === 0 && (
-              <div className="flex items-center justify-center p-4 text-lg">
-                Nenhum aluno encontrado
+            {(studentsData?.pagination.total ?? 0) > 0 && (
+              <div className="w-full">
+                <AppPagination
+                  totalItems={studentsData?.pagination.total ?? 0}
+                  itemsPerPage={limit}
+                  currentPage={page}
+                  onPageChange={setPage}
+                  onItemsPerPageChange={setLimit}
+                />
               </div>
             )}
-
-            <div className="w-full">
-              <AppPagination
-                totalItems={studentsData?.pagination.total ?? 0}
-                itemsPerPage={limit}
-                currentPage={page}
-                onPageChange={setPage}
-                onItemsPerPageChange={setLimit}
-              />
-            </div>
           </>
         )}
 

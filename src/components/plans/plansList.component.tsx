@@ -1,5 +1,6 @@
 'use client';
 
+import { EmptyState } from '@/components/emptyState/emptyState.component';
 import React, { useState } from 'react';
 import { Edit2Icon, Trash2 } from 'lucide-react';
 
@@ -53,9 +54,10 @@ const PlansList: React.FC<IPlanList> = ({
         {isLoading ? (
           <p className="py-4 text-center">Carregando planos…</p>
         ) : plans.length === 0 ? (
-          <p className="text-muted-foreground py-4 text-center">
-            Não foram encontrados planos.
-          </p>
+          <EmptyState
+            title="Nenhum plano encontrado"
+            description="Ajuste a busca, ou crie o primeiro plano de matrícula."
+          />
         ) : (
           <div className="rounded-lg border">
             <Table>

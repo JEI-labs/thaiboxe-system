@@ -83,15 +83,17 @@ export default function PlansPage() {
           }}
         />
 
-        <div className="w-full">
-          <AppPagination
-            totalItems={totalItems}
-            itemsPerPage={limit}
-            currentPage={page}
-            onPageChange={(p) => setPage(p)}
-            onItemsPerPageChange={(newLimit) => setLimit(newLimit)}
-          />
-        </div>
+        {totalItems > 0 && (
+          <div className="w-full">
+            <AppPagination
+              totalItems={totalItems}
+              itemsPerPage={limit}
+              currentPage={page}
+              onPageChange={(p) => setPage(p)}
+              onItemsPerPageChange={(newLimit) => setLimit(newLimit)}
+            />
+          </div>
+        )}
 
         {editOpen && (
           <SheetEditPlan

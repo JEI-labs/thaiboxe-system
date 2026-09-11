@@ -167,15 +167,17 @@ export default function RevenuesPage() {
           onDelete={handleDelete}
         />
 
-        <div className="mt-4">
-          <AppPagination
-            totalItems={totalItems}
-            itemsPerPage={limit}
-            currentPage={page}
-            onPageChange={setPage}
-            onItemsPerPageChange={setLimit}
-          />
-        </div>
+        {totalItems > 0 && (
+          <div className="mt-4">
+            <AppPagination
+              totalItems={totalItems}
+              itemsPerPage={limit}
+              currentPage={page}
+              onPageChange={setPage}
+              onItemsPerPageChange={setLimit}
+            />
+          </div>
+        )}
 
         {editEntry && (
           <SheetEditFinanceEntry

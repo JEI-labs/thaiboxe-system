@@ -1,3 +1,4 @@
+import { EmptyState } from '@/components/emptyState/emptyState.component';
 import React, { useState } from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
 import { EFinanceEntryStatus, EFinanceEntryType } from '@prisma/client';
@@ -65,9 +66,10 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
       {loading ? (
         <p className="py-4 text-center">Carregando lançamentos…</p>
       ) : entries.length === 0 ? (
-        <p className="text-muted-foreground py-4 text-center">
-          Ainda não há lançamentos financeiros.
-        </p>
+        <EmptyState
+          title="Nenhum lançamento encontrado"
+          description="Ajuste o período e os filtros, ou crie um lançamento."
+        />
       ) : (
         <div className="rounded-lg border">
           <Table>

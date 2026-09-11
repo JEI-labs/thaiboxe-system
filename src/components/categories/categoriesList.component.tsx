@@ -1,5 +1,6 @@
 'use client';
 
+import { EmptyState } from '@/components/emptyState/emptyState.component';
 import React, { useState } from 'react';
 import { Edit2Icon, Trash2 } from 'lucide-react';
 
@@ -55,9 +56,10 @@ export const CategoriesList: React.FC<ICategoryList> = ({
         {isLoading ? (
           <p className="py-4 text-center">Carregando categorias…</p>
         ) : categories.length === 0 ? (
-          <p className="text-muted-foreground py-4 text-center">
-            Não foram encontradas categorias.
-          </p>
+          <EmptyState
+            title="Nenhuma categoria encontrada"
+            description="Ajuste a busca e os filtros, ou crie a primeira categoria."
+          />
         ) : (
           <div className="rounded-lg border">
             <Table>
