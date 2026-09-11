@@ -1,14 +1,35 @@
 import React, { useState } from 'react';
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Edit2, Trash2 } from 'lucide-react';
+import { EFinanceEntryStatus, EFinanceEntryType } from '@prisma/client';
+
+import { CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { RowActions } from '@/components/dataTable/rowActions.component';
 import { IFinanceEntriesList } from './financeList.types';
 import { api } from '@/trpc/react';
 import { maskDecimalWithAcronym } from '@/utils/masksUtils';
-import { Trash2, Edit2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import ConfirmDeleteDialog from '../confirmDeleteDialog/confirmDeleteDialog.component';
-import { EFinanceEntryStatus, EFinanceEntryType } from '@prisma/client';
+
+const TYPE_LABEL: Record<EFinanceEntryType, string> = {
+  [EFinanceEntryType.INCOME]: 'Receita',
+  [EFinanceEntryType.STUDENTS]: 'Receita de Aluno',
+  [EFinanceEntryType.EXPENSE]: 'Despesa',
+};
+
+const STATUS_LABEL: Record<EFinanceEntryStatus, string> = {
+  [EFinanceEntryStatus.PAID]: 'Pago',
+  [EFinanceEntryStatus.PENDING]: 'Pendente',
+  [EFinanceEntryStatus.CANCELLED]: 'Cancelado',
+};
 
 export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
   entries,
@@ -33,140 +54,140 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
     if (onDelete) await onDelete(id);
   };
 
+  const hasActions = Boolean(onEdit || onDelete);
+
   return (
     <div className="w-full">
-      <CardHeader>
+      <CardHeader className="px-0">
         <CardTitle>Lista de Lançamentos</CardTitle>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-full w-full">
-          <div className="space-y-4">
-            {loading ? (
-              <p className="py-4 text-center">Carregando lançamentos…</p>
-            ) : entries.length > 0 ? (
-              entries.map((entry) => (
-                <div
-                  key={entry.id}
-                  className={`flex items-center justify-between rounded-lg border p-4 transition-shadow hover:shadow-lg ${
-                    entry.type === EFinanceEntryType.STUDENTS
-                      ? 'border-l-4 border-blue-600'
-                      : ''
-                  }`}
-                >
-                  <div className="space-y-1">
-                    <div className="mb-4 flex items-center gap-2">
-                      <Badge
-                        variant={
-                          entry.type === EFinanceEntryType.EXPENSE
-                            ? 'destructive'
-                            : 'default'
-                        }
-                      >
-                        {entry.type === EFinanceEntryType.INCOME
-                          ? 'Receita'
-                          : entry.type === EFinanceEntryType.STUDENTS
-                            ? 'Receita de Aluno'
-                            : 'Despesa'}
-                      </Badge>
-                      <Badge variant="outline">
-                        {entry.status === EFinanceEntryStatus.PAID
-                          ? 'Pago'
-                          : entry.status === EFinanceEntryStatus.PENDING
-                            ? 'Pendente'
-                            : 'Cancelado'}
-                      </Badge>
-                    </div>
 
-                    <p className="text-lg font-semibold">
-                      {categoriesData?.data.find(
-                        (c) => c.id === entry.categoryId,
-                      )?.name ?? '-'}
-                    </p>
+      {loading ? (
+        <p className="py-4 text-center">Carregando lançamentos…</p>
+      ) : entries.length === 0 ? (
+        <p className="text-muted-foreground py-4 text-center">
+          Ainda não há lançamentos financeiros.
+        </p>
+      ) : (
+        <div className="rounded-lg border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Data</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Categoria</TableHead>
+                <TableHead>Descrição</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
+                {hasActions && (
+                  <TableHead className="w-[70px] text-right">Ações</TableHead>
+                )}
+              </TableRow>
+            </TableHeader>
 
-                    <div className="flex flex-col">
-                      {entry.type === EFinanceEntryType.STUDENTS &&
-                        entry.student?.name && (
-                          <div className="mt-2 flex items-center gap-2 text-sm">
-                            <span>Aluno:</span>
-                            <p className="text-muted-foreground text-sm">
-                              {entry.student.name}
-                            </p>
-                          </div>
-                        )}
-                      {entry.referenceId && (
-                        <div className="mt-2 flex items-center gap-2 text-sm">
-                          <span>Ref:</span>
-                          <p className="text-muted-foreground text-sm">
-                            {entry.referenceId}
-                          </p>
-                        </div>
-                      )}
-                      {entry.description && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className="text-sm">Descrição:</span>
-                          <p className="text-muted-foreground text-sm">
-                            {entry.description}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+            <TableBody>
+              {entries.map((entry) => {
+                const isExpense = entry.type === EFinanceEntryType.EXPENSE;
+                const categoryName =
+                  categoriesData?.data.find((c) => c.id === entry.categoryId)
+                    ?.name ?? '—';
 
-                  <div className="flex flex-col items-end gap-2 text-right">
-                    <p className="text-muted-foreground text-sm">
-                      {new Date(entry.date).toLocaleDateString('pt-BR')}
-                    </p>
-                    <p
-                      className={`text-lg font-bold ${
-                        entry.type === EFinanceEntryType.EXPENSE
-                          ? 'text-red-600'
-                          : 'text-green-600'
-                      }`}
-                    >
-                      {entry.type === EFinanceEntryType.EXPENSE ? '- ' : '+ '}
-                      {maskDecimalWithAcronym(entry.amount)}
-                    </p>
-                    {entry.paymentMethod && (
-                      <p className="text-muted-foreground text-xs uppercase">
-                        {entry.paymentMethod.replace(/_/g, ' ')}
-                      </p>
+                // o lançamento vindo de aluno traz o nome dele; senão, cai
+                // para a referência ou a descrição livre
+                const detail =
+                  (entry.type === EFinanceEntryType.STUDENTS
+                    ? entry.student?.name
+                    : null) ??
+                  entry.description ??
+                  entry.referenceId ??
+                  '—';
+
+                return (
+                  <TableRow
+                    key={entry.id}
+                    className={cn(
+                      entry.type === EFinanceEntryType.STUDENTS &&
+                        'border-l-4 border-l-blue-600',
                     )}
+                  >
+                    <TableCell className="text-muted-foreground whitespace-nowrap">
+                      {new Date(entry.date).toLocaleDateString('pt-BR')}
+                    </TableCell>
 
-                    <div className="mt-2 flex gap-2">
-                      {onEdit && (
-                        <Button
-                          variant="default"
-                          size="icon"
-                          onClick={() => onEdit(entry.id)}
-                        >
-                          <Edit2 size={16} />
-                        </Button>
-                      )}
-                      {onDelete && (
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => handleDeleteClick(entry.id)}
-                        >
-                          <Trash2 size={16} />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-muted-foreground py-4 text-center">
-                Ainda não há lançamentos financeiros.
-              </p>
-            )}
-          </div>
-        </ScrollArea>
-      </CardContent>
+                    <TableCell>
+                      <Badge variant={isExpense ? 'destructive' : 'default'}>
+                        {TYPE_LABEL[entry.type]}
+                      </Badge>
+                    </TableCell>
 
-      {onDelete && (
+                    <TableCell className="font-medium">
+                      {categoryName}
+                    </TableCell>
+
+                    <TableCell className="text-muted-foreground max-w-xs truncate">
+                      {detail}
+                    </TableCell>
+
+                    <TableCell>
+                      <Badge variant="outline">
+                        {STATUS_LABEL[entry.status]}
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell
+                      className={cn(
+                        'text-right font-semibold whitespace-nowrap',
+                        isExpense ? 'text-red-600' : 'text-green-600',
+                      )}
+                    >
+                      {isExpense ? '- ' : '+ '}
+                      {maskDecimalWithAcronym(entry.amount)}
+                      {entry.paymentMethod && (
+                        <span className="text-muted-foreground block text-xs font-normal uppercase">
+                          {entry.paymentMethod.replace(/_/g, ' ')}
+                        </span>
+                      )}
+                    </TableCell>
+
+                    {hasActions && (
+                      <TableCell className="text-right">
+                        <RowActions
+                          srLabel={`Ações do lançamento de ${categoryName}`}
+                          actions={[
+                            ...(onEdit
+                              ? [
+                                  {
+                                    label: 'Editar',
+                                    icon: Edit2,
+                                    onSelect: () => onEdit(entry.id),
+                                  },
+                                ]
+                              : []),
+                            ...(onDelete
+                              ? [
+                                  {
+                                    label: 'Excluir',
+                                    icon: Trash2,
+                                    destructive: true,
+                                    onSelect: () => handleDeleteClick(entry.id),
+                                  },
+                                ]
+                              : []),
+                          ]}
+                        />
+                      </TableCell>
+                    )}
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
+      {onDelete && selectedId && (
         <ConfirmDeleteDialog
-          item={selectedId!}
+          item={selectedId}
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
           onConfirm={handleConfirmDelete}

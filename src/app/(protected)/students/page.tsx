@@ -6,7 +6,7 @@ import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { UserPlus } from 'lucide-react';
 import { api } from '@/trpc/react';
-import { StudentCard } from '@/components/studentCard/studentCard.component';
+import { StudentsTable } from '@/components/studentCard/studentsTable.component';
 import { LoadingContent } from '@/components/LoadingContent';
 import { toast } from '@/hooks/use-toast';
 import { SheetCreateStudent } from '@/components/modals/student/createStudent/sheetCreateStudent.component';
@@ -153,21 +153,12 @@ export default function StudentsPage() {
           <LoadingContent textLoading="Carregando alunos..." />
         ) : (
           <>
-            <div className="mt-4 flex flex-col gap-4">
-              {studentsData?.data.map((student) => (
-                <StudentCard
-                  key={student.id}
-                  id={student.id}
-                  name={student.name}
-                  avatar={student?.avatar || ''}
-                  email={student.email}
-                  status={student.status}
-                  planName={student.planName}
-                  createdAt={student.createdAt}
-                  onDelete={() => handleDeleteStudent(student.id)}
-                  onEdit={() => handleEditStudent(student.id)}
-                />
-              ))}
+            <div className="mt-4">
+              <StudentsTable
+                students={studentsData?.data ?? []}
+                onEdit={handleEditStudent}
+                onDelete={handleDeleteStudent}
+              />
             </div>
 
             {!isLoading && studentsData?.data.length === 0 && (

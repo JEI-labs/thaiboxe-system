@@ -1,11 +1,15 @@
-export interface StudentCardProps {
+export interface StudentRow {
   id: string;
   name: string;
-  avatar: string;
+  avatar?: string | null;
   email: string;
   status: string;
   planName: string;
   createdAt: Date;
-  onDelete?: () => void;
-  onEdit?: () => void;
+}
+
+export interface StudentsTableProps {
+  students: Array<StudentRow>;
+  onEdit: (_id: string) => void;
+  onDelete: (_id: string) => void | Promise<void>;
 }

@@ -1,10 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
-import { MdDelete } from 'react-icons/md';
-import { Edit2Icon } from 'lucide-react';
+import { Edit2Icon, Trash2 } from 'lucide-react';
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { RowActions } from '@/components/dataTable/rowActions.component';
 import { ISupplierList } from './supplierList.types';
 import ConfirmDeleteDialog from '../confirmDeleteDialog/confirmDeleteDialog.component';
 import { maskCellphone } from '@/utils/masksUtils';
@@ -43,58 +50,60 @@ const SuppliersList: React.FC<ISupplierList> = ({
 
   return (
     <>
-      <ScrollArea className="mt-8 h-full w-full overflow-auto">
-        <div className="space-y-2">
-          {suppliers.map((sup) => (
-            <div
-              key={sup.id}
-              className="flex items-center justify-between rounded-lg border p-4"
-            >
-              <div>
-                <h3 className="mb-2 text-lg font-semibold">{sup.name}</h3>
-                {(sup.city || sup.state) && (
-                  <p className="text-muted-foreground text-sm">
-                    {sup.city}, {sup.state}
-                  </p>
-                )}
-                {sup.phone && (
-                  <div className="mt-4 flex items-center gap-2">
-                    <span className="text-sm">Telefone: </span>
-                    <p className="text-muted-foreground text-sm">
-                      {maskCellphone(sup.phone)}
-                    </p>
-                  </div>
-                )}
-                {sup.street && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm">Endereço: </span>
-                    <p className="text-muted-foreground text-sm">
-                      {' '}
-                      {sup.street}
-                    </p>
-                  </div>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  variant="default"
-                  size="icon"
-                  onClick={() => onEdit(sup.id)}
-                >
-                  <Edit2Icon size={18} />
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => handleDeleteClick(sup.id)}
-                >
-                  <MdDelete size={18} />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
+      <div className="mt-8 rounded-lg border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead>Localização</TableHead>
+              <TableHead>Telefone</TableHead>
+              <TableHead>Endereço</TableHead>
+              <TableHead className="w-[70px] text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {suppliers.map((sup) => (
+              <TableRow key={sup.id}>
+                <TableCell className="font-medium">{sup.name}</TableCell>
+
+                <TableCell className="text-muted-foreground">
+                  {sup.city || sup.state
+                    ? [sup.city, sup.state].filter(Boolean).join(', ')
+                    : '—'}
+                </TableCell>
+
+                <TableCell className="text-muted-foreground">
+                  {sup.phone ? maskCellphone(sup.phone) : '—'}
+                </TableCell>
+
+                <TableCell className="text-muted-foreground">
+                  {sup.street || '—'}
+                </TableCell>
+
+                <TableCell className="text-right">
+                  <RowActions
+                    srLabel={`Ações de ${sup.name}`}
+                    actions={[
+                      {
+                        label: 'Editar',
+                        icon: Edit2Icon,
+                        onSelect: () => onEdit(sup.id),
+                      },
+                      {
+                        label: 'Excluir',
+                        icon: Trash2,
+                        destructive: true,
+                        onSelect: () => handleDeleteClick(sup.id),
+                      },
+                    ]}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
       {selId && (
         <ConfirmDeleteDialog

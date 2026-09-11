@@ -1,13 +1,27 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Edit2Icon, Trash2 } from 'lucide-react';
+
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
-import { MdDelete } from 'react-icons/md';
-import { Edit2Icon } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { RowActions } from '@/components/dataTable/rowActions.component';
 import type { IPlanList } from './plansList.types';
 import ConfirmDeleteDialog from '../confirmDeleteDialog/confirmDeleteDialog.component';
+
+const formatDate = (value: string | Date) =>
+  new Date(value).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
 
 const PlansList: React.FC<IPlanList> = ({
   plans,
@@ -17,10 +31,6 @@ const PlansList: React.FC<IPlanList> = ({
 }) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
-
-  const handleEdit = (id: string) => {
-    onEdit(id);
-  };
 
   const handleDeleteClick = (id: string) => {
     setSelectedPlanId(id);
@@ -39,7 +49,7 @@ const PlansList: React.FC<IPlanList> = ({
         <h1 className="text-md font-semibold">Lista de Planos</h1>
       </div>
 
-      <div className="mt-4 p-0">
+      <div className="mt-4">
         {isLoading ? (
           <p className="py-4 text-center">Carregando planos…</p>
         ) : plans.length === 0 ? (
@@ -47,71 +57,65 @@ const PlansList: React.FC<IPlanList> = ({
             Não foram encontrados planos.
           </p>
         ) : (
-          <ScrollArea className="h-full w-full overflow-auto">
-            <div className="space-y-2">
-              {plans.map((plan) => (
-                <div
-                  key={plan.id}
-                  className="overflow-hidden rounded-lg border"
-                >
-                  <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    {/* título + preço */}
-                    <div className="flex w-full items-center justify-between wrap-break-word">
-                      <h3 className="text-lg font-semibold">{plan.name}</h3>
-                      <div className="flex flex-col items-center">
-                        <span className="text-muted-foreground mb-1 text-xs">
-                          Valor da parcela do plano
-                        </span>
-                        <Badge variant="secondary">
-                          R$ {Number(plan.price).toFixed(2)}
-                        </Badge>
-                      </div>
-                    </div>
+          <div className="rounded-lg border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Plano</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead>Duração</TableHead>
+                  <TableHead className="text-right">Parcela</TableHead>
+                  <TableHead>Criado em</TableHead>
+                  <TableHead className="w-[70px] text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
 
-                    {/* descrição + duração */}
-                    <div className="text-muted-foreground w-full text-sm">
-                      {plan.description && (
-                        <p className="wrap-break-word">
-                          <span className="font-semibold">Descrição: </span>
-                          {plan.description}
-                        </p>
-                      )}
-                      <p className="mt-2 text-xs">
-                        Duração: {plan.duration}{' '}
-                        {plan.duration === 1 ? 'mês' : 'meses'}
-                      </p>
-                      <p className="mt-1 text-xs">
-                        Criado em:{' '}
-                        {new Date(plan.createdAt).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                        })}
-                      </p>
-                    </div>
+              <TableBody>
+                {plans.map((plan) => (
+                  <TableRow key={plan.id}>
+                    <TableCell className="font-medium">{plan.name}</TableCell>
 
-                    {/* botões */}
-                    <div className="flex w-full justify-end gap-2 sm:justify-end">
-                      <Button
-                        variant="default"
-                        size="icon"
-                        onClick={() => handleEdit(plan.id)}
-                      >
-                        <Edit2Icon size={18} />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => handleDeleteClick(plan.id)}
-                      >
-                        <MdDelete size={18} />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+                    <TableCell className="text-muted-foreground max-w-xs truncate">
+                      {plan.description || '—'}
+                    </TableCell>
+
+                    <TableCell className="text-muted-foreground">
+                      {plan.duration} {plan.duration === 1 ? 'mês' : 'meses'}
+                    </TableCell>
+
+                    <TableCell className="text-right">
+                      <Badge variant="secondary">
+                        R$ {Number(plan.price).toFixed(2)}
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell className="text-muted-foreground">
+                      {formatDate(plan.createdAt)}
+                    </TableCell>
+
+                    <TableCell className="text-right">
+                      <RowActions
+                        srLabel={`Ações do plano ${plan.name}`}
+                        actions={[
+                          {
+                            label: 'Editar',
+                            icon: Edit2Icon,
+                            onSelect: () => onEdit(plan.id),
+                          },
+                          {
+                            label: 'Excluir',
+                            icon: Trash2,
+                            destructive: true,
+                            onSelect: () => handleDeleteClick(plan.id),
+                          },
+                        ]}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </div>
 
