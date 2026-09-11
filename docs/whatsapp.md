@@ -77,32 +77,84 @@ o passo de `iptables` abaixo.
 
 ## Subindo o Evolution
 
-Na VM, com Docker:
+A **v2 exige PostgreSQL** (o projeto migrou para Prisma), então um `docker run`
+isolado não basta. Na VM, com Docker instalado
+(`curl -fsSL https://get.docker.com | sh`), crie `~/evolution/docker-compose.yml`:
+
+```yaml
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: evolution
+      POSTGRES_PASSWORD: TROQUE_ESTA_SENHA
+      POSTGRES_DB: evolution
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U evolution']
+      interval: 10s
+      retries: 5
+
+  evolution:
+    image: evoapicloud/evolution-api:v2.3.7
+    restart: always
+    ports:
+      - '8080:8080'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      AUTHENTICATION_API_KEY: TROQUE_ESTA_CHAVE
+      DATABASE_ENABLED: 'true'
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: 'postgresql://evolution:TROQUE_ESTA_SENHA@postgres:5432/evolution?schema=public'
+      DATABASE_CONNECTION_CLIENT_NAME: evolution
+      CACHE_LOCAL_ENABLED: 'true'
+      CACHE_REDIS_ENABLED: 'false'
+      # preserva a sessão entre reinícios; sem isto cada restart pede o QR
+      DATABASE_SAVE_DATA_INSTANCE: 'true'
+      DATABASE_SAVE_DATA_NEW_MESSAGE: 'false'
+      DATABASE_SAVE_MESSAGE_UPDATE: 'false'
+      DATABASE_SAVE_DATA_CONTACTS: 'false'
+      DATABASE_SAVE_DATA_CHATS: 'false'
+    volumes:
+      - evolution_instances:/evolution/instances
+
+volumes:
+  postgres_data:
+  evolution_instances:
+```
+
+> A imagem **mudou de namespace**: `atendai/evolution-api` foi removida do
+> Docker Hub (404) e o projeto está em **`evoapicloud/evolution-api`**. Ambas
+> as arquiteturas (amd64 e arm64) têm build, então a VM ARM da Oracle serve.
 
 ```bash
-docker run -d \
-  --name evolution \
-  --restart always \
-  -p 8080:8080 \
-  -e AUTHENTICATION_API_KEY='troque-esta-chave' \
-  -v evolution_instances:/evolution/instances \
-  atendai/evolution-api:v2.1.1
+cd ~/evolution && sudo docker compose up -d
 ```
 
 `AUTHENTICATION_API_KEY` é o que vai no campo **Token** da tela de
-Configurações. O volume preserva a sessão entre reinícios — sem ele, cada
-restart pede o QR de novo.
+Configurações. Gere algo aleatório (`openssl rand -hex 24`), não use uma
+palavra escolhida a mão.
 
-Libere a porta 8080 no _security list_ da Oracle **e** no firewall da VM, que
-na imagem Oracle Linux vem fechado mesmo depois de liberar no painel:
+### Liberando a porta (são dois firewalls)
+
+**1. Dentro da VM.** A regra precisa entrar **antes** do `REJECT` que a Oracle
+deixa no fim da cadeia — com `-A` ela iria depois e não teria efeito nenhum:
 
 ```bash
-sudo iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
-sudo netfilter-persistent save
+sudo iptables -L INPUT --line-numbers -n        # veja em que linha está o REJECT
+sudo iptables -I INPUT 5 -p tcp --dport 8080 -m state --state NEW -j ACCEPT
+sudo apt-get install -y iptables-persistent && sudo netfilter-persistent save
 ```
 
-Coloque um domínio com HTTPS na frente (Caddy resolve em duas linhas): o token
-viaja nessa conexão.
+**2. No painel.** VM → **Virtual cloud network** → **Security Lists** →
+_Default_ → **Add Ingress Rule**: origem `0.0.0.0/0`, TCP, porta `8080`.
+
+Liberar só um dos dois não adianta: a conexão externa fica pendurada até dar
+timeout, sem mensagem de erro que ajude.
 
 ## Criando a instância
 
