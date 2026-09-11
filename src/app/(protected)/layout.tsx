@@ -21,7 +21,11 @@ export default async function DashboardLayout({
               <UserProfileContainer />
             </div>
           </div>
-          <div className="mt-6 flex justify-center max-md:px-6">{children}</div>
+          {/* pb-10: sem isso o último elemento de qualquer página encosta
+                no fim da viewport */}
+          <div className="mt-6 flex justify-center pb-10 max-md:px-6">
+            {children}
+          </div>
         </div>
       </div>
     </AppSidebarProvider>

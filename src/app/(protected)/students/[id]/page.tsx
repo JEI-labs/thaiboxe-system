@@ -204,8 +204,8 @@ export default function StudentDetailPage({
           {student.enrollments.length === 0 ? (
             <EmptyRow text="Nenhuma matrícula registrada." />
           ) : (
-            <Table>
-              <TableHeader>
+            <Table containerClassName="max-h-[22rem] overflow-y-auto">
+              <TableHeader className="bg-card sticky top-0 z-10">
                 <TableRow>
                   <TableHead>Plano</TableHead>
                   <TableHead>Início</TableHead>
@@ -255,8 +255,8 @@ export default function StudentDetailPage({
           {student.payments.length === 0 ? (
             <EmptyRow text="Nenhuma parcela registrada." />
           ) : (
-            <Table>
-              <TableHeader>
+            <Table containerClassName="max-h-[22rem] overflow-y-auto">
+              <TableHeader className="bg-card sticky top-0 z-10">
                 <TableRow>
                   <TableHead>Vencimento</TableHead>
                   <TableHead className="text-right">Valor</TableHead>
@@ -305,8 +305,8 @@ export default function StudentDetailPage({
           {student.FinanceEntry.length === 0 ? (
             <EmptyRow text="Nenhum lançamento vinculado a este aluno." />
           ) : (
-            <Table>
-              <TableHeader>
+            <Table containerClassName="max-h-[22rem] overflow-y-auto">
+              <TableHeader className="bg-card sticky top-0 z-10">
                 <TableRow>
                   <TableHead>Data</TableHead>
                   <TableHead>Categoria</TableHead>
