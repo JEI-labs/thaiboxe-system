@@ -1,15 +1,7 @@
 'use client';
 
+import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
 import React, { useState, useEffect, useMemo } from 'react';
-import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
-import { Separator } from '@/components/ui/separator';
 import { Form } from '@/components/ui/form';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -140,78 +132,67 @@ export const SheetCreateSupplier: React.FC<ICreateSheetSupplier> = ({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetContent side="right" className="min-w-[30vw] overflow-auto">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 p-4"
-          >
-            <SheetHeader>
-              <SheetTitle>Novo Fornecedor</SheetTitle>
-              <SheetDescription>
-                Preencha os dados para cadastrar um fornecedor
-              </SheetDescription>
-            </SheetHeader>
-            <Separator />
+    <Form {...form}>
+      <FormDrawer
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        side="right"
+        title="Novo fornecedor"
+        description="Preencha os dados do fornecedor"
+        onSubmit={form.handleSubmit(onSubmit)}
+        submitLabel="Salvar"
+        submitPendingLabel="Salvando..."
+        isSubmitting={form.formState.isSubmitting}
+      >
+        <FormInputComponent
+          control={form.control}
+          name="name"
+          label="Nome"
+          placeholder="Nome do fornecedor"
+        />
+        <FormInputComponent
+          control={form.control}
+          name="phone"
+          label="Telefone"
+          placeholder="(xx) xxxxx-xxxx"
+          mask={maskCellphone}
+          unmask={unmaskCellphone}
+          maxLength={15}
+        />
+        <FormInputComponent
+          control={form.control}
+          name="street"
+          label="Rua"
+          placeholder="Rua do fornecedor"
+          maxLength={100}
+        />
 
-            <FormInputComponent
-              control={form.control}
-              name="name"
-              label="Nome"
-              placeholder="Nome do fornecedor"
-            />
-            <FormInputComponent
-              control={form.control}
-              name="phone"
-              label="Telefone"
-              placeholder="(xx) xxxxx-xxxx"
-              mask={maskCellphone}
-              unmask={unmaskCellphone}
-              maxLength={15}
-            />
-            <FormInputComponent
-              control={form.control}
-              name="street"
-              label="Rua"
-              placeholder="Rua do fornecedor"
-              maxLength={100}
-            />
+        <FormSelectComponent
+          control={form.control}
+          name="state"
+          label="Estado"
+          placeholder={
+            loadingStates ? 'Carregando estados...' : 'Selecione o estado'
+          }
+          options={statesOptions}
+          disabled={loadingStates}
+        />
 
-            <FormSelectComponent
-              control={form.control}
-              name="state"
-              label="Estado"
-              placeholder={
-                loadingStates ? 'Carregando estados...' : 'Selecione o estado'
-              }
-              options={statesOptions}
-              disabled={loadingStates}
-            />
-
-            <FormSelectComponent
-              control={form.control}
-              name="city"
-              label="Cidade"
-              placeholder={
-                !selectedState
-                  ? 'Selecione um estado primeiro'
-                  : loadingCities
-                    ? 'Carregando cidades...'
-                    : 'Selecione a cidade'
-              }
-              options={citiesOptions}
-              disabled={!selectedState || loadingCities}
-            />
-
-            <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'Salvando...' : 'Salvar'}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </SheetContent>
-    </Sheet>
+        <FormSelectComponent
+          control={form.control}
+          name="city"
+          label="Cidade"
+          placeholder={
+            !selectedState
+              ? 'Selecione um estado primeiro'
+              : loadingCities
+                ? 'Carregando cidades...'
+                : 'Selecione a cidade'
+          }
+          options={citiesOptions}
+          disabled={!selectedState || loadingCities}
+        />
+      </FormDrawer>
+    </Form>
   );
 };

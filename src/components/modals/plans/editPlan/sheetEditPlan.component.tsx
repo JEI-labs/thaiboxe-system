@@ -1,20 +1,13 @@
 'use client';
 
+import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Form } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { FormInputComponent } from '@/components/forms/formInput/formInput.component';
-import { Separator } from '@/components/ui/separator';
 import { api } from '@/trpc/react';
 import { ISheetEditPlan } from './sheetEditPlan.types';
 import {
@@ -93,77 +86,72 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetContent
+    <Form {...form}>
+      <FormDrawer
+        open={isOpen}
+        onOpenChange={setIsOpen}
         side={side}
-        className="min-w-[40vw] items-center overflow-auto xl:min-w-[30vw]"
+        title="Editar plano"
+        description="Altere os dados do plano"
+        onSubmit={form.handleSubmit(onSubmit)}
+        submitLabel="Salvar alterações"
+        submitPendingLabel="Salvando..."
+        isSubmitting={updatePlan.isPending || form.formState.isSubmitting}
       >
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="w-full">
-            <SheetHeader className="mx-2 mb-8 flex flex-col items-center">
-              <SheetTitle className="text-2xl">Editar Plano</SheetTitle>
-              <SheetDescription className="mt-2 text-center text-sm">
-                Faça as alterações necessárias para o plano selecionado
-              </SheetDescription>
-            </SheetHeader>
+        <div className="mx-2 my-8 grid w-full grid-cols-4 gap-6">
+          <div className="col-span-4">
+            <FormInputComponent
+              control={form.control}
+              name="name"
+              label="Nome"
+              type="text"
+              placeholder="Nome do plano"
+              maxLength={50}
+            />
+          </div>
+          <div className="col-span-4">
+            <FormInputComponent
+              control={form.control}
+              name="description"
+              label="Descrição"
+              type="text"
+              placeholder="(opcional)"
+              maxLength={50}
+            />
+          </div>
+          <div className="col-span-2">
+            <FormInputComponent
+              control={form.control}
+              name="price"
+              label="Preço (R$)"
+              placeholder="0.00"
+              mask={maskDecimalWithAcronym}
+              unmask={unmaskDecimal}
+              maxLength={10}
+            />
+          </div>
+          <div className="col-span-2">
+            <FormInputComponent
+              control={form.control}
+              name="duration"
+              label="Duração (meses)"
+              tooltip="Por quantos meses a matrícula vale. O valor informado é o de cada parcela."
+              placeholder="1"
+              mask={maskOnlyNumbersV2}
+              min={1}
+            />
+          </div>
+        </div>
 
-            <Separator />
-
-            <div className="mx-2 my-8 grid w-full grid-cols-4 gap-6">
-              <div className="col-span-4">
-                <FormInputComponent
-                  control={form.control}
-                  name="name"
-                  label="Nome"
-                  type="text"
-                  placeholder="Nome do plano"
-                  maxLength={50}
-                />
-              </div>
-              <div className="col-span-4">
-                <FormInputComponent
-                  control={form.control}
-                  name="description"
-                  label="Descrição"
-                  type="text"
-                  placeholder="(opcional)"
-                  maxLength={50}
-                />
-              </div>
-              <div className="col-span-2">
-                <FormInputComponent
-                  control={form.control}
-                  name="price"
-                  label="Preço (R$)"
-                  placeholder="0.00"
-                  mask={maskDecimalWithAcronym}
-                  unmask={unmaskDecimal}
-                  maxLength={10}
-                />
-              </div>
-              <div className="col-span-2">
-                <FormInputComponent
-                  control={form.control}
-                  name="duration"
-                  label="Duração (meses)"
-                  placeholder="1"
-                  mask={maskOnlyNumbersV2}
-                  min={1}
-                />
-              </div>
-            </div>
-
-            <div className="mb-4 flex w-full justify-end">
-              <Button
-                type="submit"
-                disabled={updatePlan.isPending || form.formState.isSubmitting}
-              >
-                {updatePlan.isPending ? 'Editando plano...' : 'Editar plano'}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </SheetContent>
-    </Sheet>
+        <div className="mb-4 flex w-full justify-end">
+          <Button
+            type="submit"
+            disabled={updatePlan.isPending || form.formState.isSubmitting}
+          >
+            {updatePlan.isPending ? 'Editando plano...' : 'Editar plano'}
+          </Button>
+        </div>
+      </FormDrawer>
+    </Form>
   );
 };

@@ -1,3 +1,4 @@
+import { FieldHint } from '@/components/forms/fieldHint/fieldHint.component';
 import React from 'react';
 import type {
   FieldPath,
@@ -53,7 +54,10 @@ export const FormSelectComponent = <T extends FieldValues, TTransformed = T>({
             render={({ field }) => (
               <FormItem className={cn('space-y-3', props.className)}>
                 <div className="flex flex-col">
-                  <FormLabel>{props.label}</FormLabel>
+                  <FormLabel>
+                    {props.label}
+                    {props.tooltip && <FieldHint text={props.tooltip} />}
+                  </FormLabel>
                   {description && (
                     <FormLabel className="text-muted-foreground text-xs">
                       {description}
@@ -71,7 +75,7 @@ export const FormSelectComponent = <T extends FieldValues, TTransformed = T>({
                   value={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className="py-6">
+                    <SelectTrigger>
                       <SelectValue placeholder={props.placeholder} />
                     </SelectTrigger>
                   </FormControl>

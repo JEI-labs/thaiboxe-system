@@ -7,6 +7,8 @@ export interface FormInputComponentProps extends InputProps {
   unmask?: (_value: string) => string | number;
   label?: string | React.JSX.Element;
   description?: string;
+  /** Texto de ajuda mostrado num tooltip ao lado do rótulo. */
+  tooltip?: string;
   hideErrors?: boolean;
   icon?: React.JSX.Element;
   generalclassname?: string;

@@ -1,15 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
@@ -101,126 +92,104 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
   const isSubmitting = createUser.isPending || form.formState.isSubmitting;
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetContent
+    <Form {...form}>
+      <FormDrawer
+        open={isOpen}
+        onOpenChange={setIsOpen}
         side={side}
-        className="flex w-full flex-col gap-0 p-0 sm:max-w-lg"
+        title="Criar novo aluno"
+        description="Preencha os dados abaixo para matricular um aluno."
+        onSubmit={form.handleSubmit(onSubmit)}
+        submitLabel="Criar aluno"
+        submitPendingLabel="Criando aluno..."
+        isSubmitting={isSubmitting}
       >
-        <Form {...form}>
-          {/* h-full + min-h-0 deixam só o miolo rolar, mantendo cabeçalho e
-              rodapé sempre visíveis */}
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex h-full min-h-0 flex-col"
-          >
-            <SheetHeader className="space-y-1 border-b px-6 py-5 text-left">
-              <SheetTitle className="text-xl">Criar novo aluno</SheetTitle>
-              <SheetDescription>
-                Preencha os dados abaixo para matricular um aluno.
-              </SheetDescription>
-            </SheetHeader>
+        <AvatarField
+          control={form.control}
+          name="avatarUrl"
+          fallback={watchedName ? getInitials(watchedName) : undefined}
+        />
 
-            <div className="min-h-0 flex-1 space-y-8 overflow-y-auto px-6 py-6">
-              <AvatarField
-                control={form.control}
-                name="avatarUrl"
-                fallback={watchedName ? getInitials(watchedName) : undefined}
-              />
+        <Separator />
 
-              <Separator />
+        <section className="space-y-4">
+          <h3 className="text-muted-foreground text-xs font-medium uppercase">
+            Dados pessoais
+          </h3>
 
-              <section className="space-y-4">
-                <h3 className="text-muted-foreground text-xs font-medium uppercase">
-                  Dados pessoais
-                </h3>
+          <FormInputComponent
+            control={form.control}
+            name="name"
+            label="Nome do aluno"
+            type="text"
+            mask={maskOnlyText}
+            placeholder="Nome completo"
+            maxLength={50}
+          />
 
-                <FormInputComponent
-                  control={form.control}
-                  name="name"
-                  label="Nome do aluno"
-                  type="text"
-                  mask={maskOnlyText}
-                  placeholder="Nome completo"
-                  maxLength={50}
-                />
+          <FormInputComponent
+            control={form.control}
+            name="email"
+            label="E-mail"
+            type="email"
+            placeholder="exemplo@exemplo.com"
+            maxLength={50}
+          />
 
-                <FormInputComponent
-                  control={form.control}
-                  name="email"
-                  label="E-mail"
-                  type="email"
-                  placeholder="exemplo@exemplo.com"
-                  maxLength={50}
-                />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormInputComponent
+              control={form.control}
+              name="birthDate"
+              label="Data de nascimento"
+              type="text"
+              mask={maskDate}
+              placeholder="DD/MM/AAAA"
+              maxLength={10}
+            />
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <FormInputComponent
-                    control={form.control}
-                    name="birthDate"
-                    label="Data de nascimento"
-                    type="text"
-                    mask={maskDate}
-                    placeholder="DD/MM/AAAA"
-                    maxLength={10}
-                  />
+            <FormInputComponent
+              control={form.control}
+              name="phone"
+              label="Telefone"
+              mask={maskCellphone}
+              unmask={unmaskCellphone}
+              placeholder="(XX) XXXXX-XXXX"
+              maxLength={15}
+            />
+          </div>
+        </section>
 
-                  <FormInputComponent
-                    control={form.control}
-                    name="phone"
-                    label="Telefone"
-                    mask={maskCellphone}
-                    unmask={unmaskCellphone}
-                    placeholder="(XX) XXXXX-XXXX"
-                    maxLength={15}
-                  />
-                </div>
-              </section>
+        <Separator />
 
-              <Separator />
+        <section className="space-y-4">
+          <h3 className="text-muted-foreground text-xs font-medium uppercase">
+            Matrícula
+          </h3>
 
-              <section className="space-y-4">
-                <h3 className="text-muted-foreground text-xs font-medium uppercase">
-                  Matrícula
-                </h3>
-
-                <FormSelectComponent
-                  control={form.control}
-                  name="planId"
-                  label="Plano"
-                  placeholder="Selecione o plano"
-                  options={
-                    plansData?.data.map((plan) => ({
-                      value: plan.id,
-                      // preço e duração no rótulo para dar contexto na hora
-                      // de escolher; precisa ser string (o Radix usa
-                      // textValue para busca por digitação)
-                      textValue: `${plan.name} · ${Number(
-                        plan.price,
-                      ).toLocaleString('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL',
-                      })} · ${plan.duration} ${
-                        plan.duration === 1 ? 'mês' : 'meses'
-                      }`,
-                    })) ?? []
-                  }
-                />
-              </section>
-            </div>
-
-            <SheetFooter className="flex-row justify-end gap-2 border-t px-6 py-4">
-              <SheetClose asChild>
-                <Button type="button" variant="outline" disabled={isSubmitting}>
-                  Cancelar
-                </Button>
-              </SheetClose>
-              <Button type="submit" disabled={isSubmitting}>
-                {createUser.isPending ? 'Criando aluno...' : 'Criar aluno'}
-              </Button>
-            </SheetFooter>
-          </form>
-        </Form>
-      </SheetContent>
-    </Sheet>
+          <FormSelectComponent
+            control={form.control}
+            name="planId"
+            label="Plano"
+            tooltip="Define o valor e a duração da matrícula, e gera as parcelas do aluno."
+            placeholder="Selecione o plano"
+            options={
+              plansData?.data.map((plan) => ({
+                value: plan.id,
+                // preço e duração no rótulo para dar contexto na hora
+                // de escolher; precisa ser string (o Radix usa
+                // textValue para busca por digitação)
+                textValue: `${plan.name} · ${Number(plan.price).toLocaleString(
+                  'pt-BR',
+                  {
+                    style: 'currency',
+                    currency: 'BRL',
+                  },
+                )} · ${plan.duration} ${plan.duration === 1 ? 'mês' : 'meses'}`,
+              })) ?? []
+            }
+          />
+        </section>
+      </FormDrawer>
+    </Form>
   );
 };

@@ -1,16 +1,8 @@
 // components/sheetCreatePlan.tsx
 'use client';
 
+import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
-import { Separator } from '@/components/ui/separator';
 import { Form } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -63,69 +55,55 @@ export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetContent side={side} className="min-w-[30vw] overflow-auto">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-6 p-4"
-          >
-            <SheetHeader>
-              <SheetTitle>Novo Plano</SheetTitle>
-              <SheetDescription>
-                Defina o nome, valor e duração do plano
-              </SheetDescription>
-            </SheetHeader>
+    <Form {...form}>
+      <FormDrawer
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        side={side}
+        title="Novo plano"
+        description="Preencha os dados do plano"
+        onSubmit={form.handleSubmit(onSubmit)}
+        submitLabel="Criar plano"
+        submitPendingLabel="Salvando..."
+        isSubmitting={createPlan.isPending || form.formState.isSubmitting}
+      >
+        <FormInputComponent
+          control={form.control}
+          name="name"
+          label="Nome"
+          type="text"
+          placeholder="Ex: Mensalidade"
+          maxLength={50}
+        />
 
-            <Separator />
+        <FormInputComponent
+          control={form.control}
+          name="description"
+          label="Descrição"
+          type="text"
+          placeholder="Descreva o plano"
+          maxLength={100}
+        />
 
-            <FormInputComponent
-              control={form.control}
-              name="name"
-              label="Nome"
-              type="text"
-              placeholder="Ex: Mensalidade"
-              maxLength={50}
-            />
+        <FormInputComponent
+          control={form.control}
+          name="price"
+          label="Preço (R$)"
+          placeholder="0.00"
+          mask={maskDecimalWithAcronym}
+          unmask={unmaskDecimal}
+        />
 
-            <FormInputComponent
-              control={form.control}
-              name="description"
-              label="Descrição"
-              type="text"
-              placeholder="Descreva o plano"
-              maxLength={100}
-            />
-
-            <FormInputComponent
-              control={form.control}
-              name="price"
-              label="Preço (R$)"
-              placeholder="0.00"
-              mask={maskDecimalWithAcronym}
-              unmask={unmaskDecimal}
-            />
-
-            <FormInputComponent
-              control={form.control}
-              name="duration"
-              label="Duração (meses)"
-              placeholder="1"
-              maxLength={2}
-              mask={maskOnlyNumbersV2}
-            />
-
-            <div className="flex justify-end pt-4">
-              <Button
-                type="submit"
-                disabled={createPlan.isPending || form.formState.isSubmitting}
-              >
-                {createPlan.isPending ? 'Salvando...' : 'Criar Plano'}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </SheetContent>
-    </Sheet>
+        <FormInputComponent
+          control={form.control}
+          name="duration"
+          label="Duração (meses)"
+          tooltip="Por quantos meses a matrícula vale. O valor informado é o de cada parcela."
+          placeholder="1"
+          maxLength={2}
+          mask={maskOnlyNumbersV2}
+        />
+      </FormDrawer>
+    </Form>
   );
 };

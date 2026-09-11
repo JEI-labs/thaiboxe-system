@@ -1,3 +1,4 @@
+import { FieldHint } from '@/components/forms/fieldHint/fieldHint.component';
 import {
   FormControl,
   FormDescription,
@@ -56,7 +57,10 @@ export const FormTextAreaComponent = <T extends FieldValues, TTransformed = T>({
             name={name}
             render={({ field }) => (
               <FormItem className={cn(props.generalclassname ?? '')}>
-                <FormLabel>{props.label}</FormLabel>
+                <FormLabel>
+                  {props.label}
+                  {props.tooltip && <FieldHint text={props.tooltip} />}
+                </FormLabel>
                 <FormControl>
                   <div className="relative">
                     {props.icon}
