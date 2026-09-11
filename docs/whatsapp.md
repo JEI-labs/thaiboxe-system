@@ -18,7 +18,19 @@ modelo sem `providerTemplateName` aparece na tela marcado como "Só dentro de
 ## Configurando
 
 No [Meta for Developers](https://developers.facebook.com), crie um app do
-tipo Business e adicione o produto WhatsApp. Você vai precisar de:
+tipo Business.
+
+O console atual organiza tudo por **Casos de uso**, e não pelo antigo
+"Adicionar produto". No menu lateral:
+
+1. **Casos de uso** → adicione _Conectar-se com clientes pelo WhatsApp_
+2. isso faz surgir **WhatsApp** na lateral, com _Configuração da API_
+3. ali a Meta já oferece um **número de teste gratuito** e um token temporário
+
+Com o número de teste dá para validar a integração inteira antes de
+verificar a empresa. É preciso cadastrar os números que vão **receber** (até 5) na mesma tela — o de teste só entrega para eles.
+
+Você vai precisar de:
 
 | Campo na tela    | Onde encontrar                                       |
 | ---------------- | ---------------------------------------------------- |
