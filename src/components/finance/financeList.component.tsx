@@ -103,13 +103,7 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
                   '—';
 
                 return (
-                  <TableRow
-                    key={entry.id}
-                    className={cn(
-                      entry.type === EFinanceEntryType.STUDENTS &&
-                        'border-l-4 border-l-blue-600',
-                    )}
-                  >
+                  <TableRow key={entry.id}>
                     <TableCell className="text-muted-foreground whitespace-nowrap">
                       {new Date(entry.date).toLocaleDateString('pt-BR')}
                     </TableCell>
