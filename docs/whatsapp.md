@@ -32,11 +32,34 @@ Menu ☰ → **Compute** → **Instances** → **Create instance**.
 - **SSH keys**: salve a chave privada; sem ela não há como entrar
 - deixe criar a VCN automaticamente, com IP público
 
-> **A capacidade de ARM em São Paulo vive esgotada.** Se aparecer _"Out of
-> host capacity"_, as saídas são: tentar de novo mais tarde (libera em
-> ciclos), escolher outra região, ou usar o shape AMD
-> `VM.Standard.E2.1.Micro` — também Always Free, mas com 1 GB de RAM, o que
-> atende uma instância e pouco mais.
+> **A capacidade de ARM em São Paulo vive esgotada.** O erro _"Out of capacity
+> for shape VM.Standard.A1.Flex"_ é comum e não indica erro de configuração.
+>
+> A mensagem sugere tentar outro availability domain, mas **São Paulo só tem
+> um (AD-1)** — essa saída não existe. Trocar de região também não ajuda:
+> **recursos Always Free só valem na região natal da conta**, então numa
+> região nova a VM seria cobrada.
+>
+> Restam duas saídas de verdade:
+>
+> 1. **Shape AMD** `VM.Standard.E2.1.Micro` — Always Free, quase sempre
+>    disponível, mas 1 GB de RAM. Atende uma instância do Evolution **com
+>    swap** (abaixo); sem swap, o contêiner morre por falta de memória.
+> 2. **Insistir no ARM** — a capacidade libera em ciclos, costuma abrir de
+>    madrugada. Não dá para prever quando.
+
+### Se for de AMD (1 GB), crie swap antes
+
+O Evolution com Baileys usa entre 150 e 400 MB por instância; somado ao Ubuntu
+e ao Docker, 1 GB fica no limite. Sem swap, o kernel mata o contêiner no
+primeiro pico:
+
+```bash
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile && sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+```
 
 ### Liberando a porta
 
