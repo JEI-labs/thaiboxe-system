@@ -117,10 +117,15 @@ export function AppSidebar() {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="jutify-center flex h-24 w-full items-center p-6">
-          <Image src="/images/logo.png" alt="Logo" width={300} height={300} />
+        {/* o nome vai no alt: some da tela, mas segue no leitor de tela */}
+        <div className="flex h-24 w-full items-center justify-center p-6">
+          <Image
+            src="/images/logo.png"
+            alt="Team Sartorato"
+            width={300}
+            height={300}
+          />
         </div>
-        <p className="text-center font-bold">Team Sartorato</p>
       </SidebarHeader>
 
       <Separator />
