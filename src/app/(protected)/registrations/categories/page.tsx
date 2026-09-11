@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { SheetCreateCategory } from '@/components/modals/category/createCategories/createCategories.component';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { api } from '@/trpc/react';
-import Search from '@/components/Search';
+import { ListToolbar } from '@/components/listToolbar/listToolbar.component';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
 import { SheetEditCategory } from '@/components/modals/category/editCategory/editCategory.component';
@@ -76,59 +76,56 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="w-full pb-[100px]">
+    <div className="w-full">
       <BreadcrumbUpdater items={breadcrumbItems} />
 
       <main className="flex flex-col gap-4">
-        <h1 className="text-2xl font-semibold">Categorias</h1>
+        <ListToolbar
+          searchPlaceholder="Buscar categorias..."
+          onSearch={(value) => setSearchTerm(value)}
+          total={totalItems}
+          totalLabel={['categoria', 'categorias']}
+          action={
+            <Button onClick={() => setCreateOpen(true)}>Criar categoria</Button>
+          }
+          filters={
+            <>
+              <AdvancedFilterDatePicker
+                title="Buscar datas"
+                onChange={({ from, to }) => {
+                  setDateFrom(from ? from.toISOString() : '');
+                  setDateTo(to ? to.toISOString() : '');
+                }}
+                description="Data de criação das categorias"
+                numberOfMonths={1}
+                showDeleteButton={false}
+                rightIcon={<Calendar />}
+              />
 
-        <div className="mt-4 flex items-center md:justify-between">
-          <Search
-            className="mr-4 w-1/2"
-            placeholder="Buscar categorias..."
-            onSearch={(value) => setSearchTerm(value)}
-          />
-
-          <Button onClick={() => setCreateOpen(true)}>Criar categoria</Button>
-        </div>
-
-        <h1 className="mt-4 text-lg font-semibold">Filtros</h1>
-
-        <div className="flex gap-2">
-          <AdvancedFilterDatePicker
-            title="Buscar datas"
-            onChange={({ from, to }) => {
-              setDateFrom(from ? from.toISOString() : '');
-              setDateTo(to ? to.toISOString() : '');
-            }}
-            description="Data de criação das categorias"
-            numberOfMonths={1}
-            showDeleteButton={false}
-            rightIcon={<Calendar />}
-          />
-
-          <AdvancedFilterCheckbox
-            title="Status"
-            description="Filtrar por status da categoria"
-            defaultValue={selectedStatuses.map((status) => ({
-              id: status,
-              label:
-                STATUS_OPTIONS.find((option) => option.id === status)?.label ||
-                status,
-            }))}
-            options={STATUS_OPTIONS}
-            onDelete={() => {
-              setSelectedStatuses([]);
-            }}
-            onChange={(next: Array<AdvancedFilterCheckboxType>) => {
-              setSelectedStatuses(
-                next.map((item) => item.id as ECategoryStatus),
-              );
-            }}
-            showCounterIndicator
-            showDeleteButton={false}
-          />
-        </div>
+              <AdvancedFilterCheckbox
+                title="Status"
+                description="Filtrar por status da categoria"
+                defaultValue={selectedStatuses.map((status) => ({
+                  id: status,
+                  label:
+                    STATUS_OPTIONS.find((option) => option.id === status)
+                      ?.label || status,
+                }))}
+                options={STATUS_OPTIONS}
+                onDelete={() => {
+                  setSelectedStatuses([]);
+                }}
+                onChange={(next: Array<AdvancedFilterCheckboxType>) => {
+                  setSelectedStatuses(
+                    next.map((item) => item.id as ECategoryStatus),
+                  );
+                }}
+                showCounterIndicator
+                showDeleteButton={false}
+              />
+            </>
+          }
+        />
 
         <CategoriesList
           categories={categories}

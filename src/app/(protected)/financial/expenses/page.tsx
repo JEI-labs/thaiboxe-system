@@ -3,7 +3,7 @@
 import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
 import { useState, Suspense } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
-import Search from '@/components/Search';
+import { ListToolbar } from '@/components/listToolbar/listToolbar.component';
 import { Button } from '@/components/ui/button';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
@@ -108,49 +108,48 @@ export default function ExpensesPage() {
       <div className="w-full gap-6 py-6">
         <BreadcrumbUpdater items={breadcrumbItems} />
 
-        <h1 className="mb-8 text-2xl font-semibold">Lançamentos de Despesas</h1>
-
-        <Search
-          className="w-full md:w-1/3"
-          placeholder="Buscar despesas..."
+        <ListToolbar
+          searchPlaceholder="Buscar despesas..."
           onSearch={setSearchTerm}
+          total={totalItems}
+          totalLabel={['despesa', 'despesas']}
+          action={
+            <Button onClick={() => setCreateOpen(true)}>Criar despesa</Button>
+          }
+          filters={
+            <>
+              <AdvancedFilterDatePicker
+                title="Intervalo de datas"
+                description="Filtrar por data"
+                numberOfMonths={1}
+                showDeleteButton={false}
+                rightIcon={<Calendar />}
+                onChange={({ from, to }) => {
+                  setDateFrom(from ? startOfDay(from).toISOString() : '');
+                  setDateTo(to ? endOfDay(to).toISOString() : '');
+                }}
+              />
+
+              <AdvancedFilterCheckbox
+                title="Status"
+                description="Filtrar por status"
+                options={STATUS_OPTIONS}
+                defaultValue={selectedStatuses.map((s) => ({
+                  id: s,
+                  label: STATUS_OPTIONS.find((o) => o.id === s)!.label,
+                }))}
+                onChange={(next) =>
+                  setSelectedStatuses(
+                    next.map((o) => o.id as EFinanceEntryStatus),
+                  )
+                }
+                onDelete={() => setSelectedStatuses([])}
+                showCounterIndicator
+                showDeleteButton={false}
+              />
+            </>
+          }
         />
-
-        <div className="my-8 flex items-center gap-4">
-          <AdvancedFilterDatePicker
-            title="Intervalo de datas"
-            description="Filtrar por data"
-            numberOfMonths={1}
-            showDeleteButton={false}
-            rightIcon={<Calendar />}
-            onChange={({ from, to }) => {
-              setDateFrom(from ? startOfDay(from).toISOString() : '');
-              setDateTo(to ? endOfDay(to).toISOString() : '');
-            }}
-          />
-
-          <AdvancedFilterCheckbox
-            title="Status"
-            description="Filtrar por status"
-            options={STATUS_OPTIONS}
-            defaultValue={selectedStatuses.map((s) => ({
-              id: s,
-              label: STATUS_OPTIONS.find((o) => o.id === s)!.label,
-            }))}
-            onChange={(next) =>
-              setSelectedStatuses(next.map((o) => o.id as EFinanceEntryStatus))
-            }
-            onDelete={() => setSelectedStatuses([])}
-            showCounterIndicator
-            showDeleteButton={false}
-          />
-        </div>
-
-        <div className="mb-4 flex justify-end">
-          <Button size="sm" onClick={() => setCreateOpen(true)}>
-            Criar despesa
-          </Button>
-        </div>
 
         {/* listagem */}
         <FinanceEntriesList

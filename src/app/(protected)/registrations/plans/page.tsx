@@ -6,7 +6,7 @@ import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { api } from '@/trpc/react';
-import Search from '@/components/Search';
+import { ListToolbar } from '@/components/listToolbar/listToolbar.component';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
 import PlansList from '@/components/plans/plansList.component';
@@ -56,21 +56,19 @@ export default function PlansPage() {
   };
 
   return (
-    <div className="w-full pb-[100px]">
+    <div className="w-full">
       <BreadcrumbUpdater items={breadcrumbItems} />
 
       <main className="flex flex-col gap-4">
-        <h1 className="text-2xl font-semibold">Planos</h1>
-
-        <div className="mt-4 flex items-center md:justify-between">
-          <Search
-            className="mr-4 w-1/2"
-            placeholder="Buscar planos..."
-            onSearch={(value) => setSearchTerm(value)}
-          />
-
-          <Button onClick={() => setCreateOpen(true)}>Criar plano</Button>
-        </div>
+        <ListToolbar
+          searchPlaceholder="Buscar planos..."
+          onSearch={(value) => setSearchTerm(value)}
+          total={totalItems}
+          totalLabel={['plano', 'planos']}
+          action={
+            <Button onClick={() => setCreateOpen(true)}>Criar plano</Button>
+          }
+        />
 
         <PlansList
           plans={plans}

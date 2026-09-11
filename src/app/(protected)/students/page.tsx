@@ -11,7 +11,7 @@ import { LoadingContent } from '@/components/LoadingContent';
 import { toast } from '@/hooks/use-toast';
 import { SheetCreateStudent } from '@/components/modals/student/createStudent/sheetCreateStudent.component';
 import { SheetEditStudent } from '@/components/modals/student/EditStudent/sheetEditStudent.component';
-import Search from '@/components/Search';
+import { ListToolbar } from '@/components/listToolbar/listToolbar.component';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
 import { AdvancedFilterDatePicker } from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
@@ -93,61 +93,59 @@ export default function StudentsPage() {
   };
 
   return (
-    <div className="w-full pb-[100px]">
+    <div className="w-full">
       <BreadcrumbUpdater items={breadcrumbItems} />
 
       <main className="flex flex-col gap-4">
-        <h1 className="text-2xl font-semibold">Alunos</h1>
+        <ListToolbar
+          searchPlaceholder="Buscar alunos..."
+          onSearch={setSearchTerm}
+          total={studentsData?.pagination.total}
+          totalLabel={['aluno', 'alunos']}
+          action={
+            <Button onClick={() => setShowSheet(true)}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Adicionar Aluno
+            </Button>
+          }
+          filters={
+            <>
+              <AdvancedFilterDatePicker
+                title="Buscar datas"
+                onChange={({ from, to }) => {
+                  setDateFrom(from ? from.toISOString() : '');
+                  setDateTo(to ? to.toISOString() : '');
+                }}
+                description="Data de criação dos alunos"
+                numberOfMonths={1}
+                showDeleteButton={false}
+                rightIcon={<Calendar />}
+              />
 
-        <div className="mt-4 flex items-center md:justify-between">
-          <Search
-            className="mr-4 w-1/2"
-            placeholder="Buscar alunos..."
-            onSearch={setSearchTerm}
-          />
-
-          <Button onClick={() => setShowSheet(true)}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Adicionar Aluno
-          </Button>
-        </div>
-
-        <h1 className="mt-4 text-lg font-semibold">Filtros</h1>
-
-        <div className="flex flex-wrap gap-2">
-          <AdvancedFilterDatePicker
-            title="Buscar datas"
-            onChange={({ from, to }) => {
-              setDateFrom(from ? from.toISOString() : '');
-              setDateTo(to ? to.toISOString() : '');
-            }}
-            description="Data de criação dos alunos"
-            numberOfMonths={1}
-            showDeleteButton={false}
-            rightIcon={<Calendar />}
-          />
-
-          <AdvancedFilterCheckbox
-            title="Status"
-            description="Filtrar por status"
-            options={STATUS_OPTIONS}
-            defaultValue={selectedStatuses.map((status) => ({
-              id: status,
-              label:
-                STATUS_OPTIONS.find((o) => o.id === status)?.label || status,
-            }))}
-            onDelete={() => setSelectedStatuses([])}
-            onChange={(next) => {
-              setSelectedStatuses(
-                next.map(
-                  (item) => item.id as 'EM DIA' | 'PENDENTE' | 'ATRASADO',
-                ),
-              );
-            }}
-            showCounterIndicator
-            showDeleteButton={false}
-          />
-        </div>
+              <AdvancedFilterCheckbox
+                title="Status"
+                description="Filtrar por status"
+                options={STATUS_OPTIONS}
+                defaultValue={selectedStatuses.map((status) => ({
+                  id: status,
+                  label:
+                    STATUS_OPTIONS.find((o) => o.id === status)?.label ||
+                    status,
+                }))}
+                onDelete={() => setSelectedStatuses([])}
+                onChange={(next) => {
+                  setSelectedStatuses(
+                    next.map(
+                      (item) => item.id as 'EM DIA' | 'PENDENTE' | 'ATRASADO',
+                    ),
+                  );
+                }}
+                showCounterIndicator
+                showDeleteButton={false}
+              />
+            </>
+          }
+        />
 
         {isLoading ? (
           <LoadingContent textLoading="Carregando alunos..." />
@@ -167,7 +165,7 @@ export default function StudentsPage() {
               </div>
             )}
 
-            <div className="mt-6 w-full">
+            <div className="mt-1 w-full">
               <AppPagination
                 totalItems={studentsData?.pagination.total ?? 0}
                 itemsPerPage={limit}

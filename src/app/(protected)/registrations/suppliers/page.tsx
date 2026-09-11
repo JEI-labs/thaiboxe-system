@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { api } from '@/trpc/react';
-import Search from '@/components/Search';
+import { ListToolbar } from '@/components/listToolbar/listToolbar.component';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import SuppliersList from '@/components/suppliers/supplierList';
 import { SheetCreateSupplier } from '@/components/modals/suppliers/createSupplier/createSupplier.component';
@@ -72,38 +72,34 @@ export default function SuppliersPage() {
       <BreadcrumbUpdater items={breadcrumbItems} />
 
       <main className="flex flex-col gap-4">
-        <h1 className="text-2xl font-semibold">Fornecedores</h1>
-
-        <div className="mt-4 flex items-center justify-between">
-          <Search
-            className="mr-4 max-sm:w-[215px]"
-            placeholder="Buscar fornecedores..."
-            onSearch={setSearchTerm}
-          />
-          <Button onClick={() => setCreateOpen(true)}>Novo fornecedor</Button>
-        </div>
-
-        <h1 className="mt-4 text-lg font-semibold">Filtros</h1>
-
-        <Form {...form}>
-          <div className="mt-4 w-1/4 max-sm:w-1/2">
-            <FormSelectComponent
-              name="state"
-              label="Estado"
-              options={statesOptions
-                .filter((state): state is string => typeof state === 'string')
-                .map((state) => ({
-                  value: state,
-                  textValue: state,
-                }))}
-              placeholder="Selecione o estado"
-              onValueChange={handleStateChange}
-              defaultValue={selectedState || ''}
-              disabled={isLoading}
-              control={form.control}
-            />
-          </div>
-        </Form>
+        <ListToolbar
+          searchPlaceholder="Buscar fornecedores..."
+          onSearch={setSearchTerm}
+          total={data?.pagination.total}
+          totalLabel={['fornecedor', 'fornecedores']}
+          action={
+            <Button onClick={() => setCreateOpen(true)}>Novo fornecedor</Button>
+          }
+          filters={
+            <Form {...form}>
+              <div className="w-56">
+                <FormSelectComponent
+                  name="state"
+                  options={statesOptions
+                    .filter(
+                      (state): state is string => typeof state === 'string',
+                    )
+                    .map((state) => ({ value: state, textValue: state }))}
+                  placeholder="Estado"
+                  onValueChange={handleStateChange}
+                  defaultValue={selectedState || ''}
+                  disabled={isLoading}
+                  control={form.control}
+                />
+              </div>
+            </Form>
+          }
+        />
 
         <SuppliersList
           suppliers={data?.data ?? []}
