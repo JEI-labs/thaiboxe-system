@@ -14,7 +14,10 @@ import { SheetEditStudent } from '@/components/modals/student/EditStudent/sheetE
 import { ListToolbar } from '@/components/listToolbar/listToolbar.component';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
-import { AdvancedFilterDatePicker } from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
+import {
+  AdvancedFilterDatePicker,
+  getDefaultDateRange,
+} from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
 import { Calendar } from 'lucide-react';
 import { AdvancedFilterCheckbox } from '@/components/forms/advancedFilterCheckbox/advancedFilterCheckbox.component';
 import { AdvancedFilterCheckboxType } from '@/components/forms/advancedFilterCheckbox/advancedFilterCheckbox.types';
@@ -30,6 +33,8 @@ const STATUS_OPTIONS: Array<AdvancedFilterCheckboxType> = [
   { id: 'ATRASADO', label: 'Atrasado' },
 ];
 
+const defaultRange = getDefaultDateRange();
+
 export default function StudentsPage() {
   const [showSheet, setShowSheet] = useState(false);
   const [showSheetEdit, setShowSheetEdit] = useState(false);
@@ -41,8 +46,10 @@ export default function StudentsPage() {
   const [selectedStatuses, setSelectedStatuses] = useState<
     Array<'EM DIA' | 'PENDENTE' | 'ATRASADO'>
   >([]);
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [dateFrom, setDateFrom] = useState<string>(
+    defaultRange.from.toISOString(),
+  );
+  const [dateTo, setDateTo] = useState<string>(defaultRange.to.toISOString());
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -111,6 +118,7 @@ export default function StudentsPage() {
           filters={
             <>
               <AdvancedFilterDatePicker
+                defaultValue={defaultRange}
                 title="Buscar datas"
                 onChange={({ from, to }) => {
                   setDateFrom(from ? from.toISOString() : '');

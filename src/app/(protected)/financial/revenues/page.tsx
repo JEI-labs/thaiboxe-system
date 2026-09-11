@@ -13,7 +13,10 @@ import { useToast } from '@/hooks/use-toast';
 import { SheetCreateFinanceEntry } from '@/components/modals/revenues/createRevenues/createRevenues.component';
 import { SheetEditFinanceEntry } from '@/components/modals/revenues/editRevenues/editRevenues.component';
 import { FinanceEntriesList } from '@/components/finance/financeList.component';
-import { AdvancedFilterDatePicker } from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
+import {
+  AdvancedFilterDatePicker,
+  getDefaultDateRange,
+} from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
 import { AdvancedFilterCheckbox } from '@/components/forms/advancedFilterCheckbox/advancedFilterCheckbox.component';
 import { Calendar } from 'lucide-react';
 import {
@@ -35,6 +38,8 @@ const STATUS_OPTIONS = [
   { id: 'CANCELLED' as EFinanceEntryStatus, label: 'Cancelado' },
 ];
 
+const defaultRange = getDefaultDateRange();
+
 export default function RevenuesPage() {
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -46,8 +51,10 @@ export default function RevenuesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  const [dateFrom, setDateFrom] = useState<string>('');
-  const [dateTo, setDateTo] = useState<string>('');
+  const [dateFrom, setDateFrom] = useState<string>(
+    defaultRange.from.toISOString(),
+  );
+  const [dateTo, setDateTo] = useState<string>(defaultRange.to.toISOString());
   const debouncedFrom = useDebounce(dateFrom, 500);
   const debouncedTo = useDebounce(dateTo, 500);
 
@@ -117,6 +124,7 @@ export default function RevenuesPage() {
           filters={
             <>
               <AdvancedFilterDatePicker
+                defaultValue={defaultRange}
                 title="Filtrar por data"
                 description="Intervalo de datas"
                 numberOfMonths={1}

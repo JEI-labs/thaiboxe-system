@@ -11,7 +11,10 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { api } from '@/trpc/react';
 import { useToast } from '@/hooks/use-toast';
 import { FinanceEntriesList } from '@/components/finance/financeList.component';
-import { AdvancedFilterDatePicker } from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
+import {
+  AdvancedFilterDatePicker,
+  getDefaultDateRange,
+} from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
 import { AdvancedFilterCheckbox } from '@/components/forms/advancedFilterCheckbox/advancedFilterCheckbox.component';
 import { Calendar } from 'lucide-react';
 import {
@@ -36,6 +39,8 @@ const STATUS_OPTIONS = [
   { id: EFinanceEntryStatus.CANCELLED, label: 'Cancelado' },
 ];
 
+const defaultRange = getDefaultDateRange();
+
 export default function ExpensesPage() {
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -47,8 +52,10 @@ export default function ExpensesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  const [dateFrom, setDateFrom] = useState<string>('');
-  const [dateTo, setDateTo] = useState<string>('');
+  const [dateFrom, setDateFrom] = useState<string>(
+    defaultRange.from.toISOString(),
+  );
+  const [dateTo, setDateTo] = useState<string>(defaultRange.to.toISOString());
   const debouncedFrom = useDebounce(dateFrom, 500);
   const debouncedTo = useDebounce(dateTo, 500);
 
@@ -119,6 +126,7 @@ export default function ExpensesPage() {
           filters={
             <>
               <AdvancedFilterDatePicker
+                defaultValue={defaultRange}
                 title="Intervalo de datas"
                 description="Filtrar por data"
                 numberOfMonths={1}

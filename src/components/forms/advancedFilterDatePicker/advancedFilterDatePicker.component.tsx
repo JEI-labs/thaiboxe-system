@@ -27,7 +27,7 @@ moment.locale('pt-br');
  * Atalhos de período. Devolvem datas cruas — `handleFormatDate` normaliza
  * início/fim do dia no fuso de São Paulo, igual à seleção pelo calendário.
  */
-const DATE_PRESETS: Array<{
+export const DATE_PRESETS: Array<{
   label: string;
   getRange: () => { from: Date; to: Date };
 }> = [
@@ -64,6 +64,40 @@ const DATE_PRESETS: Array<{
     }),
   },
 ];
+
+/** Período padrão das telas com filtro de data. */
+export const getDefaultDateRange = (): { from: Date; to: Date } => ({
+  from: moment().subtract(29, 'days').startOf('day').toDate(),
+  to: moment().endOf('day').toDate(),
+});
+
+const toKey = (date?: Date) => (date ? moment(date).format('YYYY-MM-DD') : '');
+
+/**
+ * Rótulo do botão: nome do atalho quando o intervalo bate com um deles,
+ * senão as datas mesmo — assim dá para saber o que está sendo puxado sem
+ * abrir o menu.
+ */
+const describeRange = (
+  range: AdvancedFilterDatePickerType | undefined,
+  fallback: string,
+): string => {
+  if (!range?.from && !range?.to) return fallback;
+
+  const preset = DATE_PRESETS.find((item) => {
+    const candidate = item.getRange();
+    return (
+      toKey(candidate.from) === toKey(range?.from) &&
+      toKey(candidate.to) === toKey(range?.to)
+    );
+  });
+  if (preset) return preset.label;
+
+  const from = range?.from ? moment(range.from).format('DD/MM/YY') : '';
+  const to = range?.to ? moment(range.to).format('DD/MM/YY') : '';
+  if (from && to) return from === to ? from : `${from} – ${to}`;
+  return from || to || fallback;
+};
 
 export function AdvancedFilterDatePicker({
   showDeleteButton = true,
@@ -135,7 +169,7 @@ export function AdvancedFilterDatePicker({
       <DropdownMenuTrigger asChild>
         <Button className="gap-2" variant="outline" {...props.buttonProps}>
           {props.leftIcon}
-          {props.title}
+          {describeRange(date, props.title)}
           {props.rightIcon}
         </Button>
       </DropdownMenuTrigger>

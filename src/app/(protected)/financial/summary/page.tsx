@@ -9,7 +9,10 @@ import { Button } from '@/components/ui/button';
 import { FinanceEntriesList } from '@/components/finance/financeList.component';
 import { Separator } from '@/components/ui/separator';
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
-import { AdvancedFilterDatePicker } from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
+import {
+  AdvancedFilterDatePicker,
+  getDefaultDateRange,
+} from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
 import { Calendar } from 'lucide-react';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import { EFinanceEntryStatus, EFinanceEntryType } from '@prisma/client';
@@ -21,9 +24,13 @@ const breadcrumbItems = [
   { label: 'Dashboard', href: '/dashboard' },
 ];
 
+const defaultRange = getDefaultDateRange();
+
 export default function FinanceSummary() {
-  const [dateFrom, setDateFrom] = useState<string>('');
-  const [dateTo, setDateTo] = useState<string>('');
+  const [dateFrom, setDateFrom] = useState<string>(
+    defaultRange.from.toISOString(),
+  );
+  const [dateTo, setDateTo] = useState<string>(defaultRange.to.toISOString());
   const [page, setPage] = useState<number>(1);
   const [itensPerPage, setItensPerPage] = useState<number>(10);
   const [selectedTypes, setSelectedTypes] = useState<Array<EFinanceEntryType>>(
@@ -107,6 +114,7 @@ export default function FinanceSummary() {
 
           <div className="my-4 flex flex-wrap items-center gap-2">
             <AdvancedFilterDatePicker
+              defaultValue={defaultRange}
               title="Filtrar por data"
               description="Data dos lançamentos"
               numberOfMonths={1}

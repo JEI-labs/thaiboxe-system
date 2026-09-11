@@ -284,8 +284,10 @@ export const studentRouter = createTRPCRouter({
               },
             },
           }),
+          // precisa dos mesmos filtros do findMany: contando só por userId,
+          // o total ignorava busca e datas e a paginação inventava páginas
           ctx.prisma.student.count({
-            where: { userId },
+            where: whereConditions,
           }),
         ]);
 
