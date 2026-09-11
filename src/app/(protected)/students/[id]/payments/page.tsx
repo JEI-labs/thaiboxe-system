@@ -3,7 +3,7 @@
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CreditCard } from 'lucide-react';
 
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +20,7 @@ import {
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import { LoadingContent } from '@/components/LoadingContent';
 import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
+import { useToast } from '@/hooks/use-toast';
 import { api } from '@/trpc/react';
 
 const STATUS_TABS = [
@@ -51,12 +52,30 @@ export default function StudentPaymentsPage({
   // trocar de filtro com a página 2 aberta deixaria a lista vazia
   useResetOnChange([status, limit], () => setPage(1));
 
+  const { toast } = useToast();
+  const utils = api.useUtils();
+
   const { data, isLoading } =
     api.payment.getPaymentsByStudentPaginated.useQuery({
       studentId: id,
       page,
       limit,
       status,
+    });
+
+  // registrar pagamento vivia num diálogo à parte; agora é ação desta tela
+  const { mutate: registerPayment, isPending: isRegistering } =
+    api.payment.updatePayment.useMutation({
+      onSuccess: () => {
+        toast({
+          title: 'Pagamento registrado!',
+          description: 'A parcela foi lançada nos lançamentos financeiros.',
+        });
+        utils.payment.getPaymentsByStudentPaginated.invalidate();
+        utils.student.getDetailsByID.invalidate({ id });
+      },
+      onError: () =>
+        toast({ title: 'Erro ao registrar pagamento', variant: 'destructive' }),
     });
 
   const studentName = data?.student.name ?? '';
@@ -70,7 +89,7 @@ export default function StudentPaymentsPage({
           ...(studentName
             ? [{ label: studentName, href: `/students/${id}` }]
             : []),
-          { label: 'Parcelas', href: `/students/${id}/payments` },
+          { label: 'Pagamentos', href: `/students/${id}/payments` },
         ]}
       />
 
@@ -84,7 +103,7 @@ export default function StudentPaymentsPage({
       </Button>
 
       <h1 className="text-2xl font-semibold">
-        Parcelas{studentName ? ` de ${studentName}` : ''}
+        Pagamentos{studentName ? ` de ${studentName}` : ''}
       </h1>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -102,7 +121,7 @@ export default function StudentPaymentsPage({
 
       {isLoading ? (
         <div className="mt-6">
-          <LoadingContent textLoading="Carregando parcelas..." />
+          <LoadingContent textLoading="Carregando pagamentos..." />
         </div>
       ) : (
         <>
@@ -116,6 +135,9 @@ export default function StudentPaymentsPage({
                       <TableHead className="text-right">Valor</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Pago em</TableHead>
+                      <TableHead className="w-[120px] text-right">
+                        Ação
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -152,6 +174,26 @@ export default function StudentPaymentsPage({
                               ? formatDate(payment.paymentDate)
                               : '—'}
                           </TableCell>
+                          <TableCell className="text-right">
+                            {payment.status === 'PENDING' && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={isRegistering}
+                                onClick={() =>
+                                  registerPayment({
+                                    studentId: id,
+                                    dueDate: new Date(
+                                      payment.dueDate,
+                                    ).toISOString(),
+                                  })
+                                }
+                              >
+                                <CreditCard className="mr-2 h-4 w-4" />
+                                Registrar
+                              </Button>
+                            )}
+                          </TableCell>
                         </TableRow>
                       );
                     })}
@@ -159,7 +201,7 @@ export default function StudentPaymentsPage({
                 </Table>
               ) : (
                 <p className="text-muted-foreground py-10 text-center text-sm">
-                  Nenhuma parcela encontrada para este filtro.
+                  Nenhum pagamento encontrado para este filtro.
                 </p>
               )}
             </CardContent>

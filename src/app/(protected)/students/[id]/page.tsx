@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/table';
 import { LoadingContent } from '@/components/LoadingContent';
 import { SheetEditStudent } from '@/components/modals/student/EditStudent/sheetEditStudent.component';
-import { StudentPaymentDialog } from '@/components/studentCard/studentPaymentDialog.component';
 import { api } from '@/trpc/react';
 import { cn } from '@/lib/utils';
 import { getInitials, maskCellphone } from '@/utils/masksUtils';
@@ -47,7 +46,6 @@ export default function StudentDetailPage({
   const router = useRouter();
 
   const [editOpen, setEditOpen] = useState(false);
-  const [paymentOpen, setPaymentOpen] = useState(false);
 
   const { data, isLoading, isError, refetch } =
     api.student.getDetailsByID.useQuery({ id });
@@ -99,12 +97,12 @@ export default function StudentDetailPage({
       <Card className="mb-6">
         <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
+            <Avatar className="border-border h-24 w-24 shrink-0 border sm:h-28 sm:w-28">
               <AvatarImage
                 src={student.avatar || undefined}
                 className="h-full w-full rounded-full object-cover"
               />
-              <AvatarFallback className="bg-primary text-primary-foreground">
+              <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
                 {getInitials(student.name)}
               </AvatarFallback>
             </Avatar>
@@ -140,7 +138,9 @@ export default function StudentDetailPage({
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => setPaymentOpen(true)}>
+            <Button
+              onClick={() => router.push(`/students/${student.id}/payments`)}
+            >
               <CreditCard className="mr-2 h-4 w-4" />
               Pagamentos
             </Button>
@@ -254,14 +254,14 @@ export default function StudentDetailPage({
       {/* Parcelas */}
       <Card className="mb-6">
         <CardHeader className="flex-row items-center justify-between space-y-0">
-          <CardTitle>Últimas parcelas</CardTitle>
+          <CardTitle>Últimos pagamentos</CardTitle>
           {student.payments.length > 0 && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => router.push(`/students/${student.id}/payments`)}
             >
-              Ver todas ({student.payments.length})
+              Ver todos ({student.payments.length})
             </Button>
           )}
         </CardHeader>
@@ -350,13 +350,6 @@ export default function StudentDetailPage({
           )}
         </CardContent>
       </Card>
-
-      <StudentPaymentDialog
-        studentId={student.id}
-        studentName={student.name}
-        open={paymentOpen}
-        onOpenChange={setPaymentOpen}
-      />
 
       <SheetEditStudent
         side="right"

@@ -19,7 +19,6 @@ import { RowActions } from '@/components/dataTable/rowActions.component';
 import ConfirmDeleteDialog from '@/components/confirmDeleteDialog/confirmDeleteDialog.component';
 import { cn } from '@/lib/utils';
 import { getInitials } from '@/utils/masksUtils';
-import { StudentPaymentDialog } from './studentPaymentDialog.component';
 import type { StudentsTableProps } from './studentCard.types';
 
 export function StudentsTable({
@@ -29,10 +28,6 @@ export function StudentsTable({
 }: StudentsTableProps) {
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [payingStudent, setPayingStudent] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
 
   return (
     <>
@@ -120,10 +115,7 @@ export function StudentsTable({
                         label: 'Pagamentos',
                         icon: CreditCard,
                         onSelect: () =>
-                          setPayingStudent({
-                            id: student.id,
-                            name: student.name,
-                          }),
+                          router.push(`/students/${student.id}/payments`),
                       },
                       {
                         label: 'Editar',
@@ -144,15 +136,6 @@ export function StudentsTable({
           </TableBody>
         </Table>
       </div>
-
-      {payingStudent && (
-        <StudentPaymentDialog
-          studentId={payingStudent.id}
-          studentName={payingStudent.name}
-          open={Boolean(payingStudent)}
-          onOpenChange={(open) => !open && setPayingStudent(null)}
-        />
-      )}
 
       {deleteId && (
         <ConfirmDeleteDialog
