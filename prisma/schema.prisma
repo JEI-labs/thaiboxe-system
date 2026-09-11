@@ -33,6 +33,22 @@ enum EPaymentMethod {
   BOLETO
 }
 
+enum EGraduation {
+  // Kruang-Prajied. A ordem de declaração importa: no Postgres o enum
+  // ordena por ela, então ORDER BY graduation já sai na ordem dos graus.
+  GRAU_1
+  GRAU_2
+  GRAU_3
+  GRAU_4
+  GRAU_5
+  GRAU_6
+  GRAU_7
+  GRAU_8
+  GRAU_9
+  GRAU_10
+  GRAU_11
+}
+
 enum ECategoryStatus {
   ACTIVE
   INACTIVE
@@ -54,14 +70,16 @@ model User {
 }
 
 model Student {
-  id        String    @id @default(uuid())
-  name      String
-  email     String    @unique
-  phone     String
-  avatar    String?
-  birthDate DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id         String       @id @default(uuid())
+  name       String
+  email      String       @unique
+  phone      String
+  avatar     String?
+  birthDate  DateTime?
+  // opcional: alunos existentes ficam sem graduação até o professor definir
+  graduation EGraduation?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
 
   enrollments Enrollment[]
   payments    Payment[]

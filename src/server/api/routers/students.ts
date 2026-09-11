@@ -68,6 +68,7 @@ export const studentRouter = createTRPCRouter({
               name: input.name,
               phone: input.phone,
               birthDate: birthDateFormatted,
+              graduation: input.graduation ?? null,
               avatar: input.avatarUrl,
               userId,
             },
@@ -225,6 +226,7 @@ export const studentRouter = createTRPCRouter({
           email: input.email,
           phone: input.phone,
           birthDate: birthDateFormatted,
+          graduation: input.graduation ?? null,
         },
       });
 

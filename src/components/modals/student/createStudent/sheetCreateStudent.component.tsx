@@ -1,5 +1,7 @@
 'use client';
 
+import { GRADUATION_LIST } from '@/common/constants/graduations';
+import { GraduationBadge } from '@/components/graduationBadge/graduationBadge.component';
 import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -187,6 +189,21 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
                 )} · ${plan.duration} ${plan.duration === 1 ? 'mês' : 'meses'}`,
               })) ?? []
             }
+          />
+
+          <FormSelectComponent
+            control={form.control}
+            name="graduation"
+            label="Graduação"
+            tooltip="Kruang-Prajied do aluno. Pode ficar em branco até a primeira graduação."
+            placeholder="Sem graduação"
+            options={GRADUATION_LIST.map((item) => ({
+              value: item.value,
+              textValue: `${item.degree}º grau · ${item.label}`,
+              icon: (
+                <GraduationBadge graduation={item.value} showLabel={false} />
+              ),
+            }))}
           />
         </section>
       </FormDrawer>

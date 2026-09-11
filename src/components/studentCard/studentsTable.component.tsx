@@ -1,5 +1,7 @@
 'use client';
 
+import { GraduationBadge } from '@/components/graduationBadge/graduationBadge.component';
+import { EmptyState } from '@/components/emptyState/emptyState.component';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -29,6 +31,15 @@ export function StudentsTable({
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
+  if (students.length === 0) {
+    return (
+      <EmptyState
+        title="Nenhum aluno encontrado"
+        description="Ajuste a busca e os filtros, ou adicione o primeiro aluno."
+      />
+    );
+  }
+
   return (
     <>
       <div className="rounded-lg border">
@@ -38,6 +49,7 @@ export function StudentsTable({
               <TableHead>Aluno</TableHead>
               <TableHead>Matrícula</TableHead>
               <TableHead>Plano</TableHead>
+              <TableHead>Graduação</TableHead>
               <TableHead>Matriculado em</TableHead>
               <TableHead className="w-[70px] text-right">Ações</TableHead>
             </TableRow>
@@ -96,6 +108,13 @@ export function StudentsTable({
                   <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-medium whitespace-nowrap text-red-800">
                     {student.planName}
                   </span>
+                </TableCell>
+
+                <TableCell>
+                  <GraduationBadge
+                    graduation={student.graduation}
+                    showLabel={false}
+                  />
                 </TableCell>
 
                 <TableCell className="text-muted-foreground whitespace-nowrap">

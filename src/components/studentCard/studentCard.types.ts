@@ -1,3 +1,5 @@
+import type { EGraduation } from '@prisma/client';
+
 export interface StudentRow {
   id: string;
   name: string;
@@ -5,6 +7,7 @@ export interface StudentRow {
   email: string;
   status: string;
   planName: string;
+  graduation?: EGraduation | null;
   createdAt: Date;
 }
 

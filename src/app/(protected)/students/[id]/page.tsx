@@ -1,5 +1,7 @@
 'use client';
 
+import { GRADUATIONS } from '@/common/constants/graduations';
+import { GraduationBadge } from '@/components/graduationBadge/graduationBadge.component';
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
@@ -133,6 +135,7 @@ export default function StudentDetailPage({
                   {student.status}
                 </span>
                 <Badge variant="secondary">{student.planName}</Badge>
+                <GraduationBadge graduation={student.graduation} />
               </div>
             </div>
           </div>
@@ -185,6 +188,14 @@ export default function StudentDetailPage({
           />
           <Field label="Nascimento" value={formatDate(student.birthDate)} />
           <Field label="Matriculado em" value={formatDate(student.createdAt)} />
+          <Field
+            label="Graduação"
+            value={
+              student.graduation
+                ? `${GRADUATIONS[student.graduation].degree}º grau · ${GRADUATIONS[student.graduation].label}`
+                : 'Sem graduação'
+            }
+          />
           <Field
             label="Plano atual"
             value={student.activeEnrollment?.plan?.name ?? 'Sem plano'}

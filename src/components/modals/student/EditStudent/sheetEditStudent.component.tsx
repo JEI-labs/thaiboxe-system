@@ -1,5 +1,7 @@
 'use client';
 
+import { GRADUATION_LIST } from '@/common/constants/graduations';
+import { GraduationBadge } from '@/components/graduationBadge/graduationBadge.component';
 import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -8,6 +10,7 @@ import { useForm, useWatch } from 'react-hook-form';
 import { Form } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { FormInputComponent } from '@/components/forms/formInput/formInput.component';
+import { FormSelectComponent } from '@/components/forms/formSelectInput/formSelectInput.component';
 import { AvatarField } from '@/components/forms/avatarField/avatarField.component';
 import {
   maskCellphone,
@@ -63,6 +66,7 @@ export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
         birthDate: user.birthDate
           ? maskDate(new Date(user.birthDate).toLocaleDateString('pt-BR'))
           : '',
+        graduation: user.graduation ?? null,
       });
     }
   }, [studentEdit.data, form]);
@@ -171,6 +175,22 @@ export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
               unmask={unmaskCellphone}
               placeholder="(XX) XXXXX-XXXX"
               maxLength={15}
+            />
+          </div>
+          <div className="col-span-4">
+            <FormSelectComponent
+              control={form.control}
+              name="graduation"
+              label="Graduação"
+              tooltip="Kruang-Prajied do aluno. Pode ficar em branco até a primeira graduação."
+              placeholder="Sem graduação"
+              options={GRADUATION_LIST.map((item) => ({
+                value: item.value,
+                textValue: `${item.degree}º grau · ${item.label}`,
+                icon: (
+                  <GraduationBadge graduation={item.value} showLabel={false} />
+                ),
+              }))}
             />
           </div>
         </div>
