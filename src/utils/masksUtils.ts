@@ -240,7 +240,11 @@ export const maskBRL = (value: string | number, isVisible: boolean): string => {
  * maskOnlyText("Olá, Mundo! 123"); // Retorna "Olá Mundo"
  */
 export const maskOnlyText = (value: string): string => {
-  return value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s]/g, ''); // Permite letras acentuadas e espaços
+  // normalize('NFC') junta letra + acento num código só: o teclado do macOS
+  // entrega "ã" como "a" + U+0303, e o acento combinante fica fora da faixa
+  // Latin-1, então era removido e "João" virava "Joao".
+  // \p{L} cobre qualquer letra, em vez de só as da faixa acentuada latina.
+  return value.normalize('NFC').replace(/[^\p{L}\s]/gu, '');
 };
 
 // ----------------------------------- Initials Name Mask Functions -----------------------------------

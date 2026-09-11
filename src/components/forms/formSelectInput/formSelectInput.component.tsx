@@ -29,7 +29,7 @@ export const FormSelectComponent = <T extends FieldValues, TTransformed = T>({
   rules,
   hideErrors,
   options = [],
-  hasEmptyOption = true,
+  hasEmptyOption = false,
   description,
   ...props
 }: UseControllerProps<T, FieldPath<T>, TTransformed> &
