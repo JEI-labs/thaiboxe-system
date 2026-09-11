@@ -59,7 +59,7 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
   return (
     <div className="w-full">
       <CardHeader className="px-0">
-        <CardTitle>Lista de Lançamentos</CardTitle>
+        <CardTitle>Lançamentos</CardTitle>
       </CardHeader>
 
       {loading ? (

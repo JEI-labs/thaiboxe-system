@@ -167,7 +167,7 @@ export default function RevenuesPage() {
           onDelete={handleDelete}
         />
 
-        <div className="mt-6">
+        <div className="mt-4">
           <AppPagination
             totalItems={totalItems}
             itemsPerPage={limit}

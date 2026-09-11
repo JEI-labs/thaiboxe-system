@@ -171,7 +171,7 @@ export default function ExpensesPage() {
         />
 
         {/* paginação */}
-        <div className="mt-6">
+        <div className="mt-4">
           <AppPagination
             totalItems={totalItems}
             itemsPerPage={limit}

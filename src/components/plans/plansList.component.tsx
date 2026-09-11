@@ -46,7 +46,7 @@ const PlansList: React.FC<IPlanList> = ({
   return (
     <div className="w-full">
       <div className="mt-4">
-        <h1 className="text-md font-semibold">Lista de Planos</h1>
+        <h1 className="text-md font-semibold">Planos</h1>
       </div>
 
       <div className="mt-4">

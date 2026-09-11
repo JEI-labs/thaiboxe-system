@@ -203,7 +203,7 @@ export default function FinanceSummary() {
             />
           </div>
 
-          <div className="w-full">
+          <div className="mt-4 w-full">
             <AppPagination
               totalItems={totalItems}
               itemsPerPage={itensPerPage}

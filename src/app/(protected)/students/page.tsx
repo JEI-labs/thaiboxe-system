@@ -173,7 +173,7 @@ export default function StudentsPage() {
               </div>
             )}
 
-            <div className="mt-1 w-full">
+            <div className="w-full">
               <AppPagination
                 totalItems={studentsData?.pagination.total ?? 0}
                 itemsPerPage={limit}

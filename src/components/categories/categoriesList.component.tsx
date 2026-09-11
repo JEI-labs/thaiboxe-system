@@ -48,7 +48,7 @@ export const CategoriesList: React.FC<ICategoryList> = ({
   return (
     <div className="w-full">
       <div className="mt-4">
-        <h1 className="text-md font-semibold">Lista de Categorias</h1>
+        <h1 className="text-md font-semibold">Categorias</h1>
       </div>
 
       <div className="mt-4">

@@ -207,7 +207,7 @@ export default function StudentPaymentsPage({
             </CardContent>
           </Card>
 
-          <div className="mt-1 w-full">
+          <div className="mt-4 w-full">
             <AppPagination
               totalItems={data?.pagination.total ?? 0}
               itemsPerPage={limit}
