@@ -68,7 +68,7 @@ export const FormFileInputComponent = <
 
                     <div
                       className={cn(
-                        'flex w-full flex-col items-center gap-4 overflow-auto rounded-md border p-2 break-words whitespace-normal sm:flex-row sm:p-4',
+                        'flex w-full flex-col items-center gap-4 overflow-auto rounded-md border p-2 wrap-break-word whitespace-normal sm:flex-row sm:p-4',
                         cardClassname,
                       )}
                     >
@@ -111,7 +111,7 @@ export const FormFileInputComponent = <
                       {fileName && (
                         <div className="flex w-full max-w-full items-center">
                           <p
-                            className="w-full max-w-full overflow-hidden text-center text-sm break-words whitespace-normal sm:text-left sm:text-base"
+                            className="w-full max-w-full overflow-hidden text-center text-sm wrap-break-word whitespace-normal sm:text-left sm:text-base"
                             title={fileName}
                           >
                             Anexado: {fileName}

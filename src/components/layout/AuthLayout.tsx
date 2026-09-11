@@ -20,7 +20,7 @@ export function AuthLayout({
       <ScrollArea>
         <div className="flex min-h-screen w-full items-center">
           <div className="mx-auto flex h-fit max-w-[70%] min-w-[40%] flex-col gap-8 py-4">
-            <div className="-mb-[30px] flex items-center justify-center">
+            <div className="mb-[-30px] flex items-center justify-center">
               <Image
                 src="/images/logo.png"
                 width={350}

@@ -62,7 +62,7 @@ export const CategoriesList: React.FC<ICategoryList> = ({
                     </div>
 
                     <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex w-full items-center justify-between break-words">
+                      <div className="flex w-full items-center justify-between wrap-break-word">
                         <h3 className="text-lg font-semibold">{cat.name}</h3>
                         <Badge
                           variant={
@@ -81,7 +81,7 @@ export const CategoriesList: React.FC<ICategoryList> = ({
                     className="overflow-hidden rounded-lg border"
                   >
                     <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex w-full items-center justify-between break-words">
+                      <div className="flex w-full items-center justify-between wrap-break-word">
                         <h3 className="text-lg font-semibold">{cat.name}</h3>
                         <Badge
                           variant={
@@ -115,7 +115,7 @@ export const CategoriesList: React.FC<ICategoryList> = ({
                     {/* descrição + data */}
                     <div className="text-muted-foreground w-full px-4 pt-0 pb-4 text-sm">
                       {cat.description && (
-                        <p className="break-words">
+                        <p className="wrap-break-word">
                           <span className="font-semibold">Descrição: </span>
                           {cat.description}
                         </p>

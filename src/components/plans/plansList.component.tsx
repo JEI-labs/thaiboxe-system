@@ -56,7 +56,7 @@ const PlansList: React.FC<IPlanList> = ({
                 >
                   <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
                     {/* título + preço */}
-                    <div className="flex w-full items-center justify-between break-words">
+                    <div className="flex w-full items-center justify-between wrap-break-word">
                       <h3 className="text-lg font-semibold">{plan.name}</h3>
                       <div className="flex flex-col items-center">
                         <span className="text-muted-foreground mb-1 text-xs">
@@ -71,7 +71,7 @@ const PlansList: React.FC<IPlanList> = ({
                     {/* descrição + duração */}
                     <div className="text-muted-foreground w-full text-sm">
                       {plan.description && (
-                        <p className="break-words">
+                        <p className="wrap-break-word">
                           <span className="font-semibold">Descrição: </span>
                           {plan.description}
                         </p>

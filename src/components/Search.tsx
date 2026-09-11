@@ -37,7 +37,7 @@ const Search: React.FC<SearchProps> = ({
         className={cn(
           'bg-muted flex w-full items-center rounded-md border transition-all duration-200',
           isFocused
-            ? 'border-primary/50 ring-primary/30 shadow-sm ring-1'
+            ? 'border-primary/50 ring-primary/30 shadow-xs ring-1'
             : 'border-border',
         )}
       >
@@ -54,8 +54,8 @@ const Search: React.FC<SearchProps> = ({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className={cn(
-            'h-10 flex-grow bg-transparent px-2 py-2',
-            'border-none outline-none focus:ring-0 focus:outline-none focus-visible:ring-0',
+            'h-10 grow bg-transparent px-2 py-2',
+            'border-none outline-hidden focus:ring-0 focus:outline-hidden focus-visible:ring-0',
             'shadow-none focus:shadow-none',
           )}
         />
