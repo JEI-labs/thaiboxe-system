@@ -20,12 +20,6 @@ import { getInitials } from '@/utils/masksUtils';
 import { StudentPaymentDialog } from './studentPaymentDialog.component';
 import type { StudentsTableProps } from './studentCard.types';
 
-const STATUS_STYLES: Record<string, string> = {
-  'EM DIA': 'bg-green-100 text-green-800',
-  'PENDENTE': 'bg-yellow-100 text-yellow-800',
-  'ATRASADO': 'bg-red-100 text-red-800',
-};
-
 export function StudentsTable({
   students,
   onEdit,
@@ -78,7 +72,12 @@ export function StudentsTable({
                   <span
                     className={cn(
                       'rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap',
-                      STATUS_STYLES[student.status],
+                      student.status === 'EM DIA' &&
+                        'bg-green-100 text-green-800',
+                      student.status === 'PENDENTE' &&
+                        'bg-yellow-100 text-yellow-800',
+                      student.status === 'ATRASADO' &&
+                        'bg-red-100 text-red-800',
                     )}
                   >
                     {student.status}

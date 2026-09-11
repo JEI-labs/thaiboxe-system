@@ -144,6 +144,35 @@
 }
 
 @layer base {
+  /*
+   * O preflight do Tailwind 3 dava `cursor: pointer` em button; o 4 passou a
+   * seguir o padrão do navegador (`default`). Restaurado aqui, junto com os
+   * demais papéis clicáveis, para não depender de lembrar a classe em cada
+   * componente novo.
+   */
+  button:not(:disabled),
+  [role='button']:not(:disabled),
+  [role='menuitem'],
+  [role='menuitemcheckbox'],
+  [role='menuitemradio'],
+  [role='option'],
+  [role='tab'],
+  [role='switch'],
+  a[href],
+  label[for],
+  summary,
+  select:not(:disabled),
+  input:where([type='checkbox'], [type='radio'], [type='file']):not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+}
+
+@layer base {
   * {
     @apply border-border;
   }

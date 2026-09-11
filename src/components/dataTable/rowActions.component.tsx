@@ -7,7 +7,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -69,7 +68,6 @@ export function RowActions({
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuLabel>Ações</DropdownMenuLabel>
         {regular.map(renderItem)}
         {destructive.length > 0 && regular.length > 0 ? (
           <DropdownMenuSeparator />
