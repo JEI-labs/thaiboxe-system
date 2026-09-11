@@ -1,90 +1,104 @@
 # WhatsApp
 
-O provedor padrão é a **Cloud API oficial da Meta**: não exige servidor
-próprio (roda direto da Vercel) e não corre risco de banimento. O código
-também fala com Evolution e Z-API — ver "Outros provedores" no fim.
+O provedor em uso é o **Evolution API**: gratuito, aceita texto livre a
+qualquer hora e hospeda várias instâncias num servidor só — o que importa se
+o sistema for vendido para mais de uma academia.
 
-## A janela de 24 horas
+O código também fala com a Cloud API oficial da Meta e com a Z-API. O
+`buildRequest` em `src/server/whatsapp/client.ts` isola as diferenças; trocar
+de provedor é escolher outro na tela de Configurações.
 
-É a regra que mais molda o uso. A Meta só entrega **texto livre** nas 24h
-seguintes a uma mensagem enviada _pelo aluno_. Fora dessa janela, só sai
-**template aprovado**.
+## Onde hospedar
 
-Como cobrança, aniversário e avisos partem da academia, e não do aluno, na
-prática **todos os eventos automáticos precisam de template aprovado**. Um
-modelo sem `providerTemplateName` aparece na tela marcado como "Só dentro de
-24h", justamente para deixar isso explícito.
+O Evolution mantém um WebSocket aberto com o WhatsApp, então precisa de um
+processo **sempre ligado** — por isso **não roda na Vercel**, que é
+serverless.
 
-## Configurando
+A opção gratuita de verdade é a **Oracle Cloud Always Free**: VM ARM
+(4 vCPU / 24 GB) sem prazo de expiração. Render e Railway têm plano gratuito,
+mas hibernam por inatividade, e quando o processo dorme a sessão do WhatsApp
+cai e é preciso ler o QR de novo. Um VPS simples (Hetzner, Contabo) sai por
+~R$25/mês e dá menos trabalho.
 
-No [Meta for Developers](https://developers.facebook.com), crie um app do
-tipo Business.
+## Subindo o Evolution
 
-O console atual organiza tudo por **Casos de uso**, e não pelo antigo
-"Adicionar produto". No menu lateral:
+Na VM, com Docker:
 
-1. **Casos de uso** → adicione _Conectar-se com clientes pelo WhatsApp_
-2. isso faz surgir **WhatsApp** na lateral, com _Configuração da API_
-3. ali a Meta já oferece um **número de teste gratuito** e um token temporário
-
-Com o número de teste dá para validar a integração inteira antes de
-verificar a empresa. É preciso cadastrar os números que vão **receber** (até 5) na mesma tela — o de teste só entrega para eles.
-
-Você vai precisar de:
-
-| Campo na tela    | Onde encontrar                                       |
-| ---------------- | ---------------------------------------------------- |
-| URL da instância | `https://graph.facebook.com/v21.0`                   |
-| Phone Number ID  | WhatsApp › Configuração da API. **Não** é o telefone |
-| Token            | token de acesso permanente (via System User)         |
-| Número remetente | o número cadastrado                                  |
-
-O token de teste expira em 24h. Para produção, crie um **System User** em
-Business Settings, dê a ele a permissão `whatsapp_business_messaging` e gere
-um token sem expiração.
-
-O número precisa ser **dedicado**: não pode estar ativo no app WhatsApp comum
-nem no Business. Se já estiver, é preciso apagar a conta antes.
-
-## Criando templates
-
-Em WhatsApp › Manage Templates. A aprovação leva de minutos a 48h.
-
-Os parâmetros do corpo são **posicionais** — a Meta não aceita nomes. No
-template aprovado eles são `{{1}}`, `{{2}}`; no sistema você escreve
-`{{primeiro_nome}}`, e o envio converte **na ordem em que aparecem no texto**.
-Ou seja, a ordem local precisa bater com a do template.
-
-Exemplo de template aprovado:
-
-```
-Olá {{1}}, tudo bem? Notamos que sua mensalidade venceu.
-Qualquer dúvida, estamos por aqui.
+```bash
+docker run -d \
+  --name evolution \
+  --restart always \
+  -p 8080:8080 \
+  -e AUTHENTICATION_API_KEY='troque-esta-chave' \
+  -v evolution_instances:/evolution/instances \
+  atendai/evolution-api:v2.1.1
 ```
 
-E no sistema, o corpo do modelo:
+`AUTHENTICATION_API_KEY` é o que vai no campo **Token** da tela de
+Configurações. O volume preserva a sessão entre reinícios — sem ele, cada
+restart pede o QR de novo.
 
+Libere a porta 8080 no _security list_ da Oracle **e** no firewall da VM, que
+na imagem Oracle Linux vem fechado mesmo depois de liberar no painel:
+
+```bash
+sudo iptables -I INPUT -p tcp --dport 8080 -j ACCEPT
+sudo netfilter-persistent save
 ```
-Olá {{primeiro_nome}}, tudo bem? Notamos que sua mensalidade venceu.
-Qualquer dúvida, estamos por aqui.
+
+Coloque um domínio com HTTPS na frente (Caddy resolve em duas linhas): o token
+viaja nessa conexão.
+
+## Criando a instância
+
+```bash
+curl -X POST https://seu-dominio/instance/create \
+  -H 'apikey: troque-esta-chave' \
+  -H 'Content-Type: application/json' \
+  -d '{"instanceName":"thaiboxe","integration":"WHATSAPP-BAILEYS"}'
 ```
 
-Categoria importa: cobrança e aviso são **Utility**; oferta é **Marketing**,
-que custa mais caro e o aluno pode desativar.
+Pegue o QR em `GET /instance/connect/thaiboxe` e leia pelo WhatsApp do celular
+em _Aparelhos conectados_.
 
-## Custos
+Para mais de uma academia, repita com outro `instanceName` — o mesmo servidor
+atende todas, e cada uma pareia com o número do seu dono.
 
-A Meta cobra por conversa iniciada de 24h, não por mensagem. Há uma cota
-gratuita mensal de conversas de serviço. Utility e Marketing têm preços
-diferentes — a tabela do Brasil está na documentação de pricing da Meta.
+## Preenchendo em Configurações
 
-## Outros provedores
+| Campo             | Valor                                    |
+| ----------------- | ---------------------------------------- |
+| Provedor          | Evolution API                            |
+| URL da instância  | `https://seu-dominio` (sem barra no fim) |
+| Nome da instância | `thaiboxe`                               |
+| Token             | o `AUTHENTICATION_API_KEY`               |
+| Número remetente  | o número pareado                         |
+| Integração ativa  | ligado                                   |
 
-O `buildRequest` em `src/server/whatsapp/client.ts` isola as diferenças, e a
-tela aceita escolher entre Meta, Evolution e Z-API.
+O token não é exibido depois de salvo; deixe o campo em branco para mantê-lo.
 
-Evolution e Z-API usam WhatsApp Web por baixo (Baileys), o que **não é via
-oficial**: aceitam texto livre a qualquer hora, sem template, mas o número
-pode ser banido — e disparo em massa é exatamente o padrão detectado. O
-Evolution ainda exige um servidor sempre ligado, já que mantém um WebSocket
-aberto, então não roda na Vercel.
+## Riscos
+
+Evolution usa Baileys, que é WhatsApp Web por baixo — **não é via oficial**.
+O número pode ser banido, e disparo em massa é exatamente o padrão detectado.
+
+- use um número que não seja o principal da academia;
+- espace os disparos em vez de mandar tudo de uma vez;
+- mantenha os textos pessoais: mensagem idêntica para dezenas de contatos é o
+  que chama atenção.
+
+## Alternativa: Cloud API da Meta
+
+Oficial, sem risco de banimento e sem servidor (roda da Vercel). Em troca,
+exige verificação de empresa, número dedicado e **templates aprovados**: a
+Meta só entrega texto livre nas 24h seguintes a uma mensagem do aluno, e
+cobrança, aniversário e avisos partem da academia — ou seja, na prática todo
+evento automático precisa de template aprovado.
+
+Na tela, escolha _Meta Cloud API_, use `https://graph.facebook.com/v21.0` como
+URL e o **Phone Number ID** (não o telefone) no campo de instância. No modelo
+de mensagem, preencha o nome do template aprovado; os placeholders viram
+parâmetros posicionais, na ordem em que aparecem no texto.
+
+No console da Meta, o caminho é **Casos de uso** → _Conectar-se com clientes
+pelo WhatsApp_, que faz surgir o item WhatsApp na lateral.
