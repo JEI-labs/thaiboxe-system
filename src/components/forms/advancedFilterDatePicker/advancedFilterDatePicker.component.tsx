@@ -186,22 +186,28 @@ export function AdvancedFilterDatePicker({
         </div>
         <DropdownMenuSeparator />
 
-        <div className="flex flex-wrap gap-1 px-2 pb-2">
-          {DATE_PRESETS.map((preset) => (
-            <Button
-              key={preset.label}
-              type="button"
-              variant="secondary"
-              size="sm"
-              className="h-7 px-2 text-xs"
-              onClick={() => {
-                handleChangeDate(preset.getRange());
-                open.actions.setValue(false);
-              }}
-            >
-              {preset.label}
-            </Button>
-          ))}
+        {/* w-0 + min-w-full: com largura 0 os atalhos não entram no cálculo
+            de largura do dropdown (que passa a ser o do calendário) e só
+            depois esticam para 100%, rolando na horizontal em vez de
+            empurrar o menu ou quebrar em várias linhas */}
+        <div className="w-0 min-w-full overflow-x-auto px-2 pb-2">
+          <div className="flex w-max gap-1">
+            {DATE_PRESETS.map((preset) => (
+              <Button
+                key={preset.label}
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="h-7 shrink-0 px-2 text-xs"
+                onClick={() => {
+                  handleChangeDate(preset.getRange());
+                  open.actions.setValue(false);
+                }}
+              >
+                {preset.label}
+              </Button>
+            ))}
+          </div>
         </div>
 
         <DropdownMenuSeparator />
