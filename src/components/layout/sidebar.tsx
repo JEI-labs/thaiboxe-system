@@ -9,6 +9,7 @@ import {
   ReceiptCentIcon,
   ReceiptText,
   Moon,
+  Tag,
   Sun,
   Users,
   UserSquare,
@@ -60,6 +61,11 @@ const registrationsItems = [
     title: 'Categorias',
     url: '/registrations/categories',
     icon: MdCategory,
+  },
+  {
+    title: 'Promoções',
+    url: '/registrations/promotions',
+    icon: Tag,
   },
 ];
 

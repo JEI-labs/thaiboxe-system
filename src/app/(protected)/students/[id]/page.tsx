@@ -25,7 +25,11 @@ import { LoadingContent } from '@/components/LoadingContent';
 import { SheetEditStudent } from '@/components/modals/student/EditStudent/sheetEditStudent.component';
 import { api } from '@/trpc/react';
 import { cn } from '@/lib/utils';
-import { getInitials, maskCellphone } from '@/utils/masksUtils';
+import {
+  getInitials,
+  maskCellphone,
+  maskDecimalWithAcronym,
+} from '@/utils/masksUtils';
 
 const formatDate = (value: Date | string | null | undefined) =>
   value ? format(new Date(value), 'dd/MM/yyyy') : '—';
@@ -361,7 +365,9 @@ export default function StudentDetailPage({
                       {entry.description ?? '—'}
                     </TableCell>
                     <TableCell className="text-right font-semibold text-green-600">
-                      {formatMoney(Number(entry.amount))}
+                      {/* FinanceEntry.amount fica em centavos, ao contrário
+                          de Payment.amount, que está em reais */}
+                      {maskDecimalWithAcronym(Number(entry.amount))}
                     </TableCell>
                   </TableRow>
                 ))}

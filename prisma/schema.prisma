@@ -67,6 +67,11 @@ model User {
   Plan         Plan[]
   Student      Student[]
   Supplier     Supplier[]
+
+  promotions       Promotion[]
+  whatsappConfig   WhatsappConfig?
+  messageTemplates MessageTemplate[]
+  messageLogs      MessageLog[]
 }
 
 model Student {
@@ -83,6 +88,7 @@ model Student {
 
   enrollments Enrollment[]
   payments    Payment[]
+  messageLogs MessageLog[]
 
   userId       String
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -119,16 +125,21 @@ model Enrollment {
 }
 
 model Payment {
-  id          String        @id @default(uuid())
-  amount      Decimal
-  paymentDate DateTime      @default(now())
-  dueDate     DateTime
-  status      PaymentStatus @default(PENDING)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id             String        @id @default(uuid())
+  /// Valor cheio da parcela. O recebido é amount - discountAmount.
+  amount         Decimal
+  paymentDate    DateTime      @default(now())
+  dueDate        DateTime
+  status         PaymentStatus @default(PENDING)
+  discountAmount Decimal       @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   studentId String
   student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  promotionId String?
+  promotion   Promotion? @relation(fields: [promotionId], references: [id], onDelete: SetNull)
 }
 
 model Expense {
@@ -204,4 +215,105 @@ model Supplier {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   expenses Expense[]
+}
+
+enum EDiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum EWhatsappProvider {
+  ZAPI
+  EVOLUTION
+}
+
+enum EMessageEvent {
+  PAYMENT_OVERDUE
+  BIRTHDAY
+  EVENT_ANNOUNCEMENT
+  ONE_MONTH_UNPAID
+  PROMOTIONAL
+}
+
+enum EMessageStatus {
+  SENT
+  FAILED
+}
+
+model Promotion {
+  id            String        @id @default(uuid())
+  name          String
+  description   String?
+  discountType  EDiscountType
+  discountValue Float
+  startsAt      DateTime?
+  endsAt        DateTime?
+  isActive      Boolean       @default(true)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  payments Payment[]
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
+}
+
+/// Credenciais do provedor de WhatsApp. Uma por usuário.
+model WhatsappConfig {
+  id           String            @id @default(uuid())
+  provider     EWhatsappProvider
+  baseUrl      String
+  instanceId   String?
+  /// Token do provedor. Nunca é devolvido ao cliente — ver whatsapp.getConfig.
+  token        String
+  senderNumber String
+  isActive     Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Texto por tipo de evento, com placeholders tipo {{aluno}}.
+model MessageTemplate {
+  id        String        @id @default(uuid())
+  event     EMessageEvent
+  name      String
+  body      String
+  isActive  Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  logs MessageLog[]
+
+  @@index([userId, event])
+}
+
+/// Histórico de envios, para não repetir disparo e para auditoria.
+model MessageLog {
+  id        String         @id @default(uuid())
+  event     EMessageEvent
+  body      String
+  status    EMessageStatus
+  error     String?
+  toNumber  String
+  createdAt DateTime       @default(now())
+
+  studentId String?
+  student   Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+
+  templateId String?
+  template   MessageTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([studentId, event, createdAt])
 }

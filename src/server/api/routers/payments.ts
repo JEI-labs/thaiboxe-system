@@ -5,6 +5,7 @@ import {
   PaymentStatus,
 } from '@prisma/client';
 import { createTRPCRouter, protectedProcedure } from '../trpc';
+import { calculateDiscount } from './promotions';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { format } from 'date-fns';
@@ -99,6 +100,8 @@ export const paymentsRouter = createTRPCRouter({
       z.object({
         studentId: z.string(),
         dueDate: z.string(),
+        /** Promoção aplicada nesta parcela, se houver. */
+        promotionId: z.string().uuid().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -126,7 +129,33 @@ export const paymentsRouter = createTRPCRouter({
         }
 
         const plan = student.enrollments[0].plan;
-        const amount = plan.price * 100;
+
+        // Payment.amount fica em reais; FinanceEntry.amount, em centavos
+        const fullAmount = plan.price;
+
+        let promotion = null;
+        if (input.promotionId) {
+          promotion = await ctx.prisma.promotion.findFirst({
+            where: { id: input.promotionId, userId, isActive: true },
+          });
+          if (!promotion) {
+            throw new TRPCError({
+              code: 'NOT_FOUND',
+              message: 'Promoção não encontrada ou inativa.',
+            });
+          }
+        }
+
+        const discount = promotion
+          ? calculateDiscount(
+              fullAmount,
+              promotion.discountType,
+              promotion.discountValue,
+            )
+          : 0;
+
+        // a receita entra pelo que foi de fato recebido
+        const amount = (fullAmount - discount) * 100;
 
         const category = await ctx.prisma.category.findFirst({
           where: {
@@ -178,6 +207,8 @@ export const paymentsRouter = createTRPCRouter({
             data: {
               status: PaymentStatus.PAID,
               paymentDate: new Date(),
+              discountAmount: discount,
+              promotionId: promotion?.id ?? null,
             },
           }),
           ctx.prisma.financeEntry.create({
@@ -185,7 +216,9 @@ export const paymentsRouter = createTRPCRouter({
               date: new Date(),
               amount,
               paymentMethod: EPaymentMethod.CREDIT_CARD,
-              description: `Parcela ${parcelNumber} de ${student.name} com vencimento em ${capitalize(monthYear)}.`,
+              description: promotion
+                ? `Parcela ${parcelNumber} de ${student.name} com vencimento em ${capitalize(monthYear)} (promoção: ${promotion.name}).`
+                : `Parcela ${parcelNumber} de ${student.name} com vencimento em ${capitalize(monthYear)}.`,
               type: EFinanceEntryType.STUDENTS,
               status: EFinanceEntryStatus.PAID,
               currency: 'BRL',

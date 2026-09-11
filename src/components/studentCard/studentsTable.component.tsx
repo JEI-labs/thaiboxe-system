@@ -1,12 +1,13 @@
 'use client';
 
+import { SendMessageDialog } from '@/components/whatsapp/sendMessageDialog.component';
 import { GraduationBadge } from '@/components/graduationBadge/graduationBadge.component';
 import { EmptyState } from '@/components/emptyState/emptyState.component';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { CreditCard, Edit2, Trash2 } from 'lucide-react';
+import { CreditCard, Edit2, MessageCircle, Trash2 } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -30,6 +31,10 @@ export function StudentsTable({
 }: StudentsTableProps) {
   const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [messageTo, setMessageTo] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   if (students.length === 0) {
     return (
@@ -137,6 +142,12 @@ export function StudentsTable({
                           router.push(`/students/${student.id}/payments`),
                       },
                       {
+                        label: 'Enviar mensagem',
+                        icon: MessageCircle,
+                        onSelect: () =>
+                          setMessageTo({ id: student.id, name: student.name }),
+                      },
+                      {
                         label: 'Editar',
                         icon: Edit2,
                         onSelect: () => onEdit(student.id),
@@ -155,6 +166,15 @@ export function StudentsTable({
           </TableBody>
         </Table>
       </div>
+
+      {messageTo && (
+        <SendMessageDialog
+          studentId={messageTo.id}
+          studentName={messageTo.name}
+          open={Boolean(messageTo)}
+          onOpenChange={(open) => !open && setMessageTo(null)}
+        />
+      )}
 
       {deleteId && (
         <ConfirmDeleteDialog
