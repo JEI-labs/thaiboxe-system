@@ -70,6 +70,11 @@ export default function StudentDetailPage({
 
   const student = data.data;
   const { totals } = student;
+  const latestPayments = [...student.payments]
+    .sort(
+      (a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime(),
+    )
+    .slice(0, 5);
 
   return (
     <div className="w-full">
@@ -248,15 +253,24 @@ export default function StudentDetailPage({
 
       {/* Parcelas */}
       <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Parcelas</CardTitle>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardTitle>Últimas parcelas</CardTitle>
+          {student.payments.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push(`/students/${student.id}/payments`)}
+            >
+              Ver todas ({student.payments.length})
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="p-0">
           {student.payments.length === 0 ? (
             <EmptyRow text="Nenhuma parcela registrada." />
           ) : (
-            <Table containerClassName="max-h-[22rem] overflow-y-auto">
-              <TableHeader className="bg-card sticky top-0 z-10">
+            <Table>
+              <TableHeader>
                 <TableRow>
                   <TableHead>Vencimento</TableHead>
                   <TableHead className="text-right">Valor</TableHead>
@@ -265,7 +279,7 @@ export default function StudentDetailPage({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {student.payments.map((payment) => {
+                {latestPayments.map((payment) => {
                   const isOverdue =
                     payment.status === 'PENDING' &&
                     new Date(payment.dueDate) < new Date();
