@@ -8,7 +8,8 @@ import {
   Package,
   ReceiptCentIcon,
   ReceiptText,
-  Settings,
+  Moon,
+  Sun,
   Users,
   UserSquare,
 } from 'lucide-react';
@@ -24,6 +25,7 @@ import {
   SidebarMenuSub,
 } from '@/components/ui/sidebar';
 import { MdCategory } from 'react-icons/md';
+import { useTheme } from 'next-themes';
 
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -79,14 +81,6 @@ const financialItems = [
   },
 ];
 
-const footerItems: Array<SidebarItem> = [
-  {
-    title: 'Configurações',
-    url: '/settings',
-    icon: Settings,
-  },
-];
-
 const sidebarItems: Array<SidebarRootItem> = [
   // {
   //   title: 'Dashboard',
@@ -112,6 +106,13 @@ const sidebarItems: Array<SidebarRootItem> = [
 
 export function AppSidebar() {
   const path = usePathname();
+  // resolvedTheme (e não theme) porque com enableSystem o valor pode ser 'system'
+  const { resolvedTheme, setTheme } = useTheme();
+
+  // lido só no clique: usar resolvedTheme no render divergiria da hidratação,
+  // porque no servidor ele é undefined
+  const toggleTheme = () =>
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
 
   return (
     <Sidebar>
@@ -168,16 +169,20 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        {footerItems.map((item) => (
-          <SidebarMenuItem key={item.title}>
-            <SidebarMenuButton asChild className="py-5">
-              <a href={item.url}>
-                <item.icon />
-                <span>{item.title}</span>
-              </a>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton className="py-5" onClick={toggleTheme}>
+              {/* Alternados por CSS em vez de estado: evita divergência de
+                  hidratação, já que o tema só é conhecido no cliente. */}
+              <Sun className="dark:hidden" />
+              <Moon className="hidden dark:block" />
+              <span className="text-md font-normal">
+                Tema <span className="dark:hidden">escuro</span>
+                <span className="hidden dark:inline">claro</span>
+              </span>
             </SidebarMenuButton>
           </SidebarMenuItem>
-        ))}
+        </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
   );

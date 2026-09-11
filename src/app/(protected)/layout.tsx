@@ -11,11 +11,11 @@ export default async function DashboardLayout({
       <div className="bg-background flex h-full w-full flex-col md:px-8">
         <div className="min-h-[calc(100vh-2rem)]">
           <div className="bg-muted/40 flex items-center justify-between border-b px-4 py-2 md:mt-6 md:rounded-md md:border md:px-6">
-            <div className="flex md:hidden">
+            <div className="flex items-center gap-2">
               <SidebarTrigger />
-            </div>
-            <div className="hidden md:flex">
-              <BreadcrumbContainer />
+              <div className="hidden md:flex">
+                <BreadcrumbContainer />
+              </div>
             </div>
             <div className="flex items-center">
               <UserProfileContainer />
