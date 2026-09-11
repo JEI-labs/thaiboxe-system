@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { CreditCard, Edit2, Trash2 } from 'lucide-react';
 
@@ -25,6 +27,7 @@ export function StudentsTable({
   onEdit,
   onDelete,
 }: StudentsTableProps) {
+  const router = useRouter();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [payingStudent, setPayingStudent] = useState<{
     id: string;
@@ -47,7 +50,11 @@ export function StudentsTable({
 
           <TableBody>
             {students.map((student) => (
-              <TableRow key={student.id}>
+              <TableRow
+                key={student.id}
+                className="cursor-pointer"
+                onClick={() => router.push(`/students/${student.id}`)}
+              >
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-9 w-9">
@@ -60,7 +67,13 @@ export function StudentsTable({
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
-                      <p className="truncate font-medium">{student.name}</p>
+                      <Link
+                        href={`/students/${student.id}`}
+                        className="block truncate font-medium hover:underline"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        {student.name}
+                      </Link>
                       <p className="text-muted-foreground truncate text-xs">
                         {student.email}
                       </p>
@@ -96,12 +109,15 @@ export function StudentsTable({
                     : '—'}
                 </TableCell>
 
-                <TableCell className="text-right">
+                <TableCell
+                  className="text-right"
+                  onClick={(event) => event.stopPropagation()}
+                >
                   <RowActions
                     srLabel={`Ações de ${student.name}`}
                     actions={[
                       {
-                        label: 'Registrar pagamento',
+                        label: 'Pagamentos',
                         icon: CreditCard,
                         onSelect: () =>
                           setPayingStudent({

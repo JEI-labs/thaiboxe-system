@@ -16,6 +16,7 @@ import {
   Prisma,
 } from '@prisma/client';
 import { getAllStudentInputSchema } from '@/server/validations/pagination';
+import { deriveStudentStatus } from '@/server/utils/studentStatus';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -292,41 +293,12 @@ export const studentRouter = createTRPCRouter({
         const now = new Date();
         const result = students.map((student) => {
           const activeEnrollment = student.enrollments.find((e) => e.isActive);
-          const enrollmentStart = activeEnrollment?.startDate ?? null;
-          const enrollmentEnd = activeEnrollment?.endDate ?? null;
 
-          const paymentsWithinEnrollment = student.payments.filter((p) => {
-            return (
-              (!enrollmentStart || p.dueDate >= enrollmentStart) &&
-              (!enrollmentEnd || p.dueDate <= enrollmentEnd)
-            );
-          });
-
-          const hasOverduePayment = paymentsWithinEnrollment.some(
-            (p) => p.status === 'PENDING' && p.dueDate < now,
+          const status = deriveStudentStatus(
+            student.payments,
+            activeEnrollment,
+            now,
           );
-
-          const hasUpcomingPayment = paymentsWithinEnrollment.some((p) => {
-            const diffMs = p.dueDate.getTime() - now.getTime();
-            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-            return p.status === 'PENDING' && diffDays <= 3 && diffDays >= 0;
-          });
-
-          let enrollmentStatus: 'EM DIA' | 'PENDENTE' | 'ATRASADO' = 'EM DIA';
-
-          if (!hasOverduePayment && !hasUpcomingPayment && enrollmentEnd) {
-            const diffMs = enrollmentEnd.getTime() - now.getTime();
-            const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
-            if (diffDays < 0) enrollmentStatus = 'ATRASADO';
-            else if (diffDays <= 3) enrollmentStatus = 'PENDENTE';
-          }
-
-          const status: 'EM DIA' | 'PENDENTE' | 'ATRASADO' = hasOverduePayment
-            ? 'ATRASADO'
-            : hasUpcomingPayment
-              ? 'PENDENTE'
-              : enrollmentStatus;
 
           return {
             ...student,
@@ -364,6 +336,68 @@ export const studentRouter = createTRPCRouter({
           message: 'Não foi possível carregar alunos',
         });
       }
+    }),
+
+  /** Tudo que a tela de detalhe do aluno mostra, numa query só. */
+  getDetailsByID: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const userId = ctx.session.user.id;
+
+      if (!userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Não autorizado',
+        });
+      }
+
+      const student = await ctx.prisma.student.findFirst({
+        where: { id: input.id, userId },
+        include: {
+          enrollments: {
+            include: { plan: true },
+            orderBy: { startDate: 'desc' },
+          },
+          payments: { orderBy: { dueDate: 'asc' } },
+          FinanceEntry: {
+            include: { category: true },
+            orderBy: { date: 'desc' },
+          },
+        },
+      });
+
+      if (!student) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Aluno não encontrado.',
+        });
+      }
+
+      const activeEnrollment =
+        student.enrollments.find((e) => e.isActive) ?? null;
+
+      const paid = student.payments.filter((p) => p.status === 'PAID');
+      const pending = student.payments.filter((p) => p.status === 'PENDING');
+      const overdue = pending.filter((p) => p.dueDate < new Date());
+
+      const sum = (items: Array<{ amount: Prisma.Decimal }>) =>
+        items.reduce((acc, item) => acc + Number(item.amount), 0);
+
+      return {
+        data: {
+          ...student,
+          status: deriveStudentStatus(student.payments, activeEnrollment),
+          activeEnrollment,
+          planName: activeEnrollment?.plan?.name ?? 'Sem plano',
+          totals: {
+            paidCount: paid.length,
+            pendingCount: pending.length,
+            overdueCount: overdue.length,
+            paidAmount: sum(paid),
+            pendingAmount: sum(pending),
+          },
+        },
+      };
     }),
 
   getByID: protectedProcedure

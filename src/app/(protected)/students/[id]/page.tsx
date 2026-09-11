@@ -1,0 +1,401 @@
+'use client';
+
+import { use, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { format } from 'date-fns';
+import { ArrowLeft, CreditCard, Edit2, Mail, Phone } from 'lucide-react';
+
+import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { LoadingContent } from '@/components/LoadingContent';
+import { SheetEditStudent } from '@/components/modals/student/EditStudent/sheetEditStudent.component';
+import { StudentPaymentDialog } from '@/components/studentCard/studentPaymentDialog.component';
+import { api } from '@/trpc/react';
+import { cn } from '@/lib/utils';
+import { getInitials, maskCellphone } from '@/utils/masksUtils';
+
+const formatDate = (value: Date | string | null | undefined) =>
+  value ? format(new Date(value), 'dd/MM/yyyy') : '—';
+
+const formatMoney = (value: number) =>
+  value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+const PAYMENT_STATUS = {
+  PAID: { label: 'Paga', variant: 'success' as const },
+  PENDING: { label: 'Pendente', variant: 'alert' as const },
+  OVERDUE: { label: 'Atrasada', variant: 'destructive' as const },
+};
+
+export default function StudentDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
+  const router = useRouter();
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+
+  const { data, isLoading, isError, refetch } =
+    api.student.getDetailsByID.useQuery({ id });
+
+  if (isLoading) {
+    return <LoadingContent textLoading="Carregando aluno..." />;
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-12">
+        <p className="text-muted-foreground">Aluno não encontrado.</p>
+        <Button variant="outline" onClick={() => router.push('/students')}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar para alunos
+        </Button>
+      </div>
+    );
+  }
+
+  const student = data.data;
+  const { totals } = student;
+
+  return (
+    <div className="w-full">
+      <BreadcrumbUpdater
+        items={[
+          { label: 'Home', href: '/dashboard' },
+          { label: 'Alunos', href: '/students' },
+          { label: student.name, href: `/students/${student.id}` },
+        ]}
+      />
+
+      <Button
+        variant="ghost"
+        className="mb-4 -ml-2"
+        onClick={() => router.push('/students')}
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Voltar
+      </Button>
+
+      {/* Cabeçalho */}
+      <Card className="mb-6">
+        <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <Avatar className="h-16 w-16">
+              <AvatarImage
+                src={student.avatar || undefined}
+                className="h-full w-full rounded-full object-cover"
+              />
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                {getInitials(student.name)}
+              </AvatarFallback>
+            </Avatar>
+
+            <div>
+              <h1 className="text-2xl font-semibold">{student.name}</h1>
+              <div className="text-muted-foreground mt-1 flex flex-col gap-1 text-sm sm:flex-row sm:gap-4">
+                <span className="flex items-center gap-1">
+                  <Mail className="h-3 w-3" /> {student.email}
+                </span>
+                {student.phone && (
+                  <span className="flex items-center gap-1">
+                    <Phone className="h-3 w-3" /> {maskCellphone(student.phone)}
+                  </span>
+                )}
+              </div>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <span
+                  className={cn(
+                    'rounded-full px-2 py-1 text-xs font-medium',
+                    student.status === 'EM DIA' &&
+                      'bg-green-100 text-green-800',
+                    student.status === 'PENDENTE' &&
+                      'bg-yellow-100 text-yellow-800',
+                    student.status === 'ATRASADO' && 'bg-red-100 text-red-800',
+                  )}
+                >
+                  {student.status}
+                </span>
+                <Badge variant="secondary">{student.planName}</Badge>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => setPaymentOpen(true)}>
+              <CreditCard className="mr-2 h-4 w-4" />
+              Pagamentos
+            </Button>
+            <Button variant="outline" onClick={() => setEditOpen(true)}>
+              <Edit2 className="mr-2 h-4 w-4" />
+              Editar
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Resumo financeiro */}
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <SummaryTile label="Parcelas pagas" value={String(totals.paidCount)} />
+        <SummaryTile
+          label="Total pago"
+          value={formatMoney(totals.paidAmount)}
+          tone="positive"
+        />
+        <SummaryTile
+          label="Parcelas pendentes"
+          value={String(totals.pendingCount)}
+        />
+        <SummaryTile
+          label="Em atraso"
+          value={String(totals.overdueCount)}
+          tone={totals.overdueCount > 0 ? 'negative' : undefined}
+        />
+      </div>
+
+      {/* Dados cadastrais */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Dados do aluno</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Field label="Nome" value={student.name} />
+          <Field label="E-mail" value={student.email} />
+          <Field
+            label="Telefone"
+            value={student.phone ? maskCellphone(student.phone) : '—'}
+          />
+          <Field label="Nascimento" value={formatDate(student.birthDate)} />
+          <Field label="Matriculado em" value={formatDate(student.createdAt)} />
+          <Field
+            label="Plano atual"
+            value={student.activeEnrollment?.plan?.name ?? 'Sem plano'}
+          />
+          <Field
+            label="Início da matrícula"
+            value={formatDate(student.activeEnrollment?.startDate)}
+          />
+          <Field
+            label="Fim da matrícula"
+            value={formatDate(student.activeEnrollment?.endDate)}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Matrículas */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Matrículas</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {student.enrollments.length === 0 ? (
+            <EmptyRow text="Nenhuma matrícula registrada." />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Plano</TableHead>
+                  <TableHead>Início</TableHead>
+                  <TableHead>Fim</TableHead>
+                  <TableHead className="text-right">Valor</TableHead>
+                  <TableHead>Situação</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {student.enrollments.map((enrollment) => (
+                  <TableRow key={enrollment.id}>
+                    <TableCell className="font-medium">
+                      {enrollment.plan?.name ?? '—'}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {formatDate(enrollment.startDate)}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {formatDate(enrollment.endDate)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {enrollment.plan
+                        ? formatMoney(Number(enrollment.plan.price))
+                        : '—'}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={enrollment.isActive ? 'success' : 'secondary'}
+                      >
+                        {enrollment.isActive ? 'Ativa' : 'Encerrada'}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Parcelas */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Parcelas</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {student.payments.length === 0 ? (
+            <EmptyRow text="Nenhuma parcela registrada." />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Vencimento</TableHead>
+                  <TableHead className="text-right">Valor</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Pago em</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {student.payments.map((payment) => {
+                  const isOverdue =
+                    payment.status === 'PENDING' &&
+                    new Date(payment.dueDate) < new Date();
+                  const badge =
+                    PAYMENT_STATUS[isOverdue ? 'OVERDUE' : payment.status] ??
+                    PAYMENT_STATUS.PENDING;
+
+                  return (
+                    <TableRow key={payment.id}>
+                      <TableCell>{formatDate(payment.dueDate)}</TableCell>
+                      <TableCell className="text-right">
+                        {formatMoney(Number(payment.amount))}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={badge.variant}>{badge.label}</Badge>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {payment.status === 'PAID'
+                          ? formatDate(payment.paymentDate)
+                          : '—'}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Lançamentos financeiros gerados pelo aluno */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Lançamentos financeiros</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {student.FinanceEntry.length === 0 ? (
+            <EmptyRow text="Nenhum lançamento vinculado a este aluno." />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Categoria</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead className="text-right">Valor</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {student.FinanceEntry.map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell className="text-muted-foreground">
+                      {formatDate(entry.date)}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {entry.category?.name ?? '—'}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground max-w-xs truncate">
+                      {entry.description ?? '—'}
+                    </TableCell>
+                    <TableCell className="text-right font-semibold text-green-600">
+                      {formatMoney(Number(entry.amount))}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <StudentPaymentDialog
+        studentId={student.id}
+        studentName={student.name}
+        open={paymentOpen}
+        onOpenChange={setPaymentOpen}
+      />
+
+      <SheetEditStudent
+        side="right"
+        isOpen={editOpen}
+        setIsOpen={setEditOpen}
+        refetch={refetch}
+        studentId={student.id}
+      />
+    </div>
+  );
+}
+
+function SummaryTile({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: 'positive' | 'negative';
+}) {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <p className="text-muted-foreground text-xs uppercase">{label}</p>
+        <p
+          className={cn(
+            'mt-1 text-2xl font-semibold',
+            tone === 'positive' && 'text-green-600',
+            tone === 'negative' && 'text-red-600',
+          )}
+        >
+          {value}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <p className="text-muted-foreground text-xs uppercase">{label}</p>
+      <p className="mt-1 text-sm font-medium break-words">{value}</p>
+    </div>
+  );
+}
+
+function EmptyRow({ text }: { text: string }) {
+  return (
+    <>
+      <Separator />
+      <p className="text-muted-foreground py-6 text-center text-sm">{text}</p>
+    </>
+  );
+}
