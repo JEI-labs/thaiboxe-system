@@ -26,20 +26,18 @@ export function AppPagination({
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   return (
-    <div className="flex w-full flex-row items-center justify-between gap-2">
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1 text-xs font-medium md:text-sm">
-          <span className="border-input bg-background flex h-7 min-w-7 items-center justify-center rounded-md border px-1 md:h-8 md:min-w-8">
-            {currentPage}
-          </span>
-          <span className="text-muted-foreground">de</span>
-          <span className="border-input bg-background flex h-7 min-w-7 items-center justify-center rounded-md border px-1 md:h-8 md:min-w-8">
-            {totalPages}
-          </span>
-        </div>
+    <div className="flex w-full flex-wrap items-center justify-between gap-x-3 gap-y-2">
+      <div className="flex items-center gap-1 text-xs font-medium md:text-sm">
+        <span className="border-input bg-background flex h-7 min-w-7 items-center justify-center rounded-md border px-1 md:h-8 md:min-w-8">
+          {currentPage}
+        </span>
+        <span className="text-muted-foreground">de</span>
+        <span className="border-input bg-background flex h-7 min-w-7 items-center justify-center rounded-md border px-1 md:h-8 md:min-w-8">
+          {totalPages}
+        </span>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 md:gap-3">
         {onItemsPerPageChange && (
           <div className="flex items-center gap-2 whitespace-nowrap">
             <span className="text-muted-foreground text-xs md:text-sm">
@@ -67,7 +65,7 @@ export function AppPagination({
           </div>
         )}
 
-        <Pagination>
+        <Pagination className="mx-0 w-auto">
           <PaginationContent className="flex items-center">
             <PaginationItem>
               <PaginationPrevious
