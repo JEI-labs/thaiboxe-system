@@ -11,6 +11,7 @@ import {
   Edit2,
   Mail,
   Phone,
+  Repeat,
   Wallet,
 } from 'lucide-react';
 
@@ -31,6 +32,7 @@ import {
 import { LoadingContent } from '@/components/LoadingContent';
 import { SheetEditStudent } from '@/components/modals/student/EditStudent/sheetEditStudent.component';
 import { RegisterPaymentDialog } from '@/components/modals/payments/registerPayment/registerPaymentDialog.component';
+import { ChangePlanDialog } from '@/components/modals/students/changePlan/changePlanDialog.component';
 import { api } from '@/trpc/react';
 import { cn } from '@/lib/utils';
 import {
@@ -61,6 +63,7 @@ export default function StudentDetailPage({
 
   const [editOpen, setEditOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
+  const [changePlanOpen, setChangePlanOpen] = useState(false);
 
   const { data, isLoading, isError, refetch } =
     api.student.getDetailsByID.useQuery({ id });
@@ -159,6 +162,10 @@ export default function StudentDetailPage({
               <Button onClick={() => setPayOpen(true)}>
                 <Wallet className="mr-2 h-4 w-4" />
                 Registrar pagamento
+              </Button>
+              <Button variant="outline" onClick={() => setChangePlanOpen(true)}>
+                <Repeat className="mr-2 h-4 w-4" />
+                Trocar plano
               </Button>
               <Button
                 variant="outline"
@@ -403,6 +410,18 @@ export default function StudentDetailPage({
         studentName={student.name}
         open={payOpen}
         onOpenChange={setPayOpen}
+      />
+
+      <ChangePlanDialog
+        studentId={student.id}
+        studentName={student.name}
+        currentPlanId={
+          student.enrollments.find((enrollment) => enrollment.isActive)?.planId
+        }
+        currentPlanName={student.planName}
+        open={changePlanOpen}
+        onOpenChange={setChangePlanOpen}
+        onChanged={refetch}
       />
     </div>
   );

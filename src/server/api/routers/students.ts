@@ -10,6 +10,7 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { del } from '@vercel/blob';
 import {
+  EFinanceEntryStatus,
   EFinanceEntryType,
   EGraduation,
   EPaymentMethod,
@@ -359,6 +360,9 @@ export const studentRouter = createTRPCRouter({
             ...student,
             status,
             planName: activeEnrollment?.plan?.name ?? 'Sem plano',
+            /* A lista oferece a troca de plano, e para isso precisa saber
+               qual é o de agora — senão ele apareceria entre as opções. */
+            planId: activeEnrollment?.planId ?? null,
           };
         });
 
@@ -486,6 +490,157 @@ export const studentRouter = createTRPCRouter({
         message: 'Aluno encontrado',
         data: studentData,
       };
+    }),
+
+  /**
+   * Troca o plano do aluno valendo de hoje.
+   *
+   * A matrícula atual é encerrada na data de hoje e uma nova começa no plano
+   * escolhido — o histórico guarda as duas, então dá para ver quando o aluno
+   * mudou. As parcelas ainda por vencer do plano antigo somem: elas eram a
+   * cobrança de um contrato que não existe mais. As vencidas ficam, porque são
+   * aula que o aluno já teve e não pagou, e sumir com elas seria a academia
+   * perdoar uma dívida sem ninguém pedir.
+   */
+  changePlan: protectedProcedure
+    .input(z.object({ studentId: z.string(), planId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Não autorizado',
+        });
+      }
+
+      const student = await ctx.prisma.student.findFirst({
+        where: { id: input.studentId, userId },
+        include: {
+          enrollments: { where: { isActive: true }, include: { plan: true } },
+        },
+      });
+
+      if (!student) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Aluno não encontrado',
+        });
+      }
+
+      const plan = await ctx.prisma.plan.findFirst({
+        where: { id: input.planId, userId },
+      });
+
+      if (!plan) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Plano não encontrado',
+        });
+      }
+
+      const current = student.enrollments[0];
+      if (current?.planId === plan.id) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'O aluno já está neste plano.',
+        });
+      }
+
+      const category = await ctx.prisma.category.findFirst({
+        where: {
+          userId,
+          isFixed: true,
+          name: { equals: 'Alunos', mode: 'insensitive' },
+        },
+      });
+
+      if (!category?.id) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Categoria "Alunos" não encontrada',
+        });
+      }
+
+      const startDate = new Date();
+
+      try {
+        const result = await ctx.prisma.$transaction(async (tx) => {
+          await tx.enrollment.updateMany({
+            where: { studentId: student.id, isActive: true },
+            data: { isActive: false, endDate: startDate },
+          });
+
+          const cancelled = await tx.payment.deleteMany({
+            where: {
+              studentId: student.id,
+              status: PaymentStatus.PENDING,
+              dueDate: { gte: startDate },
+            },
+          });
+
+          await tx.enrollment.create({
+            data: {
+              studentId: student.id,
+              planId: plan.id,
+              startDate,
+              endDate: new Date(
+                new Date(startDate).setMonth(
+                  startDate.getMonth() + plan.duration,
+                ),
+              ),
+            },
+          });
+
+          const amounts = splitIntoInstallments(
+            plan.price,
+            installmentCount(plan.duration, plan.billing),
+          );
+
+          await tx.payment.createMany({
+            data: amounts.map((cents, index) => {
+              const dueDate = new Date(startDate);
+              dueDate.setMonth(dueDate.getMonth() + index);
+              return {
+                studentId: student.id,
+                amount: cents / 100,
+                dueDate,
+                status:
+                  index === 0 ? PaymentStatus.PAID : PaymentStatus.PENDING,
+              };
+            }),
+          });
+
+          const firstDueDate = format(startDate, 'MMMM/yyyy', { locale: ptBR });
+          const isUpfront = plan.billing === EPlanBilling.UPFRONT;
+
+          await tx.financeEntry.create({
+            data: {
+              amount: amounts[0] ?? 0,
+              date: startDate,
+              type: EFinanceEntryType.STUDENTS,
+              description: isUpfront
+                ? `${plan.name} de ${student.name} pago à vista na troca de plano (${plan.duration} ${plan.duration === 1 ? 'mês' : 'meses'} a partir de ${firstDueDate}).`
+                : `Parcela 1 de ${student.name} no plano ${plan.name} com vencimento em ${firstDueDate}.`,
+              status: EFinanceEntryStatus.PAID,
+              currency: 'BRL',
+              paymentMethod: EPaymentMethod.CREDIT_CARD,
+              userId,
+              categoryId: category.id,
+              studentId: student.id,
+            },
+          });
+
+          return { cancelled: cancelled.count, installments: amounts.length };
+        });
+
+        return { ok: true, ...result };
+      } catch (error) {
+        console.error('Erro ao trocar o plano do aluno:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Não foi possível trocar o plano',
+        });
+      }
     }),
 
   delete: protectedProcedure

@@ -7,7 +7,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { CreditCard, Edit2, MessageCircle, Trash2 } from 'lucide-react';
+import { CreditCard, Edit2, MessageCircle, Repeat, Trash2 } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -21,10 +21,11 @@ import {
 import { RowActions } from '@/components/dataTable/rowActions.component';
 import { Button } from '@/components/ui/button';
 import { RegisterPaymentDialog } from '@/components/modals/payments/registerPayment/registerPaymentDialog.component';
+import { ChangePlanDialog } from '@/components/modals/students/changePlan/changePlanDialog.component';
 import ConfirmDeleteDialog from '@/components/confirmDeleteDialog/confirmDeleteDialog.component';
 import { cn } from '@/lib/utils';
 import { getInitials } from '@/utils/masksUtils';
-import type { StudentsTableProps } from './studentCard.types';
+import type { StudentRow, StudentsTableProps } from './studentCard.types';
 
 export function StudentsTable({
   students,
@@ -40,6 +41,7 @@ export function StudentsTable({
   const [payFor, setPayFor] = useState<{ id: string; name: string } | null>(
     null,
   );
+  const [changePlanFor, setChangePlanFor] = useState<StudentRow | null>(null);
 
   if (students.length === 0) {
     return (
@@ -163,6 +165,11 @@ export function StudentsTable({
                           router.push(`/alunos/${student.id}/pagamentos`),
                       },
                       {
+                        label: 'Trocar plano',
+                        icon: Repeat,
+                        onSelect: () => setChangePlanFor(student),
+                      },
+                      {
                         label: 'Enviar mensagem',
                         icon: MessageCircle,
                         onSelect: () =>
@@ -194,6 +201,17 @@ export function StudentsTable({
           studentName={payFor.name}
           open={Boolean(payFor)}
           onOpenChange={(open) => !open && setPayFor(null)}
+        />
+      )}
+
+      {changePlanFor && (
+        <ChangePlanDialog
+          studentId={changePlanFor.id}
+          studentName={changePlanFor.name}
+          currentPlanId={changePlanFor.planId}
+          currentPlanName={changePlanFor.planName}
+          open={Boolean(changePlanFor)}
+          onOpenChange={(open) => !open && setChangePlanFor(null)}
         />
       )}
 
