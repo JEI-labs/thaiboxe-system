@@ -91,6 +91,10 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
             <TableBody>
               {entries.map((entry) => {
                 const isExpense = entry.type === EFinanceEntryType.EXPENSE;
+                /* A mensalidade nasce do pagamento do aluno; editar ou apagar
+                   por aqui deixaria o financeiro dizendo uma coisa e a ficha
+                   do aluno outra. */
+                const isFromStudent = entry.type === EFinanceEntryType.STUDENTS;
                 const categoryName =
                   categoriesData?.data.find((c) => c.id === entry.categoryId)
                     ?.name ?? '—';
@@ -148,30 +152,40 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
 
                     {hasActions && (
                       <TableCell className="text-right">
-                        <RowActions
-                          srLabel={`Ações do lançamento de ${categoryName}`}
-                          actions={[
-                            ...(onEdit
-                              ? [
-                                  {
-                                    label: 'Editar',
-                                    icon: Edit2,
-                                    onSelect: () => onEdit(entry.id),
-                                  },
-                                ]
-                              : []),
-                            ...(onDelete
-                              ? [
-                                  {
-                                    label: 'Excluir',
-                                    icon: Trash2,
-                                    destructive: true,
-                                    onSelect: () => handleDeleteClick(entry.id),
-                                  },
-                                ]
-                              : []),
-                          ]}
-                        />
+                        {isFromStudent ? (
+                          <span
+                            className="text-muted-foreground text-xs"
+                            title="Mensalidade: altere pelo pagamento do aluno"
+                          >
+                            —
+                          </span>
+                        ) : (
+                          <RowActions
+                            srLabel={`Ações do lançamento de ${categoryName}`}
+                            actions={[
+                              ...(onEdit
+                                ? [
+                                    {
+                                      label: 'Editar',
+                                      icon: Edit2,
+                                      onSelect: () => onEdit(entry.id),
+                                    },
+                                  ]
+                                : []),
+                              ...(onDelete
+                                ? [
+                                    {
+                                      label: 'Excluir',
+                                      icon: Trash2,
+                                      destructive: true,
+                                      onSelect: () =>
+                                        handleDeleteClick(entry.id),
+                                    },
+                                  ]
+                                : []),
+                            ]}
+                          />
+                        )}
                       </TableCell>
                     )}
                   </TableRow>

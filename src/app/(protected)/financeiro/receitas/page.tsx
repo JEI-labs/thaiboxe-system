@@ -39,6 +39,20 @@ const STATUS_OPTIONS = [
   { id: 'CANCELLED' as EFinanceEntryStatus, label: 'Cancelado' },
 ];
 
+/**
+ * As duas receitas que a academia tem: a mensalidade, que nasce sozinha
+ * quando o aluno paga, e o lançamento avulso, digitado à mão.
+ */
+const TYPE_OPTIONS = [
+  { id: EFinanceEntryType.STUDENTS as string, label: 'Mensalidade de aluno' },
+  { id: EFinanceEntryType.INCOME as string, label: 'Receita avulsa' },
+];
+
+const ALL_REVENUE_TYPES = [
+  EFinanceEntryType.INCOME,
+  EFinanceEntryType.STUDENTS,
+];
+
 const defaultRange = getDefaultDateRange();
 
 export default function RevenuesPage() {
@@ -63,6 +77,10 @@ export default function RevenuesPage() {
     Array<EFinanceEntryStatus>
   >([]);
 
+  const [selectedTypes, setSelectedTypes] = useState<Array<EFinanceEntryType>>(
+    [],
+  );
+
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
 
@@ -70,7 +88,9 @@ export default function RevenuesPage() {
     page,
     limit,
     search: debouncedSearch,
-    type: 'INCOME',
+    // Mensalidade também é receita: deixá-la só no Resumo fazia a soma de lá
+    // não bater com a lista daqui.
+    type: selectedTypes.length > 0 ? selectedTypes : ALL_REVENUE_TYPES,
     status: selectedStatuses.length > 0 ? selectedStatuses : undefined,
     from: debouncedFrom || undefined,
     to: debouncedTo || undefined,
@@ -99,7 +119,14 @@ export default function RevenuesPage() {
 
   // reset página ao mudar filtros
   useResetOnChange(
-    [debouncedSearch, debouncedFrom, debouncedTo, selectedStatuses, limit],
+    [
+      debouncedSearch,
+      debouncedFrom,
+      debouncedTo,
+      selectedStatuses,
+      selectedTypes,
+      limit,
+    ],
     () => setPage(1),
   );
 
@@ -136,6 +163,22 @@ export default function RevenuesPage() {
                   setDateFrom(from ? from.toISOString() : '');
                   setDateTo(to ? to.toISOString() : '');
                 }}
+              />
+
+              <AdvancedFilterCheckbox
+                title="Tipo"
+                description="Filtrar por tipo de receita"
+                options={TYPE_OPTIONS}
+                defaultValue={selectedTypes.map((type) => ({
+                  id: type,
+                  label: TYPE_OPTIONS.find((o) => o.id === type)!.label,
+                }))}
+                onChange={(next) => {
+                  setSelectedTypes(next.map((o) => o.id as EFinanceEntryType));
+                }}
+                onDelete={() => setSelectedTypes([])}
+                showCounterIndicator
+                showDeleteButton={false}
               />
 
               <AdvancedFilterCheckbox

@@ -7,12 +7,28 @@ import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { EFinanceEntryStatus, EFinanceEntryType, Prisma } from '@prisma/client';
 
+/**
+ * Filtro de tipo: aceita um valor só ou uma lista. Receitas precisa de dois
+ * (lançamento avulso e mensalidade de aluno) no mesmo where.
+ */
+const typeFilter = z
+  .union([
+    z.nativeEnum(EFinanceEntryType),
+    z.array(z.nativeEnum(EFinanceEntryType)).min(1),
+  ])
+  .optional();
+
+const whereType = (
+  type: z.infer<typeof typeFilter>,
+): Prisma.FinanceEntryWhereInput['type'] =>
+  Array.isArray(type) ? { in: type } : type;
+
 export const financeRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(
       paginationSchema.extend({
         search: z.string().optional(),
-        type: z.nativeEnum(EFinanceEntryType).optional(),
+        type: typeFilter,
         status: z.array(z.nativeEnum(EFinanceEntryStatus)).optional(),
         from: z.string().optional(),
         to: z.string().optional(),
@@ -31,12 +47,15 @@ export const financeRouter = createTRPCRouter({
       const skip = (page - 1) * limit;
 
       const where: Prisma.FinanceEntryWhereInput = { userId };
-      if (type) where.type = type;
+      if (type) where.type = whereType(type);
       if (status) where.status = { in: status };
       if (search) {
         where.OR = [
           { description: { contains: search, mode: 'insensitive' } },
           { referenceId: { contains: search, mode: 'insensitive' } },
+          // a mensalidade aparece na lista pelo nome do aluno, então é por ele
+          // que alguém vai procurá-la
+          { student: { name: { contains: search, mode: 'insensitive' } } },
         ];
       }
       if (from || to) {
@@ -196,7 +215,7 @@ export const financeRouter = createTRPCRouter({
       z.object({
         from: z.string().optional(),
         to: z.string().optional(),
-        type: z.nativeEnum(EFinanceEntryType).optional(),
+        type: typeFilter,
         status: z.array(z.nativeEnum(EFinanceEntryStatus)).optional(),
       }),
     )
@@ -212,7 +231,7 @@ export const financeRouter = createTRPCRouter({
       const { from, to, type, status } = input;
 
       const where: Prisma.FinanceEntryWhereInput = { userId };
-      if (type) where.type = type;
+      if (type) where.type = whereType(type);
       if (status) where.status = { in: status };
       if (from || to) {
         where.date = {
