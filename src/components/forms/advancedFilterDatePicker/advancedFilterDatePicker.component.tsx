@@ -3,13 +3,14 @@
 import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
 import * as React from 'react';
 
-import { Trash2 } from 'lucide-react';
+import { CalendarDays, Check, Trash2 } from 'lucide-react';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenuLabel,
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -20,6 +21,14 @@ import type {
 import { useBoolean } from '@/hooks/useBooleanState/useBooleanState.hook';
 import moment from 'moment-timezone';
 import { DefaultCalendar } from '@/components/ui/default-calendar';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 moment.locale('pt-br');
 
@@ -99,6 +108,21 @@ const describeRange = (
   return from || to || fallback;
 };
 
+/**
+ * Texto da prévia dentro do diálogo: sozinho, o calendário não diz o que já
+ * foi clicado — quem escolhe o primeiro dia e rola o mês se perde.
+ */
+const describeDraft = (range: AdvancedFilterDatePickerType | undefined) => {
+  const from = range?.from ? moment(range.from).format('DD/MM/YYYY') : null;
+  const to = range?.to ? moment(range.to).format('DD/MM/YYYY') : null;
+
+  if (!from) return 'Clique no primeiro dia do período';
+  if (!to || from === to) return `De ${from} — agora escolha o último dia`;
+
+  const days = moment(range?.to).diff(moment(range?.from), 'days') + 1;
+  return `${from} até ${to} · ${days} ${days === 1 ? 'dia' : 'dias'}`;
+};
+
 export function AdvancedFilterDatePicker({
   showDeleteButton = true,
   ...props
@@ -164,62 +188,116 @@ export function AdvancedFilterDatePicker({
     });
   });
 
+  /* O calendário sai do menu e vai para um diálogo: dentro do dropdown ele
+     disputava largura com a lista e ficava cortado. */
+  const [customOpen, setCustomOpen] = React.useState(false);
+  const [draft, setDraft] = React.useState<
+    AdvancedFilterDatePickerType | undefined
+  >(date);
+
+  const apply = (range: AdvancedFilterDatePickerType | undefined) => {
+    handleChangeDate(range);
+    open.actions.setValue(false);
+  };
+
+  const currentLabel = describeRange(date, props.title);
+
   return (
-    <DropdownMenu open={open.value} onOpenChange={open.actions.setValue}>
-      <DropdownMenuTrigger asChild>
-        <Button className="gap-2" variant="outline" {...props.buttonProps}>
-          {props.leftIcon}
-          {describeRange(date, props.title)}
-          {props.rightIcon}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        <div className="flex items-center justify-between">
-          <DropdownMenuLabel>
-            {props?.description ?? 'Selecione a data abaixo'}
-          </DropdownMenuLabel>
-          {showDeleteButton && (
-            <Button variant="ghost" onClick={props.onDelete}>
-              <Trash2 size={16} />
-            </Button>
-          )}
-        </div>
-        <DropdownMenuSeparator />
+    <>
+      <DropdownMenu open={open.value} onOpenChange={open.actions.setValue}>
+        <DropdownMenuTrigger asChild>
+          <Button className="gap-2" variant="outline" {...props.buttonProps}>
+            {props.leftIcon}
+            {currentLabel}
+            {props.rightIcon}
+          </Button>
+        </DropdownMenuTrigger>
 
-        {/* w-0 + min-w-full: com largura 0 os atalhos não entram no cálculo
-            de largura do dropdown (que passa a ser o do calendário) e só
-            depois esticam para 100%, rolando na horizontal em vez de
-            empurrar o menu ou quebrar em várias linhas */}
-        <div className="w-0 min-w-full overflow-x-auto px-2 pb-2">
-          <div className="flex w-max gap-1">
-            {DATE_PRESETS.map((preset) => (
-              <Button
-                key={preset.label}
-                type="button"
-                variant="secondary"
-                size="sm"
-                className="h-7 shrink-0 px-2 text-xs"
-                onClick={() => {
-                  handleChangeDate(preset.getRange());
-                  open.actions.setValue(false);
-                }}
-              >
-                {preset.label}
+        <DropdownMenuContent align="start" className="w-64">
+          <div className="flex items-center justify-between">
+            <DropdownMenuLabel>
+              {props?.description ?? 'Filtrar por data'}
+            </DropdownMenuLabel>
+            {showDeleteButton && (
+              <Button variant="ghost" size="icon" onClick={props.onDelete}>
+                <Trash2 size={16} />
               </Button>
-            ))}
+            )}
           </div>
-        </div>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator />
 
-        <DefaultCalendar
-          mode="range"
-          selected={date}
-          onSelect={handleChangeDate}
-          numberOfMonths={props.numberOfMonths ?? 1}
-          locale={ptBR}
-        />
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <DropdownMenuItem
+            onSelect={() => apply({ from: undefined, to: undefined })}
+          >
+            Todas as datas
+          </DropdownMenuItem>
+
+          {DATE_PRESETS.map((preset) => (
+            <DropdownMenuItem
+              key={preset.label}
+              onSelect={() => apply(preset.getRange())}
+            >
+              <span className="flex-1">{preset.label}</span>
+              {currentLabel === preset.label && (
+                <Check className="size-4" aria-hidden />
+              )}
+            </DropdownMenuItem>
+          ))}
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            onSelect={() => {
+              // o menu fecha e o diálogo assume
+              setDraft(date);
+              setCustomOpen(true);
+            }}
+          >
+            <span className="flex-1">Personalizado…</span>
+            <CalendarDays className="size-4" aria-hidden />
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Dialog open={customOpen} onOpenChange={setCustomOpen}>
+        <DialogContent className="w-auto max-w-fit">
+          <DialogHeader>
+            <DialogTitle>Escolher período</DialogTitle>
+            <DialogDescription>
+              Clique no primeiro dia e depois no último.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DefaultCalendar
+            mode="range"
+            selected={draft}
+            onSelect={setDraft}
+            numberOfMonths={props.numberOfMonths ?? 2}
+            locale={ptBR}
+          />
+
+          <div className="bg-muted rounded-xl px-3 py-2 text-center text-sm">
+            {describeDraft(draft)}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCustomOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              /* só com as duas pontas escolhidas o intervalo faz sentido */
+              disabled={!draft?.from || !draft?.to}
+              onClick={() => {
+                apply(draft);
+                setCustomOpen(false);
+              }}
+            >
+              Aplicar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
