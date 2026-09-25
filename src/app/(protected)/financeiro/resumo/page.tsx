@@ -4,10 +4,9 @@ import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook
 import { Suspense, useEffect, useMemo, useState } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { FinancialSummary } from '@/components/finance/financeSummary/financeSummary.component';
+import { StatsSkeleton } from '@/components/skeletons/listSkeleton.component';
 import { api } from '@/trpc/react';
-import { Button } from '@/components/ui/button';
 import { FinanceEntriesList } from '@/components/finance/financeList.component';
-import { Separator } from '@/components/ui/separator';
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
 import {
   AdvancedFilterDatePicker,
@@ -20,8 +19,9 @@ import { AdvancedFilterCheckbox } from '@/components/forms/advancedFilterCheckbo
 import { STATUS_OPTIONS, TYPE_OPTIONS } from './utils';
 
 const breadcrumbItems = [
-  { label: 'Home', href: '/dashboard' },
-  { label: 'Dashboard', href: '/dashboard' },
+  { label: 'Home', href: '/painel' },
+  { label: 'Financeiro', href: '/financeiro' },
+  { label: 'Resumo', href: '/financeiro/resumo' },
 ];
 
 const defaultRange = getDefaultDateRange();
@@ -110,8 +110,6 @@ export default function FinanceSummary() {
         <BreadcrumbUpdater items={breadcrumbItems} />
 
         <main className="flex flex-col">
-          <div className="text-2xl font-semibold">Resumo Financeiro</div>
-
           <div className="my-4 flex flex-wrap items-center gap-2">
             <AdvancedFilterDatePicker
               defaultValue={defaultRange}
@@ -164,32 +162,20 @@ export default function FinanceSummary() {
               showCounterIndicator
               showDeleteButton={false}
             />
-
-            <div className="my-4 flex justify-end gap-2">
-              <Button
-                size={'sm'}
-                onClick={() => {
-                  refetch();
-                  refetchMetrics();
-                }}
-              >
-                {isLoading && loadingAllEntries
-                  ? 'Atualizando...'
-                  : 'Atualizar'}
-              </Button>
-            </div>
           </div>
 
           <div className="mb-8">
-            <FinancialSummary
-              expenses={summary.expenses}
-              incomes={summary.incomes}
-              net={summary.net}
-              studentIncomes={summary.studentIncomes}
-            />
+            {loadingAllEntries ? (
+              <StatsSkeleton />
+            ) : (
+              <FinancialSummary
+                expenses={summary.expenses}
+                incomes={summary.incomes}
+                net={summary.net}
+                studentIncomes={summary.studentIncomes}
+              />
+            )}
           </div>
-
-          <Separator />
 
           <div className="mt-8">
             <FinanceEntriesList
