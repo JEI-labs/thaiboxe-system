@@ -164,30 +164,28 @@ export default function FinanceSummary() {
             />
           </div>
 
-          <div className="mb-8">
-            {loadingAllEntries ? (
-              <StatsSkeleton />
-            ) : (
-              <FinancialSummary
-                expenses={summary.expenses}
-                incomes={summary.incomes}
-                net={summary.net}
-                studentIncomes={summary.studentIncomes}
-              />
-            )}
-          </div>
-
-          <div className="mt-8">
-            <FinanceEntriesList
-              entries={(entries?.data || []).map((entry) => ({
-                ...entry,
-                referenceId: entry.referenceId ?? null,
-                description: entry.description ?? null,
-                paymentMethod: entry.paymentMethod ?? null,
-              }))}
-              isLoading={isLoading}
+          {loadingAllEntries ? (
+            <StatsSkeleton />
+          ) : (
+            <FinancialSummary
+              expenses={summary.expenses}
+              incomes={summary.incomes}
+              net={summary.net}
+              studentIncomes={summary.studentIncomes}
             />
-          </div>
+          )}
+
+          {/* O respiro até a tabela é o padding do próprio cabeçalho
+              "Lançamentos", igual em Receitas e Despesas. */}
+          <FinanceEntriesList
+            entries={(entries?.data || []).map((entry) => ({
+              ...entry,
+              referenceId: entry.referenceId ?? null,
+              description: entry.description ?? null,
+              paymentMethod: entry.paymentMethod ?? null,
+            }))}
+            isLoading={isLoading}
+          />
 
           <div className="mt-4 w-full">
             <AppPagination
