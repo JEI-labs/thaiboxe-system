@@ -7,6 +7,7 @@ export interface PlanItem {
   price: number;
   duration: number;
   billing: EPlanBilling;
+  isDefault: boolean;
   createdAt: string | Date;
 }
 

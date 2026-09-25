@@ -2,13 +2,13 @@
 
 import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
 import React, { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Form } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { FormInputComponent } from '@/components/forms/formInput/formInput.component';
 import { FormSelectComponent } from '@/components/forms/formSelectInput/formSelectInput.component';
+import { FormSwitchComponent } from '@/components/forms/formSwitchInput/formSwitchInput.component';
 import { PLAN_BILLING_OPTIONS } from '@/common/constants/planBilling';
 import { api } from '@/trpc/react';
 import { ISheetEditPlan } from './sheetEditPlan.types';
@@ -48,6 +48,7 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
       price: '0',
       duration: '1',
       billing: EPlanBilling.MONTHLY,
+      isDefault: false,
     },
     mode: 'onChange',
   });
@@ -62,6 +63,7 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
         price: (Number(plan.price) * 100).toString(),
         duration: plan.duration.toString(),
         billing: plan.billing,
+        isDefault: plan.isDefault,
       });
     }
   }, [planQuery.data, form]);
@@ -155,15 +157,14 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
               options={PLAN_BILLING_OPTIONS}
             />
           </div>
-        </div>
-
-        <div className="mb-4 flex w-full justify-end">
-          <Button
-            type="submit"
-            disabled={updatePlan.isPending || form.formState.isSubmitting}
-          >
-            {updatePlan.isPending ? 'Editando plano...' : 'Editar plano'}
-          </Button>
+          <div className="col-span-2">
+            <FormSwitchComponent
+              control={form.control}
+              name="isDefault"
+              title="Plano padrão"
+              bottomDescription="Vem escolhido sozinho ao matricular um aluno. Só um plano pode ser o padrão: marcar este tira o anterior."
+            />
+          </div>
         </div>
       </FormDrawer>
     </Form>

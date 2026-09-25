@@ -77,7 +77,16 @@ const PlansList: React.FC<IPlanList> = ({
               <TableBody>
                 {plans.map((plan) => (
                   <TableRow key={plan.id}>
-                    <TableCell className="font-medium">{plan.name}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-2">
+                        {plan.name}
+                        {plan.isDefault && (
+                          <Badge variant="outline" className="font-normal">
+                            Padrão
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
 
                     <TableCell className="text-muted-foreground max-w-xs truncate">
                       {plan.description || '—'}

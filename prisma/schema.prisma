@@ -106,6 +106,9 @@ model Plan {
   duration    Int // Quantidade de meses
   /// Mensal divide o preço pelas parcelas; à vista cobra tudo na matrícula.
   billing     EPlanBilling @default(MONTHLY)
+  /// Plano que já vem escolhido ao matricular. No máximo um por academia —
+  /// a regra é aplicada em transação no router, não por constraint.
+  isDefault   Boolean      @default(false)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -113,6 +116,8 @@ model Plan {
 
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isDefault])
 }
 
 model Enrollment {

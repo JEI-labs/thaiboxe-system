@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { GRADUATION_LIST } from '@/common/constants/graduations';
 import { PLAN_BILLING_LABEL } from '@/common/constants/planBilling';
 import { GraduationBadge } from '@/components/graduationBadge/graduationBadge.component';
@@ -39,6 +40,7 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
 
   const plansApi = api.plans.getAll.useQuery({ page: 1, limit: 100 });
   const { data: plansData } = plansApi;
+  const defaultPlanId = plansData?.data.find((plan) => plan.isDefault)?.id;
 
   const createUser = api.student.create.useMutation();
   const updateUser = api.student.updateAvatar.useMutation();
@@ -49,6 +51,16 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
     defaultValues: defaultCreateStudentValues,
     mode: 'onChange',
   });
+
+  /* Os planos chegam depois do primeiro render, e o formulário volta ao
+     estado limpo a cada abertura — daí depender das duas coisas. Só preenche
+     se ninguém escolheu nada ainda, para não trocar o plano debaixo de quem
+     já clicou. */
+  useEffect(() => {
+    if (isOpen && defaultPlanId && !form.getValues('planId')) {
+      form.setValue('planId', defaultPlanId, { shouldValidate: true });
+    }
+  }, [isOpen, defaultPlanId, form]);
 
   const onSubmit = async (data: IStudentCreateTypes) => {
     try {

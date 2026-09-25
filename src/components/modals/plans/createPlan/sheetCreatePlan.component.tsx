@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormInputComponent } from '@/components/forms/formInput/formInput.component';
 import { FormSelectComponent } from '@/components/forms/formSelectInput/formSelectInput.component';
+import { FormSwitchComponent } from '@/components/forms/formSwitchInput/formSwitchInput.component';
 import { PLAN_BILLING_OPTIONS } from '@/common/constants/planBilling';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/trpc/react';
@@ -36,6 +37,7 @@ export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
       price: '0',
       duration: '1',
       billing: EPlanBilling.MONTHLY,
+      isDefault: false,
       description: '',
     },
     mode: 'onChange',
@@ -116,6 +118,13 @@ export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
           tooltip="Mensal gera uma parcela por mês. À vista gera uma parcela só, paga na matrícula: o aluno não tem mensalidade vencendo no meio do período, e a próxima cobrança é a renovação."
           placeholder="Como o aluno paga"
           options={PLAN_BILLING_OPTIONS}
+        />
+
+        <FormSwitchComponent
+          control={form.control}
+          name="isDefault"
+          title="Plano padrão"
+          bottomDescription="Vem escolhido sozinho ao matricular um aluno. Só um plano pode ser o padrão: marcar este tira o anterior."
         />
       </FormDrawer>
     </Form>

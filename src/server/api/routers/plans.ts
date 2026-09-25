@@ -27,15 +27,27 @@ export const plansRouter = createTRPCRouter({
         });
       }
 
-      const createdPlan = await ctx.prisma.plan.create({
-        data: {
-          name: input.name,
-          description: input.description,
-          price: parseFloat(input.price) / 100,
-          duration: Number(input.duration),
-          billing: input.billing,
-          userId,
-        },
+      /* Padrão é um só: marcar um novo tira o anterior, na mesma transação,
+         senão dois planos disputariam a pré-seleção da matrícula. */
+      const createdPlan = await ctx.prisma.$transaction(async (tx) => {
+        if (input.isDefault) {
+          await tx.plan.updateMany({
+            where: { userId, isDefault: true },
+            data: { isDefault: false },
+          });
+        }
+
+        return tx.plan.create({
+          data: {
+            name: input.name,
+            description: input.description,
+            price: parseFloat(input.price) / 100,
+            duration: Number(input.duration),
+            billing: input.billing,
+            isDefault: input.isDefault,
+            userId,
+          },
+        });
       });
 
       return {
@@ -130,13 +142,22 @@ export const plansRouter = createTRPCRouter({
 
       const { id, duration, price, ...rest } = input;
 
-      const updatedPlan = await ctx.prisma.plan.update({
-        where: { id, userId },
-        data: {
-          ...rest,
-          price: parseFloat(price) / 100,
-          duration: Number(duration),
-        },
+      const updatedPlan = await ctx.prisma.$transaction(async (tx) => {
+        if (rest.isDefault) {
+          await tx.plan.updateMany({
+            where: { userId, isDefault: true, id: { not: id } },
+            data: { isDefault: false },
+          });
+        }
+
+        return tx.plan.update({
+          where: { id, userId },
+          data: {
+            ...rest,
+            price: parseFloat(price) / 100,
+            duration: Number(duration),
+          },
+        });
       });
 
       return {
