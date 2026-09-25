@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Pencil, Plus, Trash2 } from 'lucide-react';
 import type { EMessageEvent, MessageTemplate } from '@prisma/client';
 
 import {
   MESSAGE_EVENTS,
   MESSAGE_EVENT_LIST,
-  MESSAGE_PLACEHOLDERS,
 } from '@/common/constants/messageEvents';
+import { MessagePreview } from '@/components/whatsapp/messagePreview.component';
+import { VariableChips } from '@/components/whatsapp/variableChips.component';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,6 +50,30 @@ export function MessageTemplatesCard() {
 
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(EMPTY);
+
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
+
+  /** Insere onde o cursor está, não no fim: no meio da frase é o normal. */
+  const insertVariable = (token: string) => {
+    const field = bodyRef.current;
+    const value = draft.body;
+    const start = field?.selectionStart ?? value.length;
+    const end = field?.selectionEnd ?? value.length;
+    const next = `${value.slice(0, start)}${token}${value.slice(end)}`;
+
+    setDraft((prev) => ({ ...prev, body: next }));
+
+    // devolve o cursor para depois da variável recém-inserida
+    requestAnimationFrame(() => {
+      field?.focus();
+      field?.setSelectionRange(start + token.length, start + token.length);
+    });
+  };
+
+  const { data: config } = api.whatsapp.getConfig.useQuery();
+  /* O nome do template só existe na Meta: nos outros provedores o texto sai
+     livre, e o campo só confundiria. */
+  const isMeta = config?.provider === 'META';
 
   const save = api.whatsapp.saveTemplate.useMutation({
     onSuccess: () => {
@@ -121,13 +146,14 @@ export function MessageTemplatesCard() {
                   {MESSAGE_EVENTS[template.event].automatic && (
                     <Badge variant="outline">Automático</Badge>
                   )}
-                  {template.providerTemplateName ? (
-                    <Badge variant="outline">
-                      {template.providerTemplateName}
-                    </Badge>
-                  ) : (
-                    <Badge variant="alert">Só dentro de 24h</Badge>
-                  )}
+                  {isMeta &&
+                    (template.providerTemplateName ? (
+                      <Badge variant="outline">
+                        {template.providerTemplateName}
+                      </Badge>
+                    ) : (
+                      <Badge variant="alert">Só dentro de 24h</Badge>
+                    ))}
                 </div>
                 <p className="text-muted-foreground line-clamp-2 text-sm whitespace-pre-wrap">
                   {template.body}
@@ -147,7 +173,7 @@ export function MessageTemplatesCard() {
                 <Button
                   size="icon"
                   variant="ghost"
-                  className="text-destructive hover:text-destructive h-8 w-8"
+                  className="text-destructive-text hover:text-destructive-text h-8 w-8"
                   onClick={() => remove.mutate({ id: template.id })}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -210,6 +236,7 @@ export function MessageTemplatesCard() {
             <div className="space-y-2">
               <Label htmlFor="template-body">Mensagem</Label>
               <Textarea
+                ref={bodyRef}
                 id="template-body"
                 rows={5}
                 value={draft.body}
@@ -218,34 +245,40 @@ export function MessageTemplatesCard() {
                 }
                 placeholder="Olá {{primeiro_nome}}, tudo bem?"
               />
+              <VariableChips onInsert={insertVariable} />
+
               <p className="text-muted-foreground text-xs">
-                Disponíveis:{' '}
-                {MESSAGE_PLACEHOLDERS.map((item) => item.token).join(', ')}
+                Clique para inserir onde o cursor está, ou arraste para dentro
+                do texto. Na hora do envio elas viram os dados do aluno.
               </p>
+
+              <MessagePreview body={draft.body} />
             </div>
 
-            <div className="space-y-2 rounded-md border p-3">
-              <Label htmlFor="template-provider">
-                Nome do template na Meta
-              </Label>
-              <Input
-                id="template-provider"
-                value={draft.providerTemplateName}
-                onChange={(event) =>
-                  setDraft((prev) => ({
-                    ...prev,
-                    providerTemplateName: event.target.value,
-                  }))
-                }
-                placeholder="cobranca_amigavel"
-              />
-              <p className="text-muted-foreground text-xs">
-                Obrigatório para mensagens que partem de você: a Meta só entrega
-                texto livre dentro da janela de 24h. O texto acima precisa bater
-                com o template aprovado — os placeholders viram parâmetros na
-                ordem em que aparecem.
-              </p>
-            </div>
+            {isMeta && (
+              <div className="bg-muted/40 space-y-2 rounded-xl p-3">
+                <Label htmlFor="template-provider">
+                  Nome do template na Meta
+                </Label>
+                <Input
+                  id="template-provider"
+                  value={draft.providerTemplateName}
+                  onChange={(event) =>
+                    setDraft((prev) => ({
+                      ...prev,
+                      providerTemplateName: event.target.value,
+                    }))
+                  }
+                  placeholder="cobranca_amigavel"
+                />
+                <p className="text-muted-foreground text-xs">
+                  Obrigatório para mensagens que partem de você: a Meta só
+                  entrega texto livre dentro da janela de 24h. O texto acima
+                  precisa bater com o template aprovado — os placeholders viram
+                  parâmetros na ordem em que aparecem.
+                </p>
+              </div>
+            )}
           </div>
 
           <DialogFooter>

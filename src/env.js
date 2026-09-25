@@ -23,6 +23,15 @@ export const env = createEnv({
       .enum(['development', 'test', 'production'])
       .default('development'),
     BLOB_READ_WRITE_TOKEN: z.string(),
+    /**
+     * Evolution do próprio sistema, usada no fluxo de QR code: a academia
+     * conecta o número sem ver URL nem token. Opcionais — sem elas o sistema
+     * só oferece a conexão manual.
+     */
+    EVOLUTION_BASE_URL: z.string().url().optional(),
+    EVOLUTION_API_KEY: z.string().optional(),
+    /** Segredo da rota que dispara as mensagens automáticas. */
+    CRON_SECRET: z.string().optional(),
   },
 
   /**
@@ -45,6 +54,9 @@ export const env = createEnv({
     DIRECT_URL: process.env.DIRECT_URL,
     NODE_ENV: process.env.NODE_ENV,
     BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
+    EVOLUTION_BASE_URL: process.env.EVOLUTION_BASE_URL,
+    EVOLUTION_API_KEY: process.env.EVOLUTION_API_KEY,
+    CRON_SECRET: process.env.CRON_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -97,13 +97,13 @@ export function SendMessageDialog({
         </DialogHeader>
 
         {config === null ? (
-          <p className="text-destructive text-sm">
+          <p className="text-destructive-text text-sm">
             Configure a integração de WhatsApp em Configurações antes de enviar.
           </p>
         ) : (
           <div className="space-y-4">
             {notConfigured && (
-              <p className="text-destructive text-sm">
+              <p className="text-destructive-text text-sm">
                 A integração está desativada. Ative-a em Configurações.
               </p>
             )}

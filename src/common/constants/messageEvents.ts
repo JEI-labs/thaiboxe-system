@@ -8,6 +8,16 @@ export interface MessageEventInfo {
 }
 
 export const MESSAGE_EVENTS: Record<EMessageEvent, MessageEventInfo> = {
+  PAYMENT_DUE_SOON: {
+    label: 'Lembrete antes do vencimento',
+    description: 'Avisa alguns dias antes da parcela vencer.',
+    automatic: true,
+  },
+  PAYMENT_DUE_TODAY: {
+    label: 'Vence hoje',
+    description: 'Avisa no próprio dia do vencimento.',
+    automatic: true,
+  },
   PAYMENT_OVERDUE: {
     label: 'Pagamento atrasado',
     description: 'Aluno com parcela vencida e ainda não paga.',
@@ -39,8 +49,21 @@ export const MESSAGE_EVENT_LIST = Object.entries(MESSAGE_EVENTS).map(
   ([value, info]) => ({ value: value as EMessageEvent, ...info }),
 );
 
-/** Placeholders aceitos no corpo da mensagem. */
+/**
+ * Placeholders aceitos no corpo da mensagem. O `label` é o que aparece no
+ * botão: quem escreve a mensagem não precisa saber o que são chaves duplas.
+ */
 export const MESSAGE_PLACEHOLDERS = [
-  { token: '{{aluno}}', description: 'Nome completo do aluno' },
-  { token: '{{primeiro_nome}}', description: 'Primeiro nome do aluno' },
+  {
+    token: '{{aluno}}',
+    label: 'Nome completo',
+    description: 'Nome completo do aluno',
+    sample: 'Maria Silva Souza',
+  },
+  {
+    token: '{{primeiro_nome}}',
+    label: 'Primeiro nome',
+    description: 'Primeiro nome do aluno',
+    sample: 'Maria',
+  },
 ];

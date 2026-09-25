@@ -1,4 +1,8 @@
-import { EMessageEvent, EWhatsappProvider } from '@prisma/client';
+import {
+  EMessageEvent,
+  EMessageStatus,
+  EWhatsappProvider,
+} from '@prisma/client';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
@@ -8,16 +12,37 @@ import {
   renderTemplate,
   sendWhatsappMessage,
 } from '@/server/whatsapp/client';
+import { MAX_CONNECTIONS_PER_USER } from '@/common/constants/whatsapp';
+import { runAutomationsForUser } from '@/server/whatsapp/automations';
+import {
+  connectInstance,
+  connectionState,
+  createInstance,
+  deleteInstance,
+  instanceNameFor,
+  instanceNumber,
+  logoutInstance,
+  managedEvolutionEnabled,
+} from '@/server/whatsapp/evolution';
+import { env } from '@/env';
 
-const configSchema = z.object({
-  provider: z.nativeEnum(EWhatsappProvider),
-  baseUrl: z.string().url('Informe a URL da instância'),
-  instanceId: z.string().nullable().optional(),
-  /** Vazio numa edição significa "manter o token atual". */
-  token: z.string().optional(),
-  senderNumber: z.string().min(8, 'Informe o número remetente'),
-  isActive: z.boolean(),
-});
+/** Eventos que a rotina dispara sozinha, na ordem em que aparecem na tela. */
+const AUTOMATIC_EVENTS = [
+  EMessageEvent.PAYMENT_DUE_SOON,
+  EMessageEvent.PAYMENT_DUE_TODAY,
+  EMessageEvent.PAYMENT_OVERDUE,
+  EMessageEvent.BIRTHDAY,
+] as const;
+
+/** Conexão gerenciada: aponta para a Evolution do próprio sistema. */
+function isManaged(provider: EWhatsappProvider, baseUrl: string): boolean {
+  return (
+    provider === EWhatsappProvider.EVOLUTION &&
+    Boolean(env.EVOLUTION_BASE_URL) &&
+    baseUrl.replace(/\/+$/, '') ===
+      (env.EVOLUTION_BASE_URL ?? '').replace(/\/+$/, '')
+  );
+}
 
 export const whatsappRouter = createTRPCRouter({
   /**
@@ -28,10 +53,11 @@ export const whatsappRouter = createTRPCRouter({
     const userId = ctx.session.user.id;
     if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
 
-    const config = await ctx.prisma.whatsappConfig.findUnique({
-      where: { userId },
+    const config = await ctx.prisma.whatsappConfig.findFirst({
+      where: { userId, isActive: true },
       select: {
         id: true,
+        label: true,
         provider: true,
         baseUrl: true,
         instanceId: true,
@@ -44,41 +70,243 @@ export const whatsappRouter = createTRPCRouter({
     return config ? { ...config, hasToken: true } : null;
   }),
 
-  saveConfig: protectedProcedure
-    .input(configSchema)
+  /**
+   * Conexões de WhatsApp da academia.
+   *
+   * O dono da academia não vê provedor, URL, instância nem token: isso é do
+   * servidor. Ele dá um nome, informa o número e escaneia o QR. Uma conexão é
+   * "gerenciada" quando aponta para a nossa Evolution — é o que permite gerar
+   * QR e ler o estado dela.
+   */
+  listConnections: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+    const rows = await ctx.prisma.whatsappConfig.findMany({
+      where: { userId },
+      orderBy: [{ isActive: 'desc' }, { createdAt: 'asc' }],
+      select: {
+        id: true,
+        label: true,
+        provider: true,
+        baseUrl: true,
+        instanceId: true,
+        senderNumber: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
+
+    /* Estado vem do provedor, não do banco: o celular pode ter desconectado
+       sem o sistema saber. Timeout curto para a lista não travar se a VM
+       estiver fora do ar. */
+    return Promise.all(
+      rows.map(async (row) => {
+        const managed = isManaged(row.provider, row.baseUrl);
+        const state =
+          managed && row.instanceId
+            ? await connectionState(row.instanceId, 6_000)
+            : null;
+        return { ...row, managed, state };
+      }),
+    );
+  }),
+
+  /** Cria a conexão e já devolve o QR para escanear. */
+  createConnection: protectedProcedure
+    .input(
+      z.object({
+        label: z.string().trim().min(1, 'Dê um nome para o número').max(60),
+        senderNumber: z.string().trim().min(8, 'Informe o número'),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
 
-      const existing = await ctx.prisma.whatsappConfig.findUnique({
-        where: { userId },
-        select: { token: true },
-      });
-
-      const token = input.token?.trim() ? input.token.trim() : existing?.token;
-      if (!token) {
+      if (!managedEvolutionEnabled()) {
         throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Informe o token do provedor.',
+          code: 'PRECONDITION_FAILED',
+          message: 'O servidor de WhatsApp não está configurado.',
         });
       }
 
-      const data = {
-        provider: input.provider,
-        baseUrl: input.baseUrl,
-        instanceId: input.instanceId ?? null,
-        token,
-        senderNumber: input.senderNumber,
-        isActive: input.isActive,
-      };
-
-      await ctx.prisma.whatsappConfig.upsert({
+      /* A primeira já entra ativa: senão o dono conecta o número e nada
+         envia, sem pista do porquê. */
+      const total = await ctx.prisma.whatsappConfig.count({
         where: { userId },
-        create: { ...data, userId },
-        update: data,
       });
 
-      return { message: 'Configuração salva' };
+      if (total >= MAX_CONNECTIONS_PER_USER) {
+        throw new TRPCError({
+          code: 'FORBIDDEN',
+          message:
+            MAX_CONNECTIONS_PER_USER === 1
+              ? 'Por enquanto é um número por academia. Remova o atual para conectar outro.'
+              : `Limite de ${MAX_CONNECTIONS_PER_USER} números atingido.`,
+        });
+      }
+
+      const created = await ctx.prisma.whatsappConfig.create({
+        data: {
+          label: input.label,
+          provider: EWhatsappProvider.EVOLUTION,
+          baseUrl: env.EVOLUTION_BASE_URL ?? '',
+          instanceId: '',
+          token: env.EVOLUTION_API_KEY ?? '',
+          senderNumber: input.senderNumber,
+          isActive: total === 0,
+          userId,
+        },
+        select: { id: true },
+      });
+
+      const instance = instanceNameFor(created.id);
+
+      try {
+        const qr = await createInstance(instance);
+        await ctx.prisma.whatsappConfig.update({
+          where: { id: created.id },
+          data: {
+            instanceId: instance,
+            // apikey da própria instância: não espalha a chave mestra
+            ...(qr.token ? { token: qr.token } : {}),
+          },
+        });
+
+        return { id: created.id, qr: qr.base64, pairingCode: qr.pairingCode };
+      } catch (error) {
+        // sem instância no provedor, a linha órfã só confundiria a tela
+        await ctx.prisma.whatsappConfig.delete({ where: { id: created.id } });
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Não foi possível falar com o servidor de WhatsApp.',
+        });
+      }
+    }),
+
+  /** QR novo, para primeira leitura ou reconexão. */
+  connectionQr: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+      const row = await ctx.prisma.whatsappConfig.findFirst({
+        where: { id: input.id, userId },
+        select: { instanceId: true, provider: true, baseUrl: true },
+      });
+      if (!row?.instanceId || !isManaged(row.provider, row.baseUrl)) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Conexão não encontrada.',
+        });
+      }
+
+      const qr = await connectInstance(row.instanceId);
+      return { qr: qr.base64, pairingCode: qr.pairingCode };
+    }),
+
+  /**
+   * Estado da conexão. Quando o celular acaba de ler o QR, guarda o número
+   * que entrou — é ele que passa a valer, não o que foi digitado.
+   */
+  connectionState: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+      const row = await ctx.prisma.whatsappConfig.findFirst({
+        where: { id: input.id, userId },
+        select: {
+          id: true,
+          instanceId: true,
+          provider: true,
+          baseUrl: true,
+          senderNumber: true,
+        },
+      });
+      if (!row?.instanceId || !isManaged(row.provider, row.baseUrl)) {
+        return { state: 'unknown' as const, number: row?.senderNumber ?? '' };
+      }
+
+      const state = await connectionState(row.instanceId);
+
+      if (state === 'open') {
+        const number = await instanceNumber(row.instanceId);
+        if (number && number !== row.senderNumber) {
+          await ctx.prisma.whatsappConfig.update({
+            where: { id: row.id },
+            data: { senderNumber: number },
+          });
+          return { state, number };
+        }
+      }
+
+      return { state, number: row.senderNumber };
+    }),
+
+  /** Liga uma conexão e desliga as outras, numa transação só. */
+  activateConnection: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+      const connection = await ctx.prisma.whatsappConfig.findFirst({
+        where: { id: input.id, userId },
+        select: { id: true },
+      });
+      if (!connection) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Conexão não encontrada.',
+        });
+      }
+
+      await ctx.prisma.$transaction([
+        ctx.prisma.whatsappConfig.updateMany({
+          where: { userId },
+          data: { isActive: false },
+        }),
+        ctx.prisma.whatsappConfig.update({
+          where: { id: connection.id },
+          data: { isActive: true },
+        }),
+      ]);
+
+      return { ok: true };
+    }),
+
+  /** Remove a conexão e, se for nossa, apaga a instância do servidor. */
+  deleteConnection: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+      const row = await ctx.prisma.whatsappConfig.findFirst({
+        where: { id: input.id, userId },
+        select: { id: true, instanceId: true, provider: true, baseUrl: true },
+      });
+      if (!row) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Conexão não encontrada.',
+        });
+      }
+
+      if (row.instanceId && isManaged(row.provider, row.baseUrl)) {
+        await logoutInstance(row.instanceId);
+        await deleteInstance(row.instanceId);
+      }
+
+      await ctx.prisma.whatsappConfig.delete({ where: { id: row.id } });
+      return { ok: true };
     }),
 
   listTemplates: protectedProcedure.query(async ({ ctx }) => {
@@ -162,6 +390,149 @@ export const whatsappRouter = createTRPCRouter({
     }),
 
   /** Envio manual, disparado pelas ações da linha do aluno. */
+  /**
+   * Regras de envio automático. Devolve uma linha por evento automático,
+   * mesmo os que ainda não foram configurados — a tela mostra todos com o
+   * padrão desligado.
+   */
+  listAutomations: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+    const [saved, templates] = await Promise.all([
+      ctx.prisma.messageAutomation.findMany({ where: { userId } }),
+      ctx.prisma.messageTemplate.findMany({
+        where: { userId, isActive: true },
+        select: { id: true, name: true, event: true },
+        orderBy: { name: 'asc' },
+      }),
+    ]);
+
+    const byEvent = new Map(saved.map((item) => [item.event, item]));
+
+    const automations = AUTOMATIC_EVENTS.map((event) => {
+      const current = byEvent.get(event);
+      return {
+        event,
+        isActive: current?.isActive ?? false,
+        offsetDays:
+          current?.offsetDays ?? (event === 'PAYMENT_OVERDUE' ? 7 : 3),
+        sendHour: current?.sendHour ?? 9,
+        templateId: current?.templateId ?? null,
+        templates: templates.filter((template) => template.event === event),
+      };
+    });
+
+    return automations;
+  }),
+
+  saveAutomation: protectedProcedure
+    .input(
+      z.object({
+        event: z.nativeEnum(EMessageEvent),
+        isActive: z.boolean(),
+        /** 1 a 30 dias: acima disso vira perseguição, não lembrete. */
+        offsetDays: z.number().int().min(1).max(30),
+        sendHour: z.number().int().min(0).max(23),
+        templateId: z.string().nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+      if (input.isActive && !input.templateId) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Escolha o modelo de mensagem antes de ligar.',
+        });
+      }
+
+      if (input.templateId) {
+        const template = await ctx.prisma.messageTemplate.findFirst({
+          where: { id: input.templateId, userId, event: input.event },
+          select: { id: true },
+        });
+        if (!template) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Modelo não encontrado para este evento.',
+          });
+        }
+      }
+
+      const data = {
+        isActive: input.isActive,
+        offsetDays: input.offsetDays,
+        sendHour: input.sendHour,
+        templateId: input.templateId,
+      };
+
+      await ctx.prisma.messageAutomation.upsert({
+        where: { userId_event: { userId, event: input.event } },
+        create: { ...data, event: input.event, userId },
+        update: data,
+      });
+
+      return { ok: true };
+    }),
+
+  /** Roda a rotina agora, para conferir sem esperar o horário. */
+  runAutomationsNow: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+    return runAutomationsForUser(userId);
+  }),
+
+  /** Histórico de envios, do mais recente para o mais antigo. */
+  listLogs: protectedProcedure
+    .input(
+      z
+        .object({
+          page: z.number().min(1).default(1),
+          limit: z.number().min(1).max(100).default(20),
+          event: z.nativeEnum(EMessageEvent).optional(),
+          status: z.nativeEnum(EMessageStatus).optional(),
+        })
+        .default({ page: 1, limit: 20 }),
+    )
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
+
+      const where = {
+        userId,
+        ...(input.event ? { event: input.event } : {}),
+        ...(input.status ? { status: input.status } : {}),
+      };
+
+      const [logs, total, failed] = await Promise.all([
+        ctx.prisma.messageLog.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip: (input.page - 1) * input.limit,
+          take: input.limit,
+          include: { student: { select: { id: true, name: true } } },
+        }),
+        ctx.prisma.messageLog.count({ where }),
+        ctx.prisma.messageLog.count({
+          where: { userId, status: EMessageStatus.FAILED },
+        }),
+      ]);
+
+      return {
+        data: logs,
+        failed,
+        pagination: {
+          page: input.page,
+          limit: input.limit,
+          total,
+          totalPages: Math.ceil(total / input.limit),
+        },
+      };
+    }),
+
   sendToStudent: protectedProcedure
     .input(
       z.object({
@@ -177,7 +548,9 @@ export const whatsappRouter = createTRPCRouter({
       if (!userId) throw new TRPCError({ code: 'UNAUTHORIZED' });
 
       const [config, student, template] = await Promise.all([
-        ctx.prisma.whatsappConfig.findUnique({ where: { userId } }),
+        ctx.prisma.whatsappConfig.findFirst({
+          where: { userId, isActive: true },
+        }),
         ctx.prisma.student.findFirst({
           where: { id: input.studentId, userId },
           select: { id: true, name: true, phone: true },

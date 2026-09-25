@@ -184,6 +184,70 @@ atende todas, e cada uma pareia com o número do seu dono.
 
 O token não é exibido depois de salvo; deixe o campo em branco para mantê-lo.
 
+## Mensagens automáticas (o agendador)
+
+As regras ficam em **WhatsApp › Automáticas**: lembrete antes do vencimento,
+aviso no dia, cobrança de atrasado e aniversário. Cada uma tem um modelo, uma
+quantidade de dias e um horário a partir do qual pode disparar.
+
+O sistema **não tem relógio próprio**: quem dá o start é uma chamada externa a
+
+```
+GET /api/cron/whatsapp
+Authorization: Bearer $CRON_SECRET
+```
+
+### Por que o cron fica na VM, e não na Vercel
+
+O Vercel Cron funcionaria — ele inclusive manda o `CRON_SECRET` como Bearer
+sozinho —, mas no plano Hobby **roda uma vez por dia** e a função tem timeout
+curto. Com disparo diário, o "a partir das 9h" perde o sentido e a fila (15
+envios por execução) levaria dias para drenar. A VM do Evolution já está de pé
+24h e não tem esse limite.
+
+### Configurando
+
+1. Gere um segredo e coloque **o mesmo valor** em dois lugares: na Vercel
+   (Settings › Environment Variables › `CRON_SECRET`) e no `.env` local.
+
+   ```bash
+   node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
+   ```
+
+2. Na VM, adicione a linha no crontab (`crontab -e`):
+
+   ```cron
+   0 * * * * curl -fsS -H "Authorization: Bearer SEU_SEGREDO" https://SEU-APP.vercel.app/api/cron/whatsapp >> /var/log/whatsapp-cron.log 2>&1
+   ```
+
+   De hora em hora. Executar demais não duplica nada: cada aluno recebe no
+   máximo uma mensagem por dia de cada tipo, e a trava é o próprio
+   `MessageLog`.
+
+3. Confira o retorno na mão antes de confiar no agendamento:
+
+   ```bash
+   curl -H "Authorization: Bearer SEU_SEGREDO" https://SEU-APP.vercel.app/api/cron/whatsapp
+   ```
+
+   Responde `{"ranAt": "...", "reports": [...]}` com quantas foram enviadas,
+   quantas falharam e o que foi pulado (sem conexão ativa, sem modelo, fora do
+   horário). Sem o segredo configurado no servidor: **503**. Com segredo
+   errado: **401**.
+
+### Fuso
+
+O horário das regras é sempre **America/Sao_Paulo**, calculado dentro da
+aplicação. Não importa em que fuso a VM ou a Vercel estão — o crontab só
+precisa disparar de hora em hora.
+
+### Limites de propósito
+
+- **15 envios por execução**, com 500ms entre um e outro. Rajada é o que faz o
+  WhatsApp bloquear número; o resto sai na execução seguinte.
+- **Uma mensagem por aluno por dia por tipo**, mesmo que o cron rode 24 vezes.
+- **Sem conexão ativa, não dispara nada** — nem tenta.
+
 ## Riscos
 
 Evolution usa Baileys, que é WhatsApp Web por baixo — **não é via oficial**.

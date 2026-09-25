@@ -68,10 +68,11 @@ model User {
   Student      Student[]
   Supplier     Supplier[]
 
-  promotions       Promotion[]
-  whatsappConfig   WhatsappConfig?
-  messageTemplates MessageTemplate[]
-  messageLogs      MessageLog[]
+  promotions         Promotion[]
+  whatsappConfigs    WhatsappConfig[]
+  messageTemplates   MessageTemplate[]
+  messageLogs        MessageLog[]
+  messageAutomations MessageAutomation[]
 }
 
 model Student {
@@ -234,6 +235,10 @@ enum EMessageEvent {
   EVENT_ANNOUNCEMENT
   ONE_MONTH_UNPAID
   PROMOTIONAL
+  /// Lembrete alguns dias antes do vencimento.
+  PAYMENT_DUE_SOON
+  /// Aviso no próprio dia do vencimento.
+  PAYMENT_DUE_TODAY
 }
 
 enum EMessageStatus {
@@ -261,9 +266,12 @@ model Promotion {
   @@index([userId, isActive])
 }
 
-/// Credenciais do provedor de WhatsApp. Uma por usuário.
+/// Credenciais do provedor de WhatsApp. O usuário pode cadastrar várias
+/// conexões, mas só uma fica ativa — quem envia é sempre a ativa.
 model WhatsappConfig {
   id           String            @id @default(uuid())
+  /// Nome dado pelo admin, ex.: "Número da recepção".
+  label        String?
   provider     EWhatsappProvider
   baseUrl      String
   instanceId   String?
@@ -274,8 +282,10 @@ model WhatsappConfig {
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
 
-  userId String @unique
+  userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
 }
 
 /// Texto por tipo de evento, com placeholders tipo {{aluno}}.
@@ -297,9 +307,33 @@ model MessageTemplate {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  logs MessageLog[]
+  logs        MessageLog[]
+  automations MessageAutomation[]
 
   @@index([userId, event])
+}
+
+/// Regra de envio automático por evento. Uma por evento e por usuário.
+model MessageAutomation {
+  id         String           @id @default(uuid())
+  event      EMessageEvent
+  isActive   Boolean          @default(false)
+  /// Dias antes do vencimento (lembrete) ou janela de atraso (cobrança).
+  /// Ignorado no aniversário.
+  offsetDays Int              @default(3)
+  /// Hora do dia em que a rotina pode disparar, no fuso de São Paulo.
+  sendHour   Int              @default(9)
+  /// Modelo usado. Sem ele, a regra fica parada — texto é obrigatório.
+  templateId String?
+  template   MessageTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, event])
 }
 
 /// Histórico de envios, para não repetir disparo e para auditoria.
