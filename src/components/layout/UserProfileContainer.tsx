@@ -41,13 +41,13 @@ export function UserProfileContainer(): React.JSX.Element {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-fit">
-        <Link href="/profile">
+        <Link href="/perfil">
           <DropdownMenuItem className="cursor-pointer gap-2 py-2 pr-4 pl-3">
             <UserPen className="h-4 w-4" />
             Editar perfil
           </DropdownMenuItem>
         </Link>
-        {/* <Link href="/security">
+        {/* <Link href="/seguranca">
           <DropdownMenuItem className="cursor-not-allowed gap-2 py-2 pl-3 pr-4">
             <ShieldCheck className="h-4 w-4" />
             Segurança

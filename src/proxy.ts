@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { env } from '@/env';
 
-export const DEFAULT_LOGIN_REDIRECT = '/dashboard';
-export const AUTH_PAGE = '/auth/login';
+export const DEFAULT_LOGIN_REDIRECT = '/painel';
+export const AUTH_PAGE = '/auth/entrar';
 
 const authRoutes = '/auth/';
 const publicRoutes = ['/'];

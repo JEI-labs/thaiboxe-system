@@ -6,11 +6,11 @@ import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 const breadcrumbItems = [
   {
     label: 'Home',
-    href: '/dashboard',
+    href: '/painel',
   },
   {
     label: 'Segurança',
-    href: '/security',
+    href: '/seguranca',
   },
 ];
 

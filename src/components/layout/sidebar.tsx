@@ -1,200 +1,84 @@
 'use client';
 
-import {
-  BarChart2,
-  Boxes,
-  DollarSign,
-  // LayoutDashboard,
-  Package,
-  ReceiptCentIcon,
-  ReceiptText,
-  Moon,
-  Tag,
-  Sun,
-  Users,
-  UserSquare,
-} from 'lucide-react';
+import { Boxes, LayoutDashboard, ReceiptText, Users } from 'lucide-react';
+/* Glifo da marca vem do react-icons, que já é dependência: desenhar logo de
+   memória sai errado. */
+import { FaWhatsapp } from 'react-icons/fa';
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
 } from '@/components/ui/sidebar';
-import { MdCategory } from 'react-icons/md';
-import { useTheme } from 'next-themes';
 
 import Image from 'next/image';
-import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Separator } from '../ui/separator';
 
 interface SidebarItem {
   title: string;
   url: string;
   icon: React.ElementType;
 }
-interface SidebarRootItem {
-  title: string;
-  icon: React.ElementType;
-  url?: string;
-  items?: Array<SidebarItem>;
-}
 
-const registrationsItems = [
-  {
-    title: 'Fornecedores',
-    url: '/registrations/suppliers',
-    icon: UserSquare,
-  },
-  {
-    title: 'Planos',
-    url: '/registrations/plans',
-    icon: Package,
-  },
-  {
-    title: 'Categorias',
-    url: '/registrations/categories',
-    icon: MdCategory,
-  },
-  {
-    title: 'Promoções',
-    url: '/registrations/promotions',
-    icon: Tag,
-  },
+/**
+ * Quatro destinos, e só. Financeiro e Cadastros abrem uma tela-índice com os
+ * seus assuntos: a lista inteira aberta na lateral virava um paredão de links
+ * que ninguém lia.
+ */
+const sidebarItems: Array<SidebarItem> = [
+  { title: 'Dashboard', url: '/painel', icon: LayoutDashboard },
+  { title: 'Alunos', url: '/alunos', icon: Users },
+  { title: 'Financeiro', url: '/financeiro', icon: ReceiptText },
+  { title: 'Cadastros', url: '/cadastros', icon: Boxes },
+  { title: 'WhatsApp', url: '/whatsapp', icon: FaWhatsapp },
 ];
 
-const financialItems = [
-  {
-    title: 'Resumo',
-    url: '/financial/summary',
-    icon: BarChart2,
-  },
-  {
-    title: 'Receitas',
-    url: '/financial/revenues',
-    icon: DollarSign,
-  },
-  {
-    title: 'Despesas',
-    url: '/financial/expenses',
-    icon: ReceiptCentIcon,
-  },
-];
-
-const sidebarItems: Array<SidebarRootItem> = [
-  // {
-  //   title: 'Dashboard',
-  //   icon: LayoutDashboard,
-  //   url: '/dashboard',
-  // },
-  {
-    title: 'Alunos',
-    url: '/students',
-    icon: Users,
-  },
-  {
-    title: 'Financeiro',
-    icon: ReceiptText,
-    items: financialItems,
-  },
-  {
-    title: 'Cadastros',
-    icon: Boxes,
-    items: registrationsItems,
-  },
-];
+const MENU_BUTTON = 'h-11 gap-3 px-4 text-base [&>svg]:size-5';
 
 export function AppSidebar() {
   const path = usePathname();
-  // resolvedTheme (e não theme) porque com enableSystem o valor pode ser 'system'
-  const { resolvedTheme, setTheme } = useTheme();
-
-  // lido só no clique: usar resolvedTheme no render divergiria da hidratação,
-  // porque no servidor ele é undefined
-  const toggleTheme = () =>
-    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
-
   return (
     <Sidebar>
       <SidebarHeader>
         {/* o nome vai no alt: some da tela, mas segue no leitor de tela */}
-        <div className="flex h-24 w-full items-center justify-center p-6">
+        <div className="flex h-28 w-full items-center px-4">
           <Image
             src="/images/logo.png"
             alt="Team Sartorato"
             width={300}
             height={300}
+            className="h-20 w-auto"
           />
         </div>
       </SidebarHeader>
 
-      <Separator />
-
       <SidebarContent>
         <SidebarGroup>
-          <SidebarMenu>
+          <SidebarMenu className="gap-1">
             {sidebarItems.map((item) => (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild>
-                  <Link href={item.url ?? ''} className="cursor-pointer py-5">
-                    {item.icon && <item.icon />}
-                    <span className="text-md font-normal">{item.title}</span>
+                <SidebarMenuButton
+                  asChild
+                  /* as telas de dentro mantêm o assunto aceso no menu */
+                  isActive={
+                    path === item.url || path.startsWith(`${item.url}/`)
+                  }
+                  className={MENU_BUTTON}
+                >
+                  <Link href={item.url} className="cursor-pointer">
+                    <item.icon />
+                    <span className="font-normal">{item.title}</span>
                   </Link>
                 </SidebarMenuButton>
-
-                {Array.isArray(item.items) && item.items.length > 0 && (
-                  <SidebarMenuSub>
-                    {item.items.map((subItem) => (
-                      <SidebarMenuButton
-                        asChild
-                        key={subItem.title}
-                        className={cn(
-                          path === subItem.url
-                            ? 'bg-accent'
-                            : 'transparent text-muted-foreground',
-                        )}
-                      >
-                        <Link
-                          className={cn(
-                            'flex items-center gap-4 rounded-lg px-3 py-1.5',
-                          )}
-                          href={subItem.url}
-                        >
-                          {subItem.icon && <subItem.icon />}
-                          <span>{subItem.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    ))}
-                  </SidebarMenuSub>
-                )}
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton className="py-5" onClick={toggleTheme}>
-              {/* Alternados por CSS em vez de estado: evita divergência de
-                  hidratação, já que o tema só é conhecido no cliente. */}
-              <Sun className="dark:hidden" />
-              <Moon className="hidden dark:block" />
-              <span className="text-md font-normal">
-                Tema <span className="dark:hidden">escuro</span>
-                <span className="hidden dark:inline">claro</span>
-              </span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
     </Sidebar>
   );
 }

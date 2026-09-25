@@ -59,7 +59,7 @@ export default function LoginPage(): React.JSX.Element {
       form.reset();
       // client-side nav keeps the SPA transition; refresh re-runs server
       // components so they see the session cookie signIn just set.
-      router.push('/financial/summary');
+      router.push('/financeiro/resumo');
       router.refresh();
     } else {
       setErrorMessage('Houve um erro inexperado, tente novamente mais tarde.');

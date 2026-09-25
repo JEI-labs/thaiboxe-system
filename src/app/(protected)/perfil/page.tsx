@@ -18,11 +18,11 @@ import { api } from '@/trpc/react';
 const breadcrumbItems = [
   {
     label: 'Home',
-    href: '/dashboard',
+    href: '/painel',
   },
   {
     label: 'Minha conta',
-    href: '/profile',
+    href: '/perfil',
   },
 ];
 

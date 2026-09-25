@@ -64,7 +64,7 @@ export default function StudentDetailPage({
     return (
       <div className="flex flex-col items-center gap-4 py-12">
         <p className="text-muted-foreground">Aluno não encontrado.</p>
-        <Button variant="outline" onClick={() => router.push('/students')}>
+        <Button variant="outline" onClick={() => router.push('/alunos')}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar para alunos
         </Button>
@@ -84,16 +84,16 @@ export default function StudentDetailPage({
     <div className="w-full">
       <BreadcrumbUpdater
         items={[
-          { label: 'Home', href: '/dashboard' },
-          { label: 'Alunos', href: '/students' },
-          { label: student.name, href: `/students/${student.id}` },
+          { label: 'Home', href: '/painel' },
+          { label: 'Alunos', href: '/alunos' },
+          { label: student.name, href: `/alunos/${student.id}` },
         ]}
       />
 
       <Button
         variant="ghost"
         className="mb-4 -ml-2"
-        onClick={() => router.push('/students')}
+        onClick={() => router.push('/alunos')}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Voltar
@@ -148,7 +148,7 @@ export default function StudentDetailPage({
 
             <div className="flex flex-wrap gap-2">
               <Button
-                onClick={() => router.push(`/students/${student.id}/payments`)}
+                onClick={() => router.push(`/alunos/${student.id}/pagamentos`)}
               >
                 <CreditCard className="mr-2 h-4 w-4" />
                 Pagamentos
@@ -283,7 +283,7 @@ export default function StudentDetailPage({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => router.push(`/students/${student.id}/payments`)}
+              onClick={() => router.push(`/alunos/${student.id}/pagamentos`)}
             >
               Ver todos ({student.payments.length})
             </Button>

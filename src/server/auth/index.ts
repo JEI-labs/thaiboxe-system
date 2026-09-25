@@ -44,7 +44,7 @@ export const authOptions: NextAuthOptions = {
     maxAge: 1 * 24 * 30 * 60, // 1 days
   },
   pages: {
-    signIn: '/login',
+    signIn: '/auth/entrar',
     // newUser: "/auth/register",
   },
   callbacks: {
