@@ -127,7 +127,7 @@ export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
         <Separator />
 
         <div className="grid grid-cols-4 gap-6">
-          <div className="col-span-4">
+          <div className="col-span-2">
             <FormInputComponent
               control={form.control}
               name="name"
@@ -138,7 +138,7 @@ export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
               maxLength={50}
             />
           </div>
-          <div className="col-span-4">
+          <div className="col-span-2">
             <FormInputComponent
               control={form.control}
               name="email"

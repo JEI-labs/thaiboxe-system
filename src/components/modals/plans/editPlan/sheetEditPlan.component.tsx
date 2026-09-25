@@ -103,7 +103,7 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
         submitPendingLabel="Salvando..."
         isSubmitting={updatePlan.isPending || form.formState.isSubmitting}
       >
-        <div className="mx-2 my-8 grid w-full grid-cols-4 gap-6">
+        <div className="grid grid-cols-4 gap-6">
           <div className="col-span-4">
             <FormInputComponent
               control={form.control}

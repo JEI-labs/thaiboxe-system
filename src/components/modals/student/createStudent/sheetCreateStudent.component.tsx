@@ -130,24 +130,28 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
             Dados pessoais
           </h3>
 
-          <FormInputComponent
-            control={form.control}
-            name="name"
-            label="Nome do aluno"
-            type="text"
-            mask={maskOnlyText}
-            placeholder="Nome completo"
-            maxLength={50}
-          />
+          {/* Dois a dois: em uma coluna só o formulário passava da altura da
+              janela e obrigava a rolar para chegar no botão. */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormInputComponent
+              control={form.control}
+              name="name"
+              label="Nome do aluno"
+              type="text"
+              mask={maskOnlyText}
+              placeholder="Nome completo"
+              maxLength={50}
+            />
 
-          <FormInputComponent
-            control={form.control}
-            name="email"
-            label="E-mail"
-            type="email"
-            placeholder="exemplo@exemplo.com"
-            maxLength={50}
-          />
+            <FormInputComponent
+              control={form.control}
+              name="email"
+              label="E-mail"
+              type="email"
+              placeholder="exemplo@exemplo.com"
+              maxLength={50}
+            />
+          </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <FormInputComponent
