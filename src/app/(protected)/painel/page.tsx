@@ -3,8 +3,7 @@
 import { useMemo, useState } from 'react';
 import {
   AlertTriangle,
-  Check,
-  ChevronDown,
+  Calendar,
   CalendarCheck,
   CircleDollarSign,
   PiggyBank,
@@ -18,15 +17,10 @@ import {
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { StatsSkeleton } from '@/components/skeletons/listSkeleton.component';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  AdvancedFilterDatePicker,
+  getLastYearRange,
+} from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
 import { KpiCard } from '@/components/kpiCard/kpiCard.component';
 import {
   AgingChart,
@@ -53,21 +47,23 @@ const breadcrumbItems = [
   { label: 'Dashboard', href: '/painel' },
 ];
 
-const PERIODS = [
-  { value: '6', label: 'Últimos 6 meses' },
-  { value: '12', label: 'Últimos 12 meses' },
-  { value: '24', label: 'Últimos 24 meses' },
-];
+const defaultRange = getLastYearRange();
 
 export default function DashboardPage() {
-  const [months, setMonths] = useState(12);
+  const [range, setRange] = useState<{ from?: string; to?: string }>({
+    from: defaultRange.from.toISOString(),
+    to: defaultRange.to.toISOString(),
+  });
 
-  const { data, isLoading } = api.dashboard.getOverview.useQuery(
-    { months },
-    { staleTime: 60_000 },
-  );
+  const { data, isLoading } = api.dashboard.getOverview.useQuery(range, {
+    staleTime: 60_000,
+  });
 
-  /** Variação do MRR contra o mês anterior, tirada da própria série. */
+  /* Com um período curto a série sai em dias, e a comparação do MRR passa a
+     ser contra o dia anterior. */
+  const scaleWord = (data?.series[0]?.month.length ?? 7) > 7 ? 'dia' : 'mês';
+
+  /** Variação do MRR contra o ponto anterior, tirada da própria série. */
   const mrrTrend = useMemo(() => {
     const series = data?.series ?? [];
     const current = series.at(-1)?.mrr ?? 0;
@@ -100,33 +96,23 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Mesmo desenho do filtro de data das outras telas: botão de
-              contorno com o período escolhido e as opções no menu. */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="gap-2">
-                {PERIODS.find((period) => period.value === String(months))
-                  ?.label ?? 'Período'}
-                <ChevronDown className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>Período das séries</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {PERIODS.map((period) => (
-                <DropdownMenuItem
-                  key={period.value}
-                  onSelect={() => setMonths(Number(period.value))}
-                >
-                  <span className="flex-1">{period.label}</span>
-                  {String(months) === period.value && (
-                    <Check className="size-4" aria-hidden />
-                  )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* O mesmo filtro das outras telas, com os atalhos de mês que o
+              painel precisa. Vale para os gráficos; os cards de cima são o
+              retrato de hoje. */}
+          <AdvancedFilterDatePicker
+            defaultValue={defaultRange}
+            title="Período"
+            description="Período dos gráficos"
+            numberOfMonths={1}
+            showDeleteButton={false}
+            rightIcon={<Calendar />}
+            onChange={({ from, to }) =>
+              setRange({
+                from: from ? from.toISOString() : undefined,
+                to: to ? to.toISOString() : undefined,
+              })
+            }
+          />
         </div>
 
         {isLoading || !data ? (
@@ -156,7 +142,7 @@ export default function DashboardPage() {
                 trend={
                   mrrTrend === undefined
                     ? undefined
-                    : { value: mrrTrend, label: 'vs. mês anterior' }
+                    : { value: mrrTrend, label: `vs. ${scaleWord} anterior` }
                 }
               />
               <KpiCard

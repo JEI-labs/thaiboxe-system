@@ -72,7 +72,30 @@ export const DATE_PRESETS: Array<{
       to: moment().endOf('month').toDate(),
     }),
   },
+  { label: 'Últimos 3 meses', getRange: () => lastMonths(3) },
+  { label: 'Últimos 6 meses', getRange: () => lastMonths(6) },
+  { label: 'Últimos 12 meses', getRange: () => lastMonths(12) },
 ];
+
+/**
+ * Conta o mês corrente: "últimos 12 meses" vai do dia 1 de onze meses atrás
+ * até hoje, o que dá doze meses fechados no gráfico. Sem o `startOf`, sobrava
+ * um mês pela metade na ponta e o painel desenhava treze colunas.
+ */
+function lastMonths(months: number): { from: Date; to: Date } {
+  return {
+    from: moment()
+      .subtract(months - 1, 'months')
+      .startOf('month')
+      .toDate(),
+    to: moment().toDate(),
+  };
+}
+
+/** Um ano até hoje — o padrão do painel. */
+export function getLastYearRange(): { from: Date; to: Date } {
+  return lastMonths(12);
+}
 
 /** Período padrão das telas com filtro de data. */
 export const getDefaultDateRange = (): { from: Date; to: Date } => ({

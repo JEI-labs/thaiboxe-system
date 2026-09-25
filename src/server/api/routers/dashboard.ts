@@ -14,8 +14,10 @@ import type { EGraduation, EPaymentMethod } from '@prisma/client';
 import {
   addDays,
   differenceInCalendarDays,
+  endOfDay,
   endOfMonth,
   format,
+  startOfDay,
   startOfMonth,
   subMonths,
 } from 'date-fns';
@@ -35,10 +37,44 @@ import { ptBR } from 'date-fns/locale';
 
 const CENTS = 100;
 
-/** Meses do período, do mais antigo para o mais novo. */
-function monthBuckets(months: number, now: Date) {
+/** Até aqui a série sai em dias; passando disso, em meses. */
+const DAY_SCALE_LIMIT = 62;
+
+/** Teto de colunas do gráfico: além disso vira uma cerca ilegível. */
+const MAX_MONTH_BUCKETS = 36;
+
+type Bucket = { key: string; label: string; start: Date; end: Date };
+
+/**
+ * Fatia o período escolhido. Um intervalo de duas semanas em colunas mensais
+ * seria um ponto só, e dois anos em colunas diárias seriam 700 barras — a
+ * escala acompanha o que foi pedido.
+ */
+function periodBuckets(from: Date, to: Date): Array<Bucket> {
+  const days = differenceInCalendarDays(to, from);
+
+  if (days <= DAY_SCALE_LIMIT) {
+    return Array.from({ length: Math.max(days, 0) + 1 }).map((_, index) => {
+      const reference = addDays(startOfDay(from), index);
+      return {
+        key: format(reference, 'yyyy-MM-dd'),
+        label: format(reference, 'dd/MM', { locale: ptBR }),
+        start: reference,
+        end: endOfDay(reference),
+      };
+    });
+  }
+
+  const last = startOfMonth(to);
+  const first = startOfMonth(from);
+  const span =
+    (last.getFullYear() - first.getFullYear()) * 12 +
+    (last.getMonth() - first.getMonth()) +
+    1;
+  const months = Math.min(span, MAX_MONTH_BUCKETS);
+
   return Array.from({ length: months }).map((_, index) => {
-    const reference = startOfMonth(subMonths(now, months - 1 - index));
+    const reference = startOfMonth(subMonths(last, months - 1 - index));
     return {
       key: format(reference, 'yyyy-MM'),
       label: format(reference, 'MMM/yy', { locale: ptBR }),
@@ -56,8 +92,13 @@ export const dashboardRouter = createTRPCRouter({
   getOverview: protectedProcedure
     .input(
       z
-        .object({ months: z.number().min(3).max(24).default(12) })
-        .default({ months: 12 }),
+        .object({
+          /* O mesmo filtro das outras telas manda aqui. Sem `from`, é a
+             academia inteira desde o primeiro registro. */
+          from: z.string().optional(),
+          to: z.string().optional(),
+        })
+        .default({}),
     )
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
@@ -73,8 +114,13 @@ export const dashboardRouter = createTRPCRouter({
       const monthEnd = endOfMonth(now);
       const previousMonthStart = startOfMonth(subMonths(now, 1));
       const previousMonthEnd = endOfMonth(subMonths(now, 1));
-      const buckets = monthBuckets(input.months, now);
-      const windowStart = buckets[0]?.start ?? monthStart;
+      const rangeEnd = input.to ? endOfDay(new Date(input.to)) : now;
+      const rangeStart = input.from ? startOfDay(new Date(input.from)) : null;
+      /* Sem `from` a busca é aberta; com ele, começa no menor entre o
+         período escolhido e o mês corrente. */
+      const fetchStart = rangeStart
+        ? new Date(Math.min(rangeStart.getTime(), monthStart.getTime()))
+        : null;
 
       try {
         const [students, financeEntries, categories, messageLogs] =
@@ -90,7 +136,13 @@ export const dashboardRouter = createTRPCRouter({
               },
             }),
             ctx.prisma.financeEntry.findMany({
-              where: { userId, date: { gte: windowStart } },
+              /* Os cards de cima falam sempre do mês corrente, mesmo com
+                 o filtro num período antigo — então a busca desce até o
+                 primeiro dos dois, senão "Resultado do mês" viria cortado. */
+              where: {
+                userId,
+                ...(fetchStart ? { date: { gte: fetchStart } } : {}),
+              },
               select: {
                 amount: true,
                 date: true,
@@ -272,6 +324,12 @@ export const dashboardRouter = createTRPCRouter({
         const monthEntries = paidEntries.filter(
           (entry) => entry.date >= monthStart && entry.date <= monthEnd,
         );
+
+        /* As distribuições acompanham o filtro; os KPIs acima, não. */
+        const rangeEntries = paidEntries.filter(
+          (entry) =>
+            (!rangeStart || entry.date >= rangeStart) && entry.date <= rangeEnd,
+        );
         const incomeThisMonth = monthEntries
           .filter((entry) => isIncome(entry.type))
           .reduce((total, entry) => total + entry.amount / CENTS, 0);
@@ -280,7 +338,7 @@ export const dashboardRouter = createTRPCRouter({
           .reduce((total, entry) => total + entry.amount / CENTS, 0);
 
         const expensesByCategory = Array.from(
-          monthEntries
+          rangeEntries
             .filter((entry) => entry.type === EFinanceEntryType.EXPENSE)
             .reduce((map, entry) => {
               const name =
@@ -293,7 +351,7 @@ export const dashboardRouter = createTRPCRouter({
           .sort((a, b) => b.amount - a.amount);
 
         const incomeByMethod = Array.from(
-          monthEntries
+          rangeEntries
             .filter((entry) => isIncome(entry.type))
             .reduce((map, entry) => {
               const method = entry.paymentMethod ?? 'NAO_INFORMADO';
@@ -308,11 +366,25 @@ export const dashboardRouter = createTRPCRouter({
           .sort((a, b) => b.amount - a.amount);
 
         /* ---------------------------------------------------------------- */
-        /* Séries mensais                                                    */
+        /* Séries do período                                                 */
         /* ---------------------------------------------------------------- */
 
+        /* Em "todas as datas" o começo é o primeiro movimento da academia:
+           abrir em janeiro de 1970 daria um gráfico de linha reta. */
+        const firstActivity = [
+          ...financeEntries.map((entry) => entry.date),
+          ...students.map((student) => student.createdAt),
+        ].reduce<Date | null>(
+          (earliest, date) => (!earliest || date < earliest ? date : earliest),
+          null,
+        );
+
+        const seriesStart =
+          rangeStart ?? firstActivity ?? startOfMonth(subMonths(rangeEnd, 11));
+        const buckets = periodBuckets(seriesStart, rangeEnd);
+
         const series = buckets.map((bucket) => {
-          /* MRR do mês = matrículas que estavam vigentes no fim dele. */
+          /* MRR do período = matrículas que estavam vigentes no fim dele. */
           const monthlyRecurring = students.reduce((total, student) => {
             const enrollment = student.enrollments.find(
               (e) => e.startDate <= bucket.end && e.endDate >= bucket.end,
@@ -320,13 +392,13 @@ export const dashboardRouter = createTRPCRouter({
             return total + (enrollment?.plan?.price ?? 0);
           }, 0);
 
-          const entriesOfMonth = paidEntries.filter(
+          const entriesOfBucket = paidEntries.filter(
             (entry) => entry.date >= bucket.start && entry.date <= bucket.end,
           );
-          const income = entriesOfMonth
+          const income = entriesOfBucket
             .filter((entry) => isIncome(entry.type))
             .reduce((total, entry) => total + entry.amount / CENTS, 0);
-          const expense = entriesOfMonth
+          const expense = entriesOfBucket
             .filter((entry) => entry.type === EFinanceEntryType.EXPENSE)
             .reduce((total, entry) => total + entry.amount / CENTS, 0);
 

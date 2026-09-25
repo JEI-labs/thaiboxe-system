@@ -107,6 +107,14 @@ function NoData({ text = 'Sem dados no período.' }: { text?: string }) {
   );
 }
 
+/**
+ * A série vem em dias quando o período escolhido é curto e em meses quando é
+ * longo — a chave do ponto ('2026-09' ou '2026-09-25') diz qual é.
+ */
+function scaleWord(series: Series): 'dia' | 'mês' {
+  return (series[0]?.month.length ?? 7) > 7 ? 'dia' : 'mês';
+}
+
 export function MrrChart({ series }: { series: Series }) {
   const config = {
     mrr: { label: 'MRR', color: 'hsl(var(--chart-1))' },
@@ -115,7 +123,7 @@ export function MrrChart({ series }: { series: Series }) {
   return (
     <ChartCard
       title="Receita recorrente (MRR)"
-      description="Soma das mensalidades vigentes ao fim de cada mês"
+      description={`Soma das mensalidades vigentes ao fim de cada ${scaleWord(series)}`}
     >
       <ChartContainer config={config} className="h-[220px] w-full">
         <AreaChart data={series} margin={{ left: 4, right: 8, top: 8 }}>
@@ -264,7 +272,7 @@ export function StudentsFlowChart({ series }: { series: Series }) {
   return (
     <ChartCard
       title="Entradas × saídas"
-      description="Alunos cadastrados e matrículas encerradas por mês"
+      description={`Alunos cadastrados e matrículas encerradas por ${scaleWord(series)}`}
     >
       <ChartContainer config={config} className="h-[220px] w-full">
         <BarChart data={series} margin={{ left: 4, right: 8, top: 8 }}>
@@ -479,10 +487,10 @@ export function ExpensesByCategoryChart({
   return (
     <ChartCard
       title="Despesas por categoria"
-      description="Lançamentos pagos no mês atual"
+      description="Lançamentos pagos no período escolhido"
     >
       {data.length === 0 ? (
-        <NoData text="Nenhuma despesa paga neste mês." />
+        <NoData text="Nenhuma despesa paga neste período." />
       ) : (
         <ChartContainer config={config} className="h-[220px] w-full">
           <BarChart
@@ -656,10 +664,10 @@ export function PaymentMethodChart({
   return (
     <ChartCard
       title="Recebimentos por forma de pagamento"
-      description="Entradas pagas no mês atual"
+      description="Entradas pagas no período escolhido"
     >
       {data.length === 0 ? (
-        <NoData text="Nenhuma entrada paga neste mês." />
+        <NoData text="Nenhuma entrada paga neste período." />
       ) : (
         <ChartContainer config={config} className="h-[220px] w-full">
           <BarChart
