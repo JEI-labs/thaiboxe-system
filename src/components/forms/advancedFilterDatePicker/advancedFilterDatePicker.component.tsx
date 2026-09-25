@@ -105,16 +105,20 @@ export const getDefaultDateRange = (): { from: Date; to: Date } => ({
 
 const toKey = (date?: Date) => (date ? moment(date).format('YYYY-MM-DD') : '');
 
+/** Sem intervalo escolhido, o filtro não está filtrando nada. */
+export const ALL_DATES_LABEL = 'Todas as datas';
+
 /**
  * Rótulo do botão: nome do atalho quando o intervalo bate com um deles,
  * senão as datas mesmo — assim dá para saber o que está sendo puxado sem
- * abrir o menu.
+ * abrir o menu. Sem intervalo, diz "Todas as datas" em vez do título da
+ * tela: o botão mostra o estado do filtro, não o nome dele.
  */
 const describeRange = (
   range: AdvancedFilterDatePickerType | undefined,
   fallback: string,
 ): string => {
-  if (!range?.from && !range?.to) return fallback;
+  if (!range?.from && !range?.to) return ALL_DATES_LABEL;
 
   const preset = DATE_PRESETS.find((item) => {
     const candidate = item.getRange();
@@ -239,7 +243,7 @@ export function AdvancedFilterDatePicker({
         <DropdownMenuContent align="start" className="w-64">
           <div className="flex items-center justify-between">
             <DropdownMenuLabel>
-              {props?.description ?? 'Filtrar por data'}
+              {props?.description ?? props.title}
             </DropdownMenuLabel>
             {showDeleteButton && (
               <Button variant="ghost" size="icon" onClick={props.onDelete}>
@@ -253,7 +257,10 @@ export function AdvancedFilterDatePicker({
           <DropdownMenuItem
             onSelect={() => apply({ from: undefined, to: undefined })}
           >
-            Todas as datas
+            <span className="flex-1">{ALL_DATES_LABEL}</span>
+            {currentLabel === ALL_DATES_LABEL && (
+              <Check className="size-4" aria-hidden />
+            )}
           </DropdownMenuItem>
 
           {DATE_PRESETS.map((preset) => (
