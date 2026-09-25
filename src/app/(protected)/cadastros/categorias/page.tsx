@@ -16,10 +16,7 @@ import { ListToolbar } from '@/components/listToolbar/listToolbar.component';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
 import { SheetEditCategory } from '@/components/modals/category/editCategory/editCategory.component';
-import {
-  AdvancedFilterDatePicker,
-  getDefaultDateRange,
-} from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
+import { AdvancedFilterDatePicker } from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
 import { Calendar } from 'lucide-react';
 import { AdvancedFilterCheckbox } from '@/components/forms/advancedFilterCheckbox/advancedFilterCheckbox.component';
 import { AdvancedFilterCheckboxType } from '@/components/forms/advancedFilterCheckbox/advancedFilterCheckbox.types';
@@ -36,18 +33,15 @@ const STATUS_OPTIONS: Array<AdvancedFilterCheckboxType> = [
   { id: 'INACTIVE', label: 'Inativas' },
 ];
 
-const defaultRange = getDefaultDateRange();
-
 export default function CategoriesPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
 
-  // filtros adicionais
-  const [dateFrom, setDateFrom] = useState<string>(
-    defaultRange.from.toISOString(),
-  );
-  const [dateTo, setDateTo] = useState<string>(defaultRange.to.toISOString());
+  /* Cadastro não é movimento: a lista abre com tudo o que existe, e a data
+     só entra na busca quando alguém escolher um período. */
+  const [dateFrom, setDateFrom] = useState<string>('');
+  const [dateTo, setDateTo] = useState<string>('');
 
   const [selectedStatuses, setSelectedStatuses] = useState<
     Array<ECategoryStatus>
@@ -128,7 +122,6 @@ export default function CategoriesPage() {
           filters={
             <>
               <AdvancedFilterDatePicker
-                defaultValue={defaultRange}
                 title="Buscar datas"
                 onChange={({ from, to }) => {
                   setDateFrom(from ? from.toISOString() : '');
