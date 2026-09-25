@@ -12,6 +12,7 @@ import {
   Mail,
   Phone,
   Repeat,
+  UserMinus,
   Wallet,
 } from 'lucide-react';
 
@@ -33,6 +34,7 @@ import { LoadingContent } from '@/components/LoadingContent';
 import { SheetEditStudent } from '@/components/modals/student/EditStudent/sheetEditStudent.component';
 import { RegisterPaymentDialog } from '@/components/modals/payments/registerPayment/registerPaymentDialog.component';
 import { ChangePlanDialog } from '@/components/modals/students/changePlan/changePlanDialog.component';
+import { CancelEnrollmentDialog } from '@/components/modals/students/cancelEnrollment/cancelEnrollmentDialog.component';
 import { api } from '@/trpc/react';
 import { cn } from '@/lib/utils';
 import {
@@ -64,6 +66,7 @@ export default function StudentDetailPage({
   const [editOpen, setEditOpen] = useState(false);
   const [payOpen, setPayOpen] = useState(false);
   const [changePlanOpen, setChangePlanOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const { data, isLoading, isError, refetch } =
     api.student.getDetailsByID.useQuery({ id });
@@ -149,6 +152,8 @@ export default function StudentDetailPage({
                         'bg-yellow-100 text-yellow-800',
                       student.status === 'ATRASADO' &&
                         'bg-red-100 text-red-800',
+                      student.status === 'SEM MATRÍCULA' &&
+                        'bg-muted text-muted-foreground',
                     )}
                   >
                     {student.status}
@@ -165,8 +170,18 @@ export default function StudentDetailPage({
               </Button>
               <Button variant="outline" onClick={() => setChangePlanOpen(true)}>
                 <Repeat className="mr-2 h-4 w-4" />
-                Trocar plano
+                {student.activeEnrollment ? 'Trocar plano' : 'Matricular'}
               </Button>
+              {student.activeEnrollment && (
+                <Button
+                  variant="ghost"
+                  className="text-destructive-text hover:text-destructive-text"
+                  onClick={() => setCancelOpen(true)}
+                >
+                  <UserMinus className="mr-2 h-4 w-4" />
+                  Cancelar matrícula
+                </Button>
+              )}
               <Button
                 variant="outline"
                 onClick={() => router.push(`/alunos/${student.id}/pagamentos`)}
@@ -412,12 +427,19 @@ export default function StudentDetailPage({
         onOpenChange={setPayOpen}
       />
 
+      <CancelEnrollmentDialog
+        studentId={student.id}
+        studentName={student.name}
+        planName={student.planName}
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        onCancelled={refetch}
+      />
+
       <ChangePlanDialog
         studentId={student.id}
         studentName={student.name}
-        currentPlanId={
-          student.enrollments.find((enrollment) => enrollment.isActive)?.planId
-        }
+        currentPlanId={student.activeEnrollment?.planId}
         currentPlanName={student.planName}
         open={changePlanOpen}
         onOpenChange={setChangePlanOpen}

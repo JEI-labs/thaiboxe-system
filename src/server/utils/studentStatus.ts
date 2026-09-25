@@ -1,6 +1,7 @@
 import type { Enrollment, Payment, Plan } from '@prisma/client';
 
-export type StudentStatus = 'EM DIA' | 'PENDENTE' | 'ATRASADO';
+export type StudentStatus =
+  'EM DIA' | 'PENDENTE' | 'ATRASADO' | 'SEM MATRÍCULA';
 
 type EnrollmentWithPlan = Enrollment & { plan?: Plan | null };
 
@@ -14,6 +15,10 @@ export function deriveStudentStatus(
   activeEnrollment: EnrollmentWithPlan | null | undefined,
   now: Date = new Date(),
 ): StudentStatus {
+  /* Matrícula cancelada não é aluno em dia: sem contrato em vigor não há o
+     que estar em dia com. */
+  if (!activeEnrollment) return 'SEM MATRÍCULA';
+
   const enrollmentStart = activeEnrollment?.startDate ?? null;
   const enrollmentEnd = activeEnrollment?.endDate ?? null;
 

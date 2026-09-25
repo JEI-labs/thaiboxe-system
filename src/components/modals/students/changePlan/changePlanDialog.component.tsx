@@ -65,6 +65,10 @@ export function ChangePlanDialog({
 
   useResetOnChange([studentId, open], () => setPlanId(''));
 
+  /* Sem matrícula em vigor o diálogo é de matrícula, não de troca — mesma
+     mecânica, outro texto. */
+  const isEnrolling = !currentPlanId;
+
   const options = (plansData?.data ?? []).filter(
     (plan) => plan.id !== currentPlanId,
   );
@@ -106,10 +110,16 @@ export function ChangePlanDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Trocar plano</DialogTitle>
+          <DialogTitle>
+            {isEnrolling ? 'Matricular aluno' : 'Trocar plano'}
+          </DialogTitle>
           <DialogDescription>
             {studentName}
-            {currentPlanName ? ` · hoje no plano ${currentPlanName}` : ''}
+            {isEnrolling
+              ? ' · sem matrícula em vigor'
+              : currentPlanName
+                ? ` · hoje no plano ${currentPlanName}`
+                : ''}
           </DialogDescription>
         </DialogHeader>
 
@@ -138,14 +148,21 @@ export function ChangePlanDialog({
             {/* O que a confirmação faz, em português, antes de fazer. */}
             {selected && (
               <ul className="bg-muted/60 text-muted-foreground space-y-1 rounded-xl px-4 py-3 text-sm">
-                <li>
-                  A matrícula {currentPlanName ? `de ${currentPlanName} ` : ''}
-                  encerra hoje e a do {selected.name} começa.
-                </li>
-                <li>
-                  Parcelas ainda não vencidas do plano anterior são canceladas;
-                  as atrasadas continuam a ser cobradas.
-                </li>
+                {isEnrolling ? (
+                  <li>A matrícula no {selected.name} começa hoje.</li>
+                ) : (
+                  <>
+                    <li>
+                      A matrícula{' '}
+                      {currentPlanName ? `de ${currentPlanName} ` : ''}
+                      encerra hoje e a do {selected.name} começa.
+                    </li>
+                    <li>
+                      Parcelas ainda não vencidas do plano anterior são
+                      canceladas; as atrasadas continuam a ser cobradas.
+                    </li>
+                  </>
+                )}
                 <li>
                   {amounts.length === 1
                     ? `Gera 1 parcela de ${maskBRL((amounts[0] ?? 0) / 100, true)}, já paga.`
@@ -169,7 +186,7 @@ export function ChangePlanDialog({
             {changePlan.isPending && (
               <Loader2 className="mr-2 size-4 animate-spin" />
             )}
-            Trocar plano
+            {isEnrolling ? 'Matricular' : 'Trocar plano'}
           </Button>
         </DialogFooter>
       </DialogContent>

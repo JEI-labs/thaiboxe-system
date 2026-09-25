@@ -643,6 +643,75 @@ export const studentRouter = createTRPCRouter({
       }
     }),
 
+  /**
+   * Cancela a matrícula valendo de hoje. O aluno continua cadastrado, com todo
+   * o histórico: cancelar não é excluir. Fica sem plano em vigor até alguém
+   * matriculá-lo de novo, e é isso que o status "SEM MATRÍCULA" mostra.
+   *
+   * As parcelas ainda por vencer somem junto — cobrar mensalidade de quem não
+   * treina mais seria erro de cobrança. As atrasadas ficam: é aula que já
+   * aconteceu e não foi paga.
+   */
+  cancelEnrollment: protectedProcedure
+    .input(z.object({ studentId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) {
+        throw new TRPCError({
+          code: 'UNAUTHORIZED',
+          message: 'Não autorizado',
+        });
+      }
+
+      const student = await ctx.prisma.student.findFirst({
+        where: { id: input.studentId, userId },
+        include: { enrollments: { where: { isActive: true } } },
+      });
+
+      if (!student) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'Aluno não encontrado',
+        });
+      }
+
+      if (student.enrollments.length === 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Este aluno não tem matrícula ativa.',
+        });
+      }
+
+      const now = new Date();
+
+      try {
+        const cancelled = await ctx.prisma.$transaction(async (tx) => {
+          await tx.enrollment.updateMany({
+            where: { studentId: student.id, isActive: true },
+            data: { isActive: false, endDate: now },
+          });
+
+          const removed = await tx.payment.deleteMany({
+            where: {
+              studentId: student.id,
+              status: PaymentStatus.PENDING,
+              dueDate: { gte: now },
+            },
+          });
+
+          return removed.count;
+        });
+
+        return { ok: true, cancelled };
+      } catch (error) {
+        console.error('Erro ao cancelar a matrícula:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Não foi possível cancelar a matrícula',
+        });
+      }
+    }),
+
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {

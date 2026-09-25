@@ -7,7 +7,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { CreditCard, Edit2, MessageCircle, Repeat, Trash2 } from 'lucide-react';
+import {
+  CreditCard,
+  Edit2,
+  MessageCircle,
+  Repeat,
+  Trash2,
+  UserMinus,
+} from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -22,6 +29,7 @@ import { RowActions } from '@/components/dataTable/rowActions.component';
 import { Button } from '@/components/ui/button';
 import { RegisterPaymentDialog } from '@/components/modals/payments/registerPayment/registerPaymentDialog.component';
 import { ChangePlanDialog } from '@/components/modals/students/changePlan/changePlanDialog.component';
+import { CancelEnrollmentDialog } from '@/components/modals/students/cancelEnrollment/cancelEnrollmentDialog.component';
 import ConfirmDeleteDialog from '@/components/confirmDeleteDialog/confirmDeleteDialog.component';
 import { cn } from '@/lib/utils';
 import { getInitials } from '@/utils/masksUtils';
@@ -42,6 +50,7 @@ export function StudentsTable({
     null,
   );
   const [changePlanFor, setChangePlanFor] = useState<StudentRow | null>(null);
+  const [cancelFor, setCancelFor] = useState<StudentRow | null>(null);
 
   if (students.length === 0) {
     return (
@@ -111,6 +120,8 @@ export function StudentsTable({
                         'bg-yellow-100 text-yellow-800',
                       student.status === 'ATRASADO' &&
                         'bg-red-100 text-red-800',
+                      student.status === 'SEM MATRÍCULA' &&
+                        'bg-muted text-muted-foreground',
                     )}
                   >
                     {student.status}
@@ -165,10 +176,19 @@ export function StudentsTable({
                           router.push(`/alunos/${student.id}/pagamentos`),
                       },
                       {
-                        label: 'Trocar plano',
+                        label: student.planId ? 'Trocar plano' : 'Matricular',
                         icon: Repeat,
                         onSelect: () => setChangePlanFor(student),
                       },
+                      ...(student.planId
+                        ? [
+                            {
+                              label: 'Cancelar matrícula',
+                              icon: UserMinus,
+                              onSelect: () => setCancelFor(student),
+                            },
+                          ]
+                        : []),
                       {
                         label: 'Enviar mensagem',
                         icon: MessageCircle,
@@ -201,6 +221,16 @@ export function StudentsTable({
           studentName={payFor.name}
           open={Boolean(payFor)}
           onOpenChange={(open) => !open && setPayFor(null)}
+        />
+      )}
+
+      {cancelFor && (
+        <CancelEnrollmentDialog
+          studentId={cancelFor.id}
+          studentName={cancelFor.name}
+          planName={cancelFor.planName}
+          open={Boolean(cancelFor)}
+          onOpenChange={(open) => !open && setCancelFor(null)}
         />
       )}
 

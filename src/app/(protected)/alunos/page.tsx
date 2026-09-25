@@ -3,6 +3,7 @@
 import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
 import { useState } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
+import type { StudentStatus } from '@/server/utils/studentStatus';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { api } from '@/trpc/react';
@@ -28,6 +29,7 @@ const STATUS_OPTIONS: Array<AdvancedFilterCheckboxType> = [
   { id: 'EM DIA', label: 'Em Dia' },
   { id: 'PENDENTE', label: 'Pendente' },
   { id: 'ATRASADO', label: 'Atrasado' },
+  { id: 'SEM MATRÍCULA', label: 'Sem matrícula' },
 ];
 
 export default function StudentsPage() {
@@ -39,7 +41,7 @@ export default function StudentsPage() {
   const debouncedSearch = useDebounce(searchTerm, 500);
 
   const [selectedStatuses, setSelectedStatuses] = useState<
-    Array<'EM DIA' | 'PENDENTE' | 'ATRASADO'>
+    Array<StudentStatus>
   >([]);
   // Sem período pré-selecionado: a lista abre com todos os alunos, e a data
   // só entra na busca quando o professor escolher um intervalo.
@@ -137,9 +139,7 @@ export default function StudentsPage() {
                 onDelete={() => setSelectedStatuses([])}
                 onChange={(next) => {
                   setSelectedStatuses(
-                    next.map(
-                      (item) => item.id as 'EM DIA' | 'PENDENTE' | 'ATRASADO',
-                    ),
+                    next.map((item) => item.id as StudentStatus),
                   );
                 }}
                 showCounterIndicator

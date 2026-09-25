@@ -181,6 +181,7 @@ export const dashboardRouter = createTRPCRouter({
           'EM DIA': 0,
           'PENDENTE': 0,
           'ATRASADO': 0,
+          'SEM MATRÍCULA': 0,
         };
         const byGraduation = new Map<EGraduation | 'SEM_GRADUACAO', number>();
         const byPlan = new Map<string, { students: number; mrr: number }>();

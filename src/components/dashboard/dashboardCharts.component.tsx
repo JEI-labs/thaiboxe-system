@@ -68,6 +68,7 @@ const STATUS_COLOR: Record<string, string> = {
   'EM DIA': 'hsl(142 71% 45%)',
   'PENDENTE': 'hsl(38 92% 50%)',
   'ATRASADO': 'hsl(0 72% 51%)',
+  'SEM MATRÍCULA': 'hsl(240 5% 65%)',
 };
 
 function ChartCard({
