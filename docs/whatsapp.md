@@ -214,11 +214,14 @@ envios por execução) levaria dias para drenar. A VM do Evolution já está de 
    node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
    ```
 
-2. Na VM, adicione a linha no crontab (`crontab -e`):
+2. Na VM, adicione a linha no crontab do usuário `ubuntu` (`crontab -e`):
 
    ```cron
-   0 * * * * curl -fsS -H "Authorization: Bearer SEU_SEGREDO" https://SEU-APP.vercel.app/api/cron/whatsapp >> /var/log/whatsapp-cron.log 2>&1
+   0 * * * * curl -fsS -H "Authorization: Bearer SEU_SEGREDO" https://SEU-APP.vercel.app/api/cron/whatsapp >> $HOME/whatsapp-cron.log 2>&1
    ```
+
+   O log vai para a home porque `/var/log` é de root: num crontab de usuário a
+   linha falharia calada, sem deixar nem o registro do erro.
 
    De hora em hora. Executar demais não duplica nada: cada aluno recebe no
    máximo uma mensagem por dia de cada tipo, e a trava é o próprio
