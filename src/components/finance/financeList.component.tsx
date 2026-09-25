@@ -56,7 +56,11 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
     if (onDelete) await onDelete(id);
   };
 
-  const hasActions = Boolean(onEdit || onDelete);
+  /* A coluna só existe se alguma linha da página puder ser mexida: numa
+     página só de mensalidades ela seria uma fileira de traços. */
+  const hasActions =
+    Boolean(onEdit || onDelete) &&
+    entries.some((entry) => entry.type !== EFinanceEntryType.STUDENTS);
 
   return (
     <div className="w-full">

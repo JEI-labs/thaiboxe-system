@@ -47,6 +47,10 @@ export const CategoriesList: React.FC<ICategoryList> = ({
     setSelectedCategoryId(null);
   };
 
+  /* Sem nenhuma categoria editável na página, a coluna de ações fica vazia
+     — é o caso de quem só tem a categoria fixa do sistema. */
+  const hasActions = categories.some((cat) => !cat.isFixed);
+
   return (
     <div className="w-full">
       <div className="mt-4">
@@ -66,7 +70,9 @@ export const CategoriesList: React.FC<ICategoryList> = ({
                   <TableHead>Descrição</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Criada em</TableHead>
-                  <TableHead className="w-[70px] text-right">Ações</TableHead>
+                  {hasActions && (
+                    <TableHead className="w-[70px] text-right">Ações</TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
 
@@ -102,30 +108,32 @@ export const CategoriesList: React.FC<ICategoryList> = ({
                       {formatDate(cat.createdAt)}
                     </TableCell>
 
-                    <TableCell className="text-right">
-                      {/* categorias fixas do sistema não podem ser alteradas;
-                          sem ações, RowActions não renderiza nada */}
-                      <RowActions
-                        srLabel={`Ações da categoria ${cat.name}`}
-                        actions={
-                          cat.isFixed
-                            ? []
-                            : [
-                                {
-                                  label: 'Editar',
-                                  icon: Edit2Icon,
-                                  onSelect: () => onEdit(cat.id),
-                                },
-                                {
-                                  label: 'Excluir',
-                                  icon: Trash2,
-                                  destructive: true,
-                                  onSelect: () => handleDeleteClick(cat.id),
-                                },
-                              ]
-                        }
-                      />
-                    </TableCell>
+                    {hasActions && (
+                      <TableCell className="text-right">
+                        {/* categorias fixas do sistema não podem ser alteradas;
+                            sem ações, RowActions não renderiza nada */}
+                        <RowActions
+                          srLabel={`Ações da categoria ${cat.name}`}
+                          actions={
+                            cat.isFixed
+                              ? []
+                              : [
+                                  {
+                                    label: 'Editar',
+                                    icon: Edit2Icon,
+                                    onSelect: () => onEdit(cat.id),
+                                  },
+                                  {
+                                    label: 'Excluir',
+                                    icon: Trash2,
+                                    destructive: true,
+                                    onSelect: () => handleDeleteClick(cat.id),
+                                  },
+                                ]
+                          }
+                        />
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
