@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/table';
 import { LoadingContent } from '@/components/LoadingContent';
 import { SheetEditStudent } from '@/components/modals/student/EditStudent/sheetEditStudent.component';
+import { RowActions } from '@/components/dataTable/rowActions.component';
 import { RegisterPaymentDialog } from '@/components/modals/payments/registerPayment/registerPaymentDialog.component';
 import { ChangePlanDialog } from '@/components/modals/students/changePlan/changePlanDialog.component';
 import { CancelEnrollmentDialog } from '@/components/modals/students/cancelEnrollment/cancelEnrollmentDialog.component';
@@ -42,6 +43,7 @@ import {
   maskCellphone,
   maskDecimalWithAcronym,
 } from '@/utils/masksUtils';
+import { formatPaymentMoment } from '@/utils/dateUtils';
 
 const formatDate = (value: Date | string | null | undefined) =>
   value ? format(new Date(value), 'dd/MM/yyyy') : '—';
@@ -117,82 +119,107 @@ export default function StudentDetailPage({
       {/* Cabeçalho + graduação, lado a lado a partir de lg */}
       <div className="mb-6 flex flex-col gap-4 lg:flex-row">
         <Card className="flex-1">
-          <CardContent className="flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-4">
-              <Avatar className="border-border h-24 w-24 shrink-0 border sm:h-28 sm:w-28">
-                <AvatarImage
-                  src={student.avatar || undefined}
-                  className="h-full w-full rounded-full object-cover"
-                />
-                <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-                  {getInitials(student.name)}
-                </AvatarFallback>
-              </Avatar>
+          <CardContent className="flex flex-col gap-5 p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 items-center gap-4">
+                <Avatar className="border-border h-20 w-20 shrink-0 border">
+                  <AvatarImage
+                    src={student.avatar || undefined}
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                  <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                    {getInitials(student.name)}
+                  </AvatarFallback>
+                </Avatar>
 
-              <div>
-                <h1 className="text-2xl font-semibold">{student.name}</h1>
-                <div className="text-muted-foreground mt-1 flex flex-col gap-1 text-sm sm:flex-row sm:gap-4">
-                  <span className="flex items-center gap-1">
-                    <Mail className="h-3 w-3" /> {student.email}
-                  </span>
-                  {student.phone && (
-                    <span className="flex items-center gap-1">
-                      <Phone className="h-3 w-3" />{' '}
-                      {maskCellphone(student.phone)}
+                <div className="min-w-0">
+                  <h1 className="truncate text-2xl font-semibold">
+                    {student.name}
+                  </h1>
+
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <span
+                      className={cn(
+                        'rounded-full px-2 py-1 text-xs font-medium',
+                        student.status === 'EM DIA' &&
+                          'bg-green-100 text-green-800',
+                        student.status === 'PENDENTE' &&
+                          'bg-yellow-100 text-yellow-800',
+                        student.status === 'ATRASADO' &&
+                          'bg-red-100 text-red-800',
+                        student.status === 'SEM MATRÍCULA' &&
+                          'bg-muted text-muted-foreground',
+                      )}
+                    >
+                      {student.status}
                     </span>
-                  )}
+                    <Badge variant="secondary">{student.planName}</Badge>
+                  </div>
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <span
-                    className={cn(
-                      'rounded-full px-2 py-1 text-xs font-medium',
-                      student.status === 'EM DIA' &&
-                        'bg-green-100 text-green-800',
-                      student.status === 'PENDENTE' &&
-                        'bg-yellow-100 text-yellow-800',
-                      student.status === 'ATRASADO' &&
-                        'bg-red-100 text-red-800',
-                      student.status === 'SEM MATRÍCULA' &&
-                        'bg-muted text-muted-foreground',
-                    )}
-                  >
-                    {student.status}
-                  </span>
-                  <Badge variant="secondary">{student.planName}</Badge>
-                </div>
+              </div>
+
+              {/* Três ações à vista e o resto no menu: com cinco botões lado a
+                  lado nenhum deles era o principal, e a linha quebrava. */}
+              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                <Button onClick={() => setPayOpen(true)}>
+                  <Wallet className="mr-2 h-4 w-4" />
+                  Registrar pagamento
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={() => setChangePlanOpen(true)}
+                >
+                  <Repeat className="mr-2 h-4 w-4" />
+                  {student.activeEnrollment ? 'Trocar plano' : 'Matricular'}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    router.push(`/alunos/${student.id}/pagamentos`)
+                  }
+                >
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Pagamentos
+                </Button>
+
+                <RowActions
+                  srLabel={`Mais ações de ${student.name}`}
+                  actions={[
+                    {
+                      label: 'Editar dados',
+                      icon: Edit2,
+                      onSelect: () => setEditOpen(true),
+                    },
+                    ...(student.activeEnrollment
+                      ? [
+                          {
+                            label: 'Cancelar matrícula',
+                            icon: UserMinus,
+                            destructive: true,
+                            onSelect: () => setCancelOpen(true),
+                          },
+                        ]
+                      : []),
+                  ]}
+                />
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={() => setPayOpen(true)}>
-                <Wallet className="mr-2 h-4 w-4" />
-                Registrar pagamento
-              </Button>
-              <Button variant="outline" onClick={() => setChangePlanOpen(true)}>
-                <Repeat className="mr-2 h-4 w-4" />
-                {student.activeEnrollment ? 'Trocar plano' : 'Matricular'}
-              </Button>
-              {student.activeEnrollment && (
-                <Button
-                  variant="ghost"
-                  className="text-destructive-text hover:text-destructive-text"
-                  onClick={() => setCancelOpen(true)}
-                >
-                  <UserMinus className="mr-2 h-4 w-4" />
-                  Cancelar matrícula
-                </Button>
+            {/* Contato em linha própria: espremido ao lado do nome, o telefone
+                quebrava no meio do número. */}
+            <div className="text-muted-foreground flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+              <span className="flex min-w-0 items-center gap-2">
+                <Mail className="h-4 w-4 shrink-0" />
+                <span className="truncate">{student.email}</span>
+              </span>
+              {student.phone && (
+                <span className="flex items-center gap-2 whitespace-nowrap">
+                  <Phone className="h-4 w-4 shrink-0" />
+                  {maskCellphone(student.phone)}
+                </span>
               )}
-              <Button
-                variant="outline"
-                onClick={() => router.push(`/alunos/${student.id}/pagamentos`)}
-              >
-                <CreditCard className="mr-2 h-4 w-4" />
-                Histórico
-              </Button>
-              <Button variant="outline" onClick={() => setEditOpen(true)}>
-                <Edit2 className="mr-2 h-4 w-4" />
-                Editar
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -358,7 +385,7 @@ export default function StudentDetailPage({
                       </TableCell>
                       <TableCell className="text-muted-foreground">
                         {payment.status === 'PAID'
-                          ? formatDate(payment.paymentDate)
+                          ? formatPaymentMoment(payment.paymentDate)
                           : '—'}
                       </TableCell>
                     </TableRow>

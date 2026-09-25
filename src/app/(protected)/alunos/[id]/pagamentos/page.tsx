@@ -22,6 +22,7 @@ import { AppPagination } from '@/components/appPagination/appPagination.componen
 import { ListSkeleton } from '@/components/skeletons/listSkeleton.component';
 import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
 import { useToast } from '@/hooks/use-toast';
+import { formatPaymentMoment } from '@/utils/dateUtils';
 import { api } from '@/trpc/react';
 
 const STATUS_TABS = [
@@ -172,7 +173,7 @@ export default function StudentPaymentsPage({
                           </TableCell>
                           <TableCell className="text-muted-foreground">
                             {payment.status === 'PAID'
-                              ? formatDate(payment.paymentDate)
+                              ? formatPaymentMoment(payment.paymentDate)
                               : '—'}
                           </TableCell>
                           <TableCell className="text-right">

@@ -18,6 +18,7 @@ import { RowActions } from '@/components/dataTable/rowActions.component';
 import { IFinanceEntriesList } from './financeList.types';
 import { api } from '@/trpc/react';
 import { maskDecimalWithAcronym } from '@/utils/masksUtils';
+import { formatPaymentMoment } from '@/utils/dateUtils';
 import { cn } from '@/lib/utils';
 import ConfirmDeleteDialog from '../confirmDeleteDialog/confirmDeleteDialog.component';
 
@@ -116,7 +117,7 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
                 return (
                   <TableRow key={entry.id}>
                     <TableCell className="text-muted-foreground whitespace-nowrap">
-                      {new Date(entry.date).toLocaleDateString('pt-BR')}
+                      {formatPaymentMoment(entry.date)}
                     </TableCell>
 
                     <TableCell>
