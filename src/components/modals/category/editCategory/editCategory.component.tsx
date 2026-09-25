@@ -2,7 +2,6 @@
 
 import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
 import React, { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Form } from '@/components/ui/form';
@@ -127,17 +126,6 @@ export const SheetEditCategory: React.FC<ISheetEditCategory> = ({
               ]}
             />
           </div>
-        </div>
-
-        <div className="mb-4 flex w-full justify-end">
-          <Button
-            type="submit"
-            disabled={updateCategory.isPending || form.formState.isSubmitting}
-          >
-            {updateCategory.isPending
-              ? 'Editando categoria...'
-              : 'Editar categoria'}
-          </Button>
         </div>
       </FormDrawer>
     </Form>

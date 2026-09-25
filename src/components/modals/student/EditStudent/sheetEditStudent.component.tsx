@@ -2,7 +2,6 @@
 
 import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
 import React, { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { Form } from '@/components/ui/form';
@@ -173,15 +172,6 @@ export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
               maxLength={15}
             />
           </div>
-        </div>
-
-        <div className="mb-4 flex justify-end">
-          <Button
-            type="submit"
-            disabled={updateStudent.isPending || form.formState.isSubmitting}
-          >
-            {updateStudent.isPending ? 'Editando aluno...' : 'Editar aluno'}
-          </Button>
         </div>
       </FormDrawer>
     </Form>
