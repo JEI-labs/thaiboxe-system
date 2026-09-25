@@ -19,6 +19,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { RowActions } from '@/components/dataTable/rowActions.component';
+import { Button } from '@/components/ui/button';
+import { RegisterPaymentDialog } from '@/components/modals/payments/registerPayment/registerPaymentDialog.component';
 import ConfirmDeleteDialog from '@/components/confirmDeleteDialog/confirmDeleteDialog.component';
 import { cn } from '@/lib/utils';
 import { getInitials } from '@/utils/masksUtils';
@@ -35,6 +37,9 @@ export function StudentsTable({
     id: string;
     name: string;
   } | null>(null);
+  const [payFor, setPayFor] = useState<{ id: string; name: string } | null>(
+    null,
+  );
 
   if (students.length === 0) {
     return (
@@ -56,6 +61,7 @@ export function StudentsTable({
               <TableHead>Plano</TableHead>
               <TableHead>Graduação</TableHead>
               <TableHead>Matriculado em</TableHead>
+              <TableHead className="w-[150px]">Pagamento</TableHead>
               <TableHead className="w-[70px] text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -128,6 +134,21 @@ export function StudentsTable({
                     : '—'}
                 </TableCell>
 
+                {/* Dar baixa na mensalidade é o que mais se faz nesta tela,
+                    então fica como botão na linha e não escondido no menu. */}
+                <TableCell onClick={(event) => event.stopPropagation()}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      setPayFor({ id: student.id, name: student.name })
+                    }
+                  >
+                    <CreditCard className="mr-2 size-4" />
+                    Registrar
+                  </Button>
+                </TableCell>
+
                 <TableCell
                   className="text-right"
                   onClick={(event) => event.stopPropagation()}
@@ -136,7 +157,7 @@ export function StudentsTable({
                     srLabel={`Ações de ${student.name}`}
                     actions={[
                       {
-                        label: 'Pagamentos',
+                        label: 'Histórico de pagamentos',
                         icon: CreditCard,
                         onSelect: () =>
                           router.push(`/alunos/${student.id}/pagamentos`),
@@ -166,6 +187,15 @@ export function StudentsTable({
           </TableBody>
         </Table>
       </div>
+
+      {payFor && (
+        <RegisterPaymentDialog
+          studentId={payFor.id}
+          studentName={payFor.name}
+          open={Boolean(payFor)}
+          onOpenChange={(open) => !open && setPayFor(null)}
+        />
+      )}
 
       {messageTo && (
         <SendMessageDialog

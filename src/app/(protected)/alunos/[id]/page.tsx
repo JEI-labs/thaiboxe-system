@@ -5,7 +5,14 @@ import { GRADUATIONS } from '@/common/constants/graduations';
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
-import { ArrowLeft, CreditCard, Edit2, Mail, Phone } from 'lucide-react';
+import {
+  ArrowLeft,
+  CreditCard,
+  Edit2,
+  Mail,
+  Phone,
+  Wallet,
+} from 'lucide-react';
 
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -23,6 +30,7 @@ import {
 } from '@/components/ui/table';
 import { LoadingContent } from '@/components/LoadingContent';
 import { SheetEditStudent } from '@/components/modals/student/EditStudent/sheetEditStudent.component';
+import { RegisterPaymentDialog } from '@/components/modals/payments/registerPayment/registerPaymentDialog.component';
 import { api } from '@/trpc/react';
 import { cn } from '@/lib/utils';
 import {
@@ -52,6 +60,7 @@ export default function StudentDetailPage({
   const router = useRouter();
 
   const [editOpen, setEditOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
 
   const { data, isLoading, isError, refetch } =
     api.student.getDetailsByID.useQuery({ id });
@@ -147,11 +156,16 @@ export default function StudentDetailPage({
             </div>
 
             <div className="flex flex-wrap gap-2">
+              <Button onClick={() => setPayOpen(true)}>
+                <Wallet className="mr-2 h-4 w-4" />
+                Registrar pagamento
+              </Button>
               <Button
+                variant="outline"
                 onClick={() => router.push(`/alunos/${student.id}/pagamentos`)}
               >
                 <CreditCard className="mr-2 h-4 w-4" />
-                Pagamentos
+                Histórico
               </Button>
               <Button variant="outline" onClick={() => setEditOpen(true)}>
                 <Edit2 className="mr-2 h-4 w-4" />
@@ -383,6 +397,13 @@ export default function StudentDetailPage({
         setIsOpen={setEditOpen}
         refetch={refetch}
         studentId={student.id}
+      />
+
+      <RegisterPaymentDialog
+        studentId={student.id}
+        studentName={student.name}
+        open={payOpen}
+        onOpenChange={setPayOpen}
       />
     </div>
   );

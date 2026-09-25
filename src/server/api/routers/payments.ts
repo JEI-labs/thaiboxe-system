@@ -5,7 +5,7 @@ import {
   PaymentStatus,
 } from '@prisma/client';
 import { createTRPCRouter, protectedProcedure } from '../trpc';
-import { calculateDiscount } from './promotions';
+import { calculateDiscount } from '@/utils/discountUtils';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { format } from 'date-fns';
@@ -128,11 +128,6 @@ export const paymentsRouter = createTRPCRouter({
           });
         }
 
-        const plan = student.enrollments[0].plan;
-
-        // Payment.amount fica em reais; FinanceEntry.amount, em centavos
-        const fullAmount = plan.price;
-
         let promotion = null;
         if (input.promotionId) {
           promotion = await ctx.prisma.promotion.findFirst({
@@ -145,17 +140,6 @@ export const paymentsRouter = createTRPCRouter({
             });
           }
         }
-
-        const discount = promotion
-          ? calculateDiscount(
-              fullAmount,
-              promotion.discountType,
-              promotion.discountValue,
-            )
-          : 0;
-
-        // a receita entra pelo que foi de fato recebido
-        const amount = (fullAmount - discount) * 100;
 
         const category = await ctx.prisma.category.findFirst({
           where: {
@@ -188,6 +172,23 @@ export const paymentsRouter = createTRPCRouter({
             message: 'Nenhuma parcela pendente encontrada para essa data.',
           });
         }
+
+        /* O valor é o da parcela, não o preço de hoje do plano: uma
+           mensalidade reajustada não pode reescrever o que já estava
+           combinado nas parcelas em aberto.
+           Payment.amount fica em reais; FinanceEntry.amount, em centavos. */
+        const fullAmount = Number(payment.amount);
+
+        const discount = promotion
+          ? calculateDiscount(
+              fullAmount,
+              promotion.discountType,
+              promotion.discountValue,
+            )
+          : 0;
+
+        // a receita entra pelo que foi de fato recebido
+        const amount = (fullAmount - discount) * 100;
 
         // Buscar todas as parcelas do aluno e identificar o número da atual
         const allPayments = await ctx.prisma.payment.findMany({
