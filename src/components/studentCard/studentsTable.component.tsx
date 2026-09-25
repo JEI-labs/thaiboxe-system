@@ -170,7 +170,7 @@ export function StudentsTable({
                     srLabel={`Ações de ${student.name}`}
                     actions={[
                       {
-                        label: 'Histórico de pagamentos',
+                        label: 'Pagamentos',
                         icon: CreditCard,
                         onSelect: () =>
                           router.push(`/alunos/${student.id}/pagamentos`),
