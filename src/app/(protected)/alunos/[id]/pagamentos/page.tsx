@@ -19,7 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
-import { LoadingContent } from '@/components/LoadingContent';
+import { ListSkeleton } from '@/components/skeletons/listSkeleton.component';
 import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/trpc/react';
@@ -85,19 +85,19 @@ export default function StudentPaymentsPage({
     <div className="w-full">
       <BreadcrumbUpdater
         items={[
-          { label: 'Home', href: '/dashboard' },
-          { label: 'Alunos', href: '/students' },
+          { label: 'Home', href: '/painel' },
+          { label: 'Alunos', href: '/alunos' },
           ...(studentName
-            ? [{ label: studentName, href: `/students/${id}` }]
+            ? [{ label: studentName, href: `/alunos/${id}` }]
             : []),
-          { label: 'Pagamentos', href: `/students/${id}/payments` },
+          { label: 'Pagamentos', href: `/alunos/${id}/pagamentos` },
         ]}
       />
 
       <Button
         variant="ghost"
         className="mb-4 -ml-2"
-        onClick={() => router.push(`/students/${id}`)}
+        onClick={() => router.push(`/alunos/${id}`)}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Voltar para o aluno
@@ -122,7 +122,7 @@ export default function StudentPaymentsPage({
 
       {isLoading ? (
         <div className="mt-6">
-          <LoadingContent textLoading="Carregando pagamentos..." />
+          <ListSkeleton columns={5} />
         </div>
       ) : (
         <>

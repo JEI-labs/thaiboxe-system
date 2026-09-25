@@ -17,6 +17,7 @@ import {
 } from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
 import { AdvancedFilterCheckbox } from '@/components/forms/advancedFilterCheckbox/advancedFilterCheckbox.component';
 import { Calendar } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import {
   EFinanceEntryStatus,
   EFinanceEntryType,
@@ -28,9 +29,9 @@ import { SheetEditExpenseEntry } from '@/components/modals/expenses/editExpenses
 import { SheetCreateExpenseEntry } from '@/components/modals/expenses/createExpenses/createExpenses.component';
 
 const breadcrumbItems = [
-  { label: 'Home', href: '/dashboard' },
-  { label: 'Financeiro', href: '/financial' },
-  { label: 'Despesas', href: '/financial/expenses' },
+  { label: 'Home', href: '/painel' },
+  { label: 'Financeiro', href: '/financeiro' },
+  { label: 'Despesas', href: '/financeiro/despesas' },
 ];
 
 const STATUS_OPTIONS = [
@@ -121,7 +122,10 @@ export default function ExpensesPage() {
           total={totalItems}
           totalLabel={['despesa', 'despesas']}
           action={
-            <Button onClick={() => setCreateOpen(true)}>Criar despesa</Button>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 size-4" />
+              Criar despesa
+            </Button>
           }
           filters={
             <>

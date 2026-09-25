@@ -47,7 +47,7 @@ export function StudentsTable({
 
   return (
     <>
-      <div className="rounded-lg border">
+      <div className="bg-card shadow-card overflow-hidden rounded-2xl">
         <Table>
           <TableHeader>
             <TableRow>
@@ -65,7 +65,7 @@ export function StudentsTable({
               <TableRow
                 key={student.id}
                 className="cursor-pointer"
-                onClick={() => router.push(`/students/${student.id}`)}
+                onClick={() => router.push(`/alunos/${student.id}`)}
               >
                 <TableCell>
                   <div className="flex items-center gap-3">
@@ -80,8 +80,8 @@ export function StudentsTable({
                     </Avatar>
                     <div className="min-w-0">
                       <Link
-                        href={`/students/${student.id}`}
-                        className="block truncate font-medium hover:underline"
+                        href={`/alunos/${student.id}`}
+                        className="block truncate font-medium"
                         onClick={(event) => event.stopPropagation()}
                       >
                         {student.name}
@@ -139,7 +139,7 @@ export function StudentsTable({
                         label: 'Pagamentos',
                         icon: CreditCard,
                         onSelect: () =>
-                          router.push(`/students/${student.id}/payments`),
+                          router.push(`/alunos/${student.id}/pagamentos`),
                       },
                       {
                         label: 'Enviar mensagem',

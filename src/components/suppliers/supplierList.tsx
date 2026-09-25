@@ -1,6 +1,7 @@
 'use client';
 
 import { EmptyState } from '@/components/emptyState/emptyState.component';
+import { ListSkeleton } from '@/components/skeletons/listSkeleton.component';
 import React, { useState } from 'react';
 import { Edit2Icon, Trash2 } from 'lucide-react';
 
@@ -38,7 +39,7 @@ const SuppliersList: React.FC<ISupplierList> = ({
   };
 
   if (isLoading) {
-    return <p className="py-4 text-center">Carregando fornecedores…</p>;
+    return <ListSkeleton columns={5} />;
   }
 
   if (suppliers.length === 0) {
@@ -52,7 +53,7 @@ const SuppliersList: React.FC<ISupplierList> = ({
 
   return (
     <>
-      <div className="mt-8 rounded-lg border">
+      <div className="bg-card mt-8 overflow-hidden rounded-2xl">
         <Table>
           <TableHeader>
             <TableRow>

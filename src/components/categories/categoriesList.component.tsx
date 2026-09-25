@@ -1,6 +1,7 @@
 'use client';
 
 import { EmptyState } from '@/components/emptyState/emptyState.component';
+import { ListSkeleton } from '@/components/skeletons/listSkeleton.component';
 import React, { useState } from 'react';
 import { Edit2Icon, Trash2 } from 'lucide-react';
 
@@ -49,19 +50,15 @@ export const CategoriesList: React.FC<ICategoryList> = ({
   return (
     <div className="w-full">
       <div className="mt-4">
-        <h1 className="text-md font-semibold">Categorias</h1>
-      </div>
-
-      <div className="mt-4">
         {isLoading ? (
-          <p className="py-4 text-center">Carregando categorias…</p>
+          <ListSkeleton columns={5} />
         ) : categories.length === 0 ? (
           <EmptyState
             title="Nenhuma categoria encontrada"
             description="Ajuste a busca e os filtros, ou crie a primeira categoria."
           />
         ) : (
-          <div className="rounded-lg border">
+          <div className="bg-card shadow-card overflow-hidden rounded-2xl">
             <Table>
               <TableHeader>
                 <TableRow>

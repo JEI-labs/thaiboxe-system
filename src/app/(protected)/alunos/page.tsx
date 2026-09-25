@@ -4,27 +4,24 @@ import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook
 import { useState } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { Button } from '@/components/ui/button';
-import { UserPlus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { api } from '@/trpc/react';
 import { StudentsTable } from '@/components/studentCard/studentsTable.component';
-import { LoadingContent } from '@/components/LoadingContent';
+import { ListSkeleton } from '@/components/skeletons/listSkeleton.component';
 import { toast } from '@/hooks/use-toast';
 import { SheetCreateStudent } from '@/components/modals/student/createStudent/sheetCreateStudent.component';
 import { SheetEditStudent } from '@/components/modals/student/EditStudent/sheetEditStudent.component';
 import { ListToolbar } from '@/components/listToolbar/listToolbar.component';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
-import {
-  AdvancedFilterDatePicker,
-  getDefaultDateRange,
-} from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
+import { AdvancedFilterDatePicker } from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
 import { Calendar } from 'lucide-react';
 import { AdvancedFilterCheckbox } from '@/components/forms/advancedFilterCheckbox/advancedFilterCheckbox.component';
 import { AdvancedFilterCheckboxType } from '@/components/forms/advancedFilterCheckbox/advancedFilterCheckbox.types';
 
 const breadcrumbItems = [
-  { label: 'Home', href: '/dashboard' },
-  { label: 'Alunos', href: '/students' },
+  { label: 'Home', href: '/painel' },
+  { label: 'Alunos', href: '/alunos' },
 ];
 
 const STATUS_OPTIONS: Array<AdvancedFilterCheckboxType> = [
@@ -32,8 +29,6 @@ const STATUS_OPTIONS: Array<AdvancedFilterCheckboxType> = [
   { id: 'PENDENTE', label: 'Pendente' },
   { id: 'ATRASADO', label: 'Atrasado' },
 ];
-
-const defaultRange = getDefaultDateRange();
 
 export default function StudentsPage() {
   const [showSheet, setShowSheet] = useState(false);
@@ -46,10 +41,10 @@ export default function StudentsPage() {
   const [selectedStatuses, setSelectedStatuses] = useState<
     Array<'EM DIA' | 'PENDENTE' | 'ATRASADO'>
   >([]);
-  const [dateFrom, setDateFrom] = useState<string>(
-    defaultRange.from.toISOString(),
-  );
-  const [dateTo, setDateTo] = useState<string>(defaultRange.to.toISOString());
+  // Sem período pré-selecionado: a lista abre com todos os alunos, e a data
+  // só entra na busca quando o professor escolher um intervalo.
+  const [dateFrom, setDateFrom] = useState<string>('');
+  const [dateTo, setDateTo] = useState<string>('');
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -111,14 +106,13 @@ export default function StudentsPage() {
           totalLabel={['aluno', 'alunos']}
           action={
             <Button onClick={() => setShowSheet(true)}>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Adicionar Aluno
+              <Plus className="mr-2 size-4" />
+              Adicionar aluno
             </Button>
           }
           filters={
             <>
               <AdvancedFilterDatePicker
-                defaultValue={defaultRange}
                 title="Buscar datas"
                 onChange={({ from, to }) => {
                   setDateFrom(from ? from.toISOString() : '');
@@ -156,7 +150,7 @@ export default function StudentsPage() {
         />
 
         {isLoading ? (
-          <LoadingContent textLoading="Carregando alunos..." />
+          <ListSkeleton columns={5} />
         ) : (
           <>
             <div className="mt-4">

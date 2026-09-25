@@ -1,5 +1,9 @@
 'use client';
 
+import { Package } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { PageIntro } from '@/components/pageIntro/pageIntro.component';
+
 import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
 import { useState } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
@@ -15,8 +19,9 @@ import { SheetCreatePlan } from '@/components/modals/plans/createPlan/sheetCreat
 import { toast } from '@/hooks/use-toast';
 
 const breadcrumbItems = [
-  { label: 'Home', href: '/dashboard' },
-  { label: 'Planos', href: '/plans' },
+  { label: 'Home', href: '/painel' },
+  { label: 'Cadastros', href: '/cadastros' },
+  { label: 'Planos', href: '/cadastros/planos' },
 ];
 
 export default function PlansPage() {
@@ -60,13 +65,35 @@ export default function PlansPage() {
       <BreadcrumbUpdater items={breadcrumbItems} />
 
       <main className="flex flex-col gap-4">
+        <PageIntro
+          icon={Package}
+          title="O que é um plano?"
+          example={
+            <>
+              <strong className="text-foreground font-medium">
+                Trimestral
+              </strong>{' '}
+              — parcela de R$ 150 e duração de 3 meses. Ao matricular um aluno
+              nesse plano, o sistema já cria as três parcelas de R$ 150, uma por
+              mês.
+            </>
+          }
+        >
+          É o contrato que o aluno assina: quanto custa a mensalidade e por
+          quantos meses ela vale. O preço aqui é o da parcela, não o valor
+          fechado do período.
+        </PageIntro>
+
         <ListToolbar
           searchPlaceholder="Buscar planos..."
           onSearch={(value) => setSearchTerm(value)}
           total={totalItems}
           totalLabel={['plano', 'planos']}
           action={
-            <Button onClick={() => setCreateOpen(true)}>Criar plano</Button>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 size-4" />
+              Criar plano
+            </Button>
           }
         />
 

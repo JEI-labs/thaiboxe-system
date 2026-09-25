@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/table';
 import { RowActions } from '@/components/dataTable/rowActions.component';
 import { EmptyState } from '@/components/emptyState/emptyState.component';
+import { ListSkeleton } from '@/components/skeletons/listSkeleton.component';
 import ConfirmDeleteDialog from '../confirmDeleteDialog/confirmDeleteDialog.component';
 
 interface PromotionsListProps {
@@ -45,7 +46,7 @@ export function PromotionsList({
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   if (isLoading) {
-    return <p className="py-4 text-center">Carregando promoções…</p>;
+    return <ListSkeleton columns={5} />;
   }
 
   if (promotions.length === 0) {
@@ -59,7 +60,7 @@ export function PromotionsList({
 
   return (
     <>
-      <div className="rounded-lg border">
+      <div className="bg-card shadow-card overflow-hidden rounded-2xl">
         <Table>
           <TableHeader>
             <TableRow>

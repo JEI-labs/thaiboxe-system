@@ -1,5 +1,9 @@
 'use client';
 
+import { Tag } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { PageIntro } from '@/components/pageIntro/pageIntro.component';
+
 import { useState } from 'react';
 
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
@@ -14,8 +18,9 @@ import { useToast } from '@/hooks/use-toast';
 import { api } from '@/trpc/react';
 
 const breadcrumbItems = [
-  { label: 'Home', href: '/dashboard' },
-  { label: 'Promoções', href: '/registrations/promotions' },
+  { label: 'Home', href: '/painel' },
+  { label: 'Cadastros', href: '/cadastros' },
+  { label: 'Promoções', href: '/cadastros/promocoes' },
 ];
 
 export default function PromotionsPage() {
@@ -55,13 +60,34 @@ export default function PromotionsPage() {
       <BreadcrumbUpdater items={breadcrumbItems} />
 
       <main className="flex flex-col gap-4">
+        <PageIntro
+          icon={Tag}
+          title="O que é uma promoção?"
+          example={
+            <>
+              <strong className="text-foreground font-medium">
+                Matrícula de janeiro
+              </strong>{' '}
+              — 20% de desconto, valendo de 01/01 a 31/01. Numa parcela de R$
+              150, abate R$ 30.
+            </>
+          }
+        >
+          É um desconto com prazo de validade, em porcentagem ou em valor fixo,
+          para abater na parcela do aluno. Fora do período, ou desativada, ela
+          deixa de valer.
+        </PageIntro>
+
         <ListToolbar
           searchPlaceholder="Buscar promoções..."
           onSearch={setSearchTerm}
           total={totalItems}
           totalLabel={['promoção', 'promoções']}
           action={
-            <Button onClick={() => setCreateOpen(true)}>Criar promoção</Button>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 size-4" />
+              Criar promoção
+            </Button>
           }
         />
 

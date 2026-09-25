@@ -1,5 +1,9 @@
 'use client';
 
+import { UserSquare } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { PageIntro } from '@/components/pageIntro/pageIntro.component';
+
 import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
@@ -20,8 +24,9 @@ interface ISupplierForm {
 }
 
 const breadcrumbItems = [
-  { label: 'Home', href: '/dashboard' },
-  { label: 'Fornecedores', href: '/suppliers' },
+  { label: 'Home', href: '/painel' },
+  { label: 'Cadastros', href: '/cadastros' },
+  { label: 'Fornecedores', href: '/cadastros/fornecedores' },
 ];
 
 export default function SuppliersPage() {
@@ -72,13 +77,33 @@ export default function SuppliersPage() {
       <BreadcrumbUpdater items={breadcrumbItems} />
 
       <main className="flex flex-col gap-4">
+        <PageIntro
+          icon={UserSquare}
+          title="O que é um fornecedor?"
+          example={
+            <>
+              <strong className="text-foreground font-medium">
+                Casa do Boxe
+              </strong>{' '}
+              — material de treino, (11) 99999-0000, São Paulo/SP.
+            </>
+          }
+        >
+          É quem vende ou presta serviço para a academia. A tela guarda o
+          contato e o endereço de cada um, para ter à mão na hora de repor
+          material ou chamar uma manutenção.
+        </PageIntro>
+
         <ListToolbar
           searchPlaceholder="Buscar fornecedores..."
           onSearch={setSearchTerm}
           total={data?.pagination.total}
           totalLabel={['fornecedor', 'fornecedores']}
           action={
-            <Button onClick={() => setCreateOpen(true)}>Novo fornecedor</Button>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 size-4" />
+              Novo fornecedor
+            </Button>
           }
           filters={
             <Form {...form}>

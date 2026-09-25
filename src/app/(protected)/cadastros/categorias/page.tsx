@@ -1,5 +1,9 @@
 'use client';
 
+import { Layers3 } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { PageIntro } from '@/components/pageIntro/pageIntro.component';
+
 import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook';
 import { useState } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
@@ -22,8 +26,9 @@ import { AdvancedFilterCheckboxType } from '@/components/forms/advancedFilterChe
 import { ECategoryStatus } from '@prisma/client';
 
 const breadcrumbItems = [
-  { label: 'Home', href: '/dashboard' },
-  { label: 'Categorias', href: '/categories' },
+  { label: 'Home', href: '/painel' },
+  { label: 'Cadastros', href: '/cadastros' },
+  { label: 'Categorias', href: '/cadastros/categorias' },
 ];
 
 const STATUS_OPTIONS: Array<AdvancedFilterCheckboxType> = [
@@ -87,13 +92,38 @@ export default function CategoriesPage() {
       <BreadcrumbUpdater items={breadcrumbItems} />
 
       <main className="flex flex-col gap-4">
+        <PageIntro
+          icon={Layers3}
+          title="O que é uma categoria?"
+          example={
+            <>
+              <strong className="text-foreground font-medium">Aluguel</strong>,{' '}
+              <strong className="text-foreground font-medium">Energia</strong>{' '}
+              ou{' '}
+              <strong className="text-foreground font-medium">
+                Equipamentos
+              </strong>{' '}
+              para as despesas. A categoria <em>Alunos</em> já vem pronta e é do
+              sistema: as mensalidades caem nela sozinhas, e por isso ela não
+              pode ser editada nem excluída.
+            </>
+          }
+        >
+          É a gaveta onde cada lançamento do financeiro é guardado. Todo
+          lançamento precisa de uma, e é por ela que o resumo consegue dizer
+          para onde o dinheiro da academia foi.
+        </PageIntro>
+
         <ListToolbar
           searchPlaceholder="Buscar categorias..."
           onSearch={(value) => setSearchTerm(value)}
           total={totalItems}
           totalLabel={['categoria', 'categorias']}
           action={
-            <Button onClick={() => setCreateOpen(true)}>Criar categoria</Button>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 size-4" />
+              Criar categoria
+            </Button>
           }
           filters={
             <>

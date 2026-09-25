@@ -1,6 +1,7 @@
 'use client';
 
 import { EmptyState } from '@/components/emptyState/emptyState.component';
+import { ListSkeleton } from '@/components/skeletons/listSkeleton.component';
 import React, { useState } from 'react';
 import { Edit2Icon, Trash2 } from 'lucide-react';
 
@@ -47,19 +48,15 @@ const PlansList: React.FC<IPlanList> = ({
   return (
     <div className="w-full">
       <div className="mt-4">
-        <h1 className="text-md font-semibold">Planos</h1>
-      </div>
-
-      <div className="mt-4">
         {isLoading ? (
-          <p className="py-4 text-center">Carregando planos…</p>
+          <ListSkeleton columns={5} />
         ) : plans.length === 0 ? (
           <EmptyState
             title="Nenhum plano encontrado"
             description="Ajuste a busca, ou crie o primeiro plano de matrícula."
           />
         ) : (
-          <div className="rounded-lg border">
+          <div className="bg-card shadow-card overflow-hidden rounded-2xl">
             <Table>
               <TableHeader>
                 <TableRow>

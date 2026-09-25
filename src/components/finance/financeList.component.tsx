@@ -1,4 +1,5 @@
 import { EmptyState } from '@/components/emptyState/emptyState.component';
+import { ListSkeleton } from '@/components/skeletons/listSkeleton.component';
 import React, { useState } from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
 import { EFinanceEntryStatus, EFinanceEntryType } from '@prisma/client';
@@ -64,14 +65,14 @@ export const FinanceEntriesList: React.FC<IFinanceEntriesList> = ({
       </CardHeader>
 
       {loading ? (
-        <p className="py-4 text-center">Carregando lançamentos…</p>
+        <ListSkeleton columns={6} />
       ) : entries.length === 0 ? (
         <EmptyState
           title="Nenhum lançamento encontrado"
           description="Ajuste o período e os filtros, ou crie um lançamento."
         />
       ) : (
-        <div className="rounded-lg border">
+        <div className="bg-card shadow-card overflow-hidden rounded-2xl">
           <Table>
             <TableHeader>
               <TableRow>

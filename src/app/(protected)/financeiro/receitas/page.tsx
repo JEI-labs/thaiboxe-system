@@ -19,6 +19,7 @@ import {
 } from '@/components/forms/advancedFilterDatePicker/advancedFilterDatePicker.component';
 import { AdvancedFilterCheckbox } from '@/components/forms/advancedFilterCheckbox/advancedFilterCheckbox.component';
 import { Calendar } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import {
   EFinanceEntryStatus,
   EFinanceEntryType,
@@ -27,9 +28,9 @@ import {
 } from '@prisma/client';
 
 const breadcrumbItems = [
-  { label: 'Home', href: '/dashboard' },
-  { label: 'Financeiro', href: '/financial' },
-  { label: 'Receitas', href: '/financial/revenues' },
+  { label: 'Home', href: '/painel' },
+  { label: 'Financeiro', href: '/financeiro' },
+  { label: 'Receitas', href: '/financeiro/receitas' },
 ];
 
 const STATUS_OPTIONS = [
@@ -118,6 +119,7 @@ export default function RevenuesPage() {
           totalLabel={['receita', 'receitas']}
           action={
             <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="mr-2 size-4" />
               Criar lançamento
             </Button>
           }
