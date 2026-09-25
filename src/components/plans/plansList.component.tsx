@@ -2,6 +2,10 @@
 
 import { EmptyState } from '@/components/emptyState/emptyState.component';
 import { ListSkeleton } from '@/components/skeletons/listSkeleton.component';
+import { PLAN_BILLING_LABEL } from '@/common/constants/planBilling';
+import { monthlyValue } from '@/utils/planUtils';
+import { maskBRL } from '@/utils/masksUtils';
+import { EPlanBilling } from '@prisma/client';
 import React, { useState } from 'react';
 import { Edit2Icon, Trash2 } from 'lucide-react';
 
@@ -63,7 +67,8 @@ const PlansList: React.FC<IPlanList> = ({
                   <TableHead>Plano</TableHead>
                   <TableHead>Descrição</TableHead>
                   <TableHead>Duração</TableHead>
-                  <TableHead className="text-right">Parcela</TableHead>
+                  <TableHead>Cobrança</TableHead>
+                  <TableHead className="text-right">Preço</TableHead>
                   <TableHead>Criado em</TableHead>
                   <TableHead className="w-[70px] text-right">Ações</TableHead>
                 </TableRow>
@@ -82,10 +87,33 @@ const PlansList: React.FC<IPlanList> = ({
                       {plan.duration} {plan.duration === 1 ? 'mês' : 'meses'}
                     </TableCell>
 
-                    <TableCell className="text-right">
-                      <Badge variant="secondary">
-                        R$ {Number(plan.price).toFixed(2)}
+                    <TableCell>
+                      <Badge
+                        variant={
+                          plan.billing === EPlanBilling.UPFRONT
+                            ? 'default'
+                            : 'outline'
+                        }
+                      >
+                        {PLAN_BILLING_LABEL[plan.billing]}
                       </Badge>
+                    </TableCell>
+
+                    {/* O preço é o do período; embaixo, o que isso dá por mês,
+                        que é como o professor compara um plano com o outro. */}
+                    <TableCell className="text-right whitespace-nowrap">
+                      <span className="font-medium">
+                        {maskBRL(Number(plan.price), true)}
+                      </span>
+                      {plan.duration > 1 && (
+                        <span className="text-muted-foreground block text-xs">
+                          {maskBRL(
+                            monthlyValue(Number(plan.price), plan.duration),
+                            true,
+                          )}
+                          /mês
+                        </span>
+                      )}
                     </TableCell>
 
                     <TableCell className="text-muted-foreground">

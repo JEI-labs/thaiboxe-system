@@ -1,6 +1,7 @@
 // server/api/routers/painel.ts
 import { createTRPCRouter, protectedProcedure } from '@/server/api/trpc';
 import { deriveStudentStatus } from '@/server/utils/studentStatus';
+import { monthlyValue } from '@/utils/planUtils';
 import type { StudentStatus } from '@/server/utils/studentStatus';
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
@@ -30,9 +31,10 @@ import { ptBR } from 'date-fns/locale';
  * reais e `FinanceEntry.amount`, em centavos. Tudo que sai daqui já está em
  * reais.
  *
- * `Plan.price` é a PARCELA mensal, não o valor fechado do plano — a matrícula
- * gera `plan.duration` parcelas de `plan.price`. Por isso o MRR é a soma
- * direta dos preços das matrículas vigentes.
+ * `Plan.price` é o valor fechado do PERÍODO, não o da parcela. O MRR mede
+ * receita por mês, então cada matrícula entra por `price / duration` —
+ * inclusive a de um plano pago à vista: quem paga o trimestre adiantado
+ * continua valendo um terço disso por mês.
  */
 
 const CENTS = 100;
@@ -198,14 +200,18 @@ export const dashboardRouter = createTRPCRouter({
           if (!enrollment?.plan) continue;
 
           activeStudents += 1;
-          mrr += enrollment.plan.price;
+          const monthly = monthlyValue(
+            enrollment.plan.price,
+            enrollment.plan.duration,
+          );
+          mrr += monthly;
 
           const plan = byPlan.get(enrollment.plan.name) ?? {
             students: 0,
             mrr: 0,
           };
           plan.students += 1;
-          plan.mrr += enrollment.plan.price;
+          plan.mrr += monthly;
           byPlan.set(enrollment.plan.name, plan);
 
           byStatus[
@@ -389,7 +395,12 @@ export const dashboardRouter = createTRPCRouter({
             const enrollment = student.enrollments.find(
               (e) => e.startDate <= bucket.end && e.endDate >= bucket.end,
             );
-            return total + (enrollment?.plan?.price ?? 0);
+            return (
+              total +
+              (enrollment?.plan
+                ? monthlyValue(enrollment.plan.price, enrollment.plan.duration)
+                : 0)
+            );
           }, 0);
 
           const entriesOfBucket = paidEntries.filter(

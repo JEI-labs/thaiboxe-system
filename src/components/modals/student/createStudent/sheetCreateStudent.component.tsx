@@ -1,6 +1,7 @@
 'use client';
 
 import { GRADUATION_LIST } from '@/common/constants/graduations';
+import { PLAN_BILLING_LABEL } from '@/common/constants/planBilling';
 import { GraduationBadge } from '@/components/graduationBadge/graduationBadge.component';
 import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
 
@@ -186,7 +187,9 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
                     style: 'currency',
                     currency: 'BRL',
                   },
-                )} · ${plan.duration} ${plan.duration === 1 ? 'mês' : 'meses'}`,
+                )} · ${plan.duration} ${plan.duration === 1 ? 'mês' : 'meses'} · ${
+                  PLAN_BILLING_LABEL[plan.billing]
+                }`,
               })) ?? []
             }
           />

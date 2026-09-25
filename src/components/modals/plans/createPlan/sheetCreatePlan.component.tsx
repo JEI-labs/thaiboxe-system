@@ -7,6 +7,8 @@ import { Form } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { FormInputComponent } from '@/components/forms/formInput/formInput.component';
+import { FormSelectComponent } from '@/components/forms/formSelectInput/formSelectInput.component';
+import { PLAN_BILLING_OPTIONS } from '@/common/constants/planBilling';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/trpc/react';
 import { ICreateSheetPlan } from './sheetCreatePlan.types';
@@ -16,6 +18,7 @@ import {
   ICreatePlanSchema,
 } from '@/server/validations/plans';
 import { maskOnlyNumbersV2 } from '@/common/utils/mask';
+import { EPlanBilling } from '@prisma/client';
 
 export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
   side,
@@ -32,6 +35,7 @@ export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
       name: '',
       price: '0',
       duration: '1',
+      billing: EPlanBilling.MONTHLY,
       description: '',
     },
     mode: 'onChange',
@@ -88,7 +92,8 @@ export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
         <FormInputComponent
           control={form.control}
           name="price"
-          label="Preço (R$)"
+          label="Preço do período (R$)"
+          tooltip="Valor cheio do período, não o da parcela. Um trimestral de R$ 350,50 custa isso pelos três meses — na cobrança mensal o sistema divide em três."
           placeholder="0.00"
           mask={maskDecimalWithAcronym}
           unmask={unmaskDecimal}
@@ -98,10 +103,19 @@ export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
           control={form.control}
           name="duration"
           label="Duração (meses)"
-          tooltip="Por quantos meses a matrícula vale. O valor informado é o de cada parcela."
+          tooltip="Por quantos meses a matrícula vale."
           placeholder="1"
           maxLength={2}
           mask={maskOnlyNumbersV2}
+        />
+
+        <FormSelectComponent
+          control={form.control}
+          name="billing"
+          label="Cobrança"
+          tooltip="Mensal gera uma parcela por mês. À vista gera uma parcela só, paga na matrícula: o aluno não tem mensalidade vencendo no meio do período, e a próxima cobrança é a renovação."
+          placeholder="Como o aluno paga"
+          options={PLAN_BILLING_OPTIONS}
         />
       </FormDrawer>
     </Form>

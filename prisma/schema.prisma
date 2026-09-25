@@ -97,13 +97,17 @@ model Student {
 }
 
 model Plan {
-  id          String   @id @default(uuid())
-  name        String   @unique
+  id          String       @id @default(uuid())
+  name        String       @unique
   description String?
+  /// Valor fechado do período inteiro, não da parcela: um trimestral de
+  /// R$ 350,50 custa isso pelos três meses.
   price       Float
   duration    Int // Quantidade de meses
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  /// Mensal divide o preço pelas parcelas; à vista cobra tudo na matrícula.
+  billing     EPlanBilling @default(MONTHLY)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   enrollments Enrollment[]
 
@@ -216,6 +220,14 @@ model Supplier {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   expenses Expense[]
+}
+
+/// Como o plano é cobrado.
+enum EPlanBilling {
+  /// Uma parcela por mês de duração.
+  MONTHLY
+  /// O período inteiro pago de uma vez, na matrícula.
+  UPFRONT
 }
 
 enum EDiscountType {

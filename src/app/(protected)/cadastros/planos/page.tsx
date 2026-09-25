@@ -73,15 +73,18 @@ export default function PlansPage() {
               <strong className="text-foreground font-medium">
                 Trimestral
               </strong>{' '}
-              — parcela de R$ 150 e duração de 3 meses. Ao matricular um aluno
-              nesse plano, o sistema já cria as três parcelas de R$ 150, uma por
-              mês.
+              — R$ 450 por 3 meses. Na cobrança{' '}
+              <strong className="text-foreground font-medium">mensal</strong>, a
+              matrícula gera três parcelas de R$ 150. Na{' '}
+              <strong className="text-foreground font-medium">à vista</strong>,
+              gera uma só de R$ 450, já paga, e o aluno fica sem nada vencendo
+              até a renovação.
             </>
           }
         >
-          É o contrato que o aluno assina: quanto custa a mensalidade e por
-          quantos meses ela vale. O preço aqui é o da parcela, não o valor
-          fechado do período.
+          É o contrato que o aluno assina: quanto custa e por quantos meses
+          vale. O preço é o do período inteiro; quem divide em parcelas é a
+          forma de cobrança escolhida no plano.
         </PageIntro>
 
         <ListToolbar

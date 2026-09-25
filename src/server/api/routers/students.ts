@@ -13,11 +13,13 @@ import {
   EFinanceEntryType,
   EGraduation,
   EPaymentMethod,
+  EPlanBilling,
   PaymentStatus,
   Prisma,
 } from '@prisma/client';
 import { getAllStudentInputSchema } from '@/server/validations/pagination';
 import { deriveStudentStatus } from '@/server/utils/studentStatus';
+import { installmentCount, splitIntoInstallments } from '@/utils/planUtils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -89,13 +91,23 @@ export const studentRouter = createTRPCRouter({
             },
           });
 
-          // 5. Geração dos pagamentos
-          const payments = Array.from({ length: plan.duration }).map((_, i) => {
+          /* 5. Geração dos pagamentos.
+
+             Plano mensal: uma parcela por mês de duração, a primeira já paga
+             na matrícula. Plano à vista: uma parcela só, com o período
+             inteiro — quem paga o trimestre adiantado não tem mensalidade
+             vencendo no meio dele, e a próxima cobrança é a renovação. */
+          const amounts = splitIntoInstallments(
+            plan.price,
+            installmentCount(plan.duration, plan.billing),
+          );
+
+          const payments = amounts.map((cents, i) => {
             const dueDate = new Date(startDate);
             dueDate.setMonth(dueDate.getMonth() + i);
             return {
               studentId: student.id,
-              amount: plan.price,
+              amount: cents / 100,
               dueDate,
               status: i === 0 ? PaymentStatus.PAID : PaymentStatus.PENDING,
             };
@@ -118,14 +130,17 @@ export const studentRouter = createTRPCRouter({
           }
 
           const firstDueDate = format(startDate, 'MMMM/yyyy', { locale: ptBR });
+          const isUpfront = plan.billing === EPlanBilling.UPFRONT;
 
-          // 7. Criação da entrada financeira
+          // 7. Criação da entrada financeira (só o que foi pago agora)
           await tx.financeEntry.create({
             data: {
-              amount: plan.price * 100,
+              amount: amounts[0] ?? 0,
               date: startDate,
               type: EFinanceEntryType.STUDENTS,
-              description: `Parcela 1 de ${student.name} com vencimento em ${firstDueDate}.`,
+              description: isUpfront
+                ? `${plan.name} de ${student.name} pago à vista (${plan.duration} ${plan.duration === 1 ? 'mês' : 'meses'} a partir de ${firstDueDate}).`
+                : `Parcela 1 de ${student.name} com vencimento em ${firstDueDate}.`,
               status: PaymentStatus.PAID,
               currency: 'BRL',
               paymentMethod: EPaymentMethod.CREDIT_CARD,

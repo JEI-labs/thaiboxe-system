@@ -33,6 +33,7 @@ export const plansRouter = createTRPCRouter({
           description: input.description,
           price: parseFloat(input.price) / 100,
           duration: Number(input.duration),
+          billing: input.billing,
           userId,
         },
       });

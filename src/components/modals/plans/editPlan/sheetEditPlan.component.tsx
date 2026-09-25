@@ -8,6 +8,8 @@ import { useForm } from 'react-hook-form';
 import { Form } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { FormInputComponent } from '@/components/forms/formInput/formInput.component';
+import { FormSelectComponent } from '@/components/forms/formSelectInput/formSelectInput.component';
+import { PLAN_BILLING_OPTIONS } from '@/common/constants/planBilling';
 import { api } from '@/trpc/react';
 import { ISheetEditPlan } from './sheetEditPlan.types';
 import {
@@ -16,6 +18,7 @@ import {
 } from '@/server/validations/plans';
 import { maskDecimalWithAcronym, unmaskDecimal } from '@/utils/masksUtils';
 import { maskOnlyNumbersV2 } from '@/common/utils/mask';
+import { EPlanBilling } from '@prisma/client';
 
 export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
   side,
@@ -44,6 +47,7 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
       description: '',
       price: '0',
       duration: '1',
+      billing: EPlanBilling.MONTHLY,
     },
     mode: 'onChange',
   });
@@ -57,11 +61,10 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
         description: plan.description ?? '',
         price: (Number(plan.price) * 100).toString(),
         duration: plan.duration.toString(),
+        billing: plan.billing,
       });
     }
   }, [planQuery.data, form]);
-
-  console.log(planQuery.data?.data.price);
 
   const onSubmit = async (data: IUpdatePlanSchema) => {
     try {
@@ -123,7 +126,8 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
             <FormInputComponent
               control={form.control}
               name="price"
-              label="Preço (R$)"
+              label="Preço do período (R$)"
+              tooltip="Valor cheio do período, não o da parcela. Um trimestral de R$ 350,50 custa isso pelos três meses — na cobrança mensal o sistema divide em três."
               placeholder="0.00"
               mask={maskDecimalWithAcronym}
               unmask={unmaskDecimal}
@@ -135,10 +139,20 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
               control={form.control}
               name="duration"
               label="Duração (meses)"
-              tooltip="Por quantos meses a matrícula vale. O valor informado é o de cada parcela."
+              tooltip="Por quantos meses a matrícula vale."
               placeholder="1"
               mask={maskOnlyNumbersV2}
               min={1}
+            />
+          </div>
+          <div className="col-span-2">
+            <FormSelectComponent
+              control={form.control}
+              name="billing"
+              label="Cobrança"
+              tooltip="Mensal gera uma parcela por mês. À vista gera uma parcela só, paga na matrícula. Vale para as próximas matrículas; as que já existem seguem como foram criadas."
+              placeholder="Como o aluno paga"
+              options={PLAN_BILLING_OPTIONS}
             />
           </div>
         </div>
