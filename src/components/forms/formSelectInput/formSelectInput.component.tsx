@@ -23,6 +23,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+/**
+ * Valor da opção "em branco". O Radix não aceita SelectItem com value vazio,
+ * então a ausência vira um valor sentinela aqui dentro e volta a ser `null`
+ * no formulário — quem usa o componente não precisa saber disso.
+ */
+const NONE_VALUE = '__none__';
+
 export const FormSelectComponent = <T extends FieldValues, TTransformed = T>({
   control,
   name,
@@ -36,7 +43,7 @@ export const FormSelectComponent = <T extends FieldValues, TTransformed = T>({
   FormSelectComponentProps): React.JSX.Element => {
   const extendedOptions = hasEmptyOption
     ? [
-        { value: null, textValue: props.placeholder ?? '-', icon: null },
+        { value: NONE_VALUE, textValue: props.placeholder ?? '-', icon: null },
         ...options,
       ]
     : options;
@@ -52,27 +59,43 @@ export const FormSelectComponent = <T extends FieldValues, TTransformed = T>({
             control={control}
             name={name}
             render={({ field }) => (
-              <FormItem className={cn('space-y-3', props.className)}>
-                <div className="flex flex-col">
-                  <FormLabel>
-                    {props.label}
-                    {props.tooltip && <FieldHint text={props.tooltip} />}
-                  </FormLabel>
-                  {description && (
-                    <FormLabel className="text-muted-foreground text-xs">
-                      {description}
-                    </FormLabel>
-                  )}
-                </div>
+              <FormItem
+                className={cn(props.label && 'space-y-3', props.className)}
+              >
+                {/* Sem rótulo o bloco não é renderizado: como filtro de
+                    barra, um label vazio ocupava altura e desalinhava o
+                    campo em relação à busca ao lado. */}
+                {(props.label || description) && (
+                  <div className="flex flex-col">
+                    {props.label && (
+                      <FormLabel>
+                        {props.label}
+                        {props.tooltip && <FieldHint text={props.tooltip} />}
+                      </FormLabel>
+                    )}
+                    {description && (
+                      <FormLabel className="text-muted-foreground text-xs">
+                        {description}
+                      </FormLabel>
+                    )}
+                  </div>
+                )}
                 <Select
                   {...props}
                   onValueChange={(value) => {
-                    field.onChange(value);
+                    const parsed = value === NONE_VALUE ? null : value;
+                    field.onChange(parsed);
                     if (props.onValueChange) {
                       props.onValueChange(value);
                     }
                   }}
-                  value={field.value}
+                  value={
+                    field.value === null || field.value === undefined
+                      ? hasEmptyOption
+                        ? NONE_VALUE
+                        : undefined
+                      : field.value
+                  }
                 >
                   <FormControl>
                     <SelectTrigger>

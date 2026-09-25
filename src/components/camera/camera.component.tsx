@@ -97,7 +97,9 @@ export function CameraCaptureButton({ onCapture }: CameraCaptureButtonProps) {
           </DialogHeader>
 
           {error ? (
-            <p className="text-destructive py-8 text-center text-sm">{error}</p>
+            <p className="text-destructive-text py-8 text-center text-sm">
+              {error}
+            </p>
           ) : (
             <video
               ref={videoRef}

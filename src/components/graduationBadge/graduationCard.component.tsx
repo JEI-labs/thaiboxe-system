@@ -129,7 +129,7 @@ export function GraduationCard({
               <Button
                 type="button"
                 variant="ghost"
-                className="text-destructive hover:text-destructive"
+                className="text-destructive-text hover:text-destructive-text"
                 disabled={isPending}
                 onClick={() => mutate({ id: studentId, graduation: null })}
               >

@@ -112,7 +112,7 @@ export function AvatarField<T extends FieldValues, TTransformed = T>({
                     type="button"
                     size="sm"
                     variant="ghost"
-                    className="text-destructive hover:text-destructive"
+                    className="text-destructive-text hover:text-destructive-text"
                     onClick={clear}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />

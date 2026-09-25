@@ -9,7 +9,7 @@ export const StyledSwitchComponent = ({
   return (
     <div
       className={cn(
-        'flex w-full items-center justify-between rounded-lg border p-4',
+        'bg-muted/40 flex w-full items-center justify-between rounded-xl p-4',
         props.className,
       )}
     >

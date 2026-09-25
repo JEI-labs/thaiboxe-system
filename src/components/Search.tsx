@@ -35,7 +35,7 @@ const Search: React.FC<SearchProps> = ({
     <div className={cn('relative flex w-full max-w-[350px]', className)}>
       <div
         className={cn(
-          'bg-muted flex w-full items-center rounded-md border transition-all duration-200',
+          'bg-muted flex w-full items-center rounded-full border transition-all duration-200',
           isFocused
             ? 'border-primary/50 ring-primary/30 shadow-xs ring-1'
             : 'border-border',

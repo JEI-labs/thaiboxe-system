@@ -39,7 +39,7 @@ export const FormSwitchComponent = <T extends FieldValues, TTransformed = T>({
                 className={cn(
                   'flex flex-col',
                   props.asCard &&
-                    'flex w-full flex-row items-center justify-between rounded-lg border p-4',
+                    'bg-muted/40 flex w-full flex-row items-center justify-between rounded-xl p-4',
                   props.className,
                 )}
               >

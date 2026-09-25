@@ -7,6 +7,8 @@ interface EmptyStateProps {
   /** Linha de apoio: o que fazer a seguir. */
   description?: string;
   icon?: React.ElementType;
+  /** Botão de saída, ex.: tentar de novo. */
+  action?: React.ReactNode;
   className?: string;
 }
 
@@ -18,12 +20,13 @@ export function EmptyState({
   title,
   description,
   icon: Icon = Inbox,
+  action,
   className,
 }: EmptyStateProps) {
   return (
     <div
       className={cn(
-        'border-border flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-6 py-14 text-center',
+        'bg-muted/60 flex flex-col items-center justify-center gap-3 rounded-2xl px-6 py-14 text-center',
         className,
       )}
     >
@@ -39,6 +42,8 @@ export function EmptyState({
           </p>
         )}
       </div>
+
+      {action}
     </div>
   );
 }

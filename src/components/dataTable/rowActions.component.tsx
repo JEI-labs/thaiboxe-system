@@ -48,7 +48,7 @@ export function RowActions({
         onSelect={action.onSelect}
         className={
           action.destructive
-            ? 'text-destructive focus:text-destructive'
+            ? 'text-destructive-text focus:text-destructive-text'
             : undefined
         }
       >

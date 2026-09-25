@@ -123,7 +123,7 @@ export const FormFileInputComponent = <
                               setPreviewUrl(null);
                               field.onChange(null);
                             }}
-                            className="text-destructive hover:text-destructive/70 ml-2 flex"
+                            className="text-destructive-text hover:text-destructive-text/70 ml-2 flex"
                           >
                             Remover
                           </button>
