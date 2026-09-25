@@ -95,7 +95,6 @@ export default function PromotionsPage() {
           promotions={data?.data ?? []}
           isLoading={isLoading}
           onEdit={setEditId}
-          onDelete={handleDelete}
         />
 
         {totalItems > 0 && (
@@ -122,6 +121,7 @@ export default function PromotionsPage() {
         setIsOpen={(open) => !open && setEditId(null)}
         promotionId={editId}
         refetch={refetch}
+        onDelete={editId ? () => handleDelete(editId) : undefined}
       />
     </div>
   );

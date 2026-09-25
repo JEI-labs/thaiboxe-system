@@ -7,7 +7,6 @@ import { ListToolbar } from '@/components/listToolbar/listToolbar.component';
 import { Button } from '@/components/ui/button';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
 import { useDebounce } from '@/hooks/useDebounce/useDebounce';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { api } from '@/trpc/react';
 import { useToast } from '@/hooks/use-toast';
 import { FinanceEntriesList } from '@/components/finance/financeList.component';
@@ -43,7 +42,6 @@ const STATUS_OPTIONS = [
 const defaultRange = getDefaultDateRange();
 
 export default function ExpensesPage() {
-  const isMobile = useIsMobile();
   const { toast } = useToast();
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -190,7 +188,6 @@ export default function ExpensesPage() {
         {/* sheets */}
         {editEntry && (
           <SheetEditExpenseEntry
-            side={isMobile ? 'bottom' : 'right'}
             isOpen={editOpen}
             setIsOpen={(open) => {
               setEditOpen(open);
@@ -214,7 +211,6 @@ export default function ExpensesPage() {
 
         {createOpen && (
           <SheetCreateExpenseEntry
-            side={isMobile ? 'bottom' : 'right'}
             isOpen={createOpen}
             setIsOpen={setCreateOpen}
             refetch={financeQuery.refetch}

@@ -6,8 +6,7 @@ import { PLAN_BILLING_LABEL } from '@/common/constants/planBilling';
 import { monthlyValue } from '@/utils/planUtils';
 import { maskBRL } from '@/utils/masksUtils';
 import { EPlanBilling } from '@prisma/client';
-import React, { useState } from 'react';
-import { Edit2Icon, Trash2 } from 'lucide-react';
+import React from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import {
@@ -18,9 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { RowActions } from '@/components/dataTable/rowActions.component';
 import type { IPlanList } from './plansList.types';
-import ConfirmDeleteDialog from '../confirmDeleteDialog/confirmDeleteDialog.component';
 
 const formatDate = (value: string | Date) =>
   new Date(value).toLocaleDateString('pt-BR', {
@@ -29,26 +26,7 @@ const formatDate = (value: string | Date) =>
     year: 'numeric',
   });
 
-const PlansList: React.FC<IPlanList> = ({
-  plans,
-  isLoading,
-  onEdit,
-  onDelete,
-}) => {
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
-
-  const handleDeleteClick = (id: string) => {
-    setSelectedPlanId(id);
-    setOpenDeleteDialog(true);
-  };
-
-  const handleConfirmDelete = async (id: string) => {
-    await onDelete(id);
-    setOpenDeleteDialog(false);
-    setSelectedPlanId(null);
-  };
-
+const PlansList: React.FC<IPlanList> = ({ plans, isLoading, onEdit }) => {
   return (
     <div className="w-full">
       <div className="mt-4">
@@ -70,13 +48,16 @@ const PlansList: React.FC<IPlanList> = ({
                   <TableHead>Cobrança</TableHead>
                   <TableHead className="text-right">Preço</TableHead>
                   <TableHead>Criado em</TableHead>
-                  <TableHead className="w-[70px] text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
                 {plans.map((plan) => (
-                  <TableRow key={plan.id}>
+                  <TableRow
+                    key={plan.id}
+                    className="cursor-pointer"
+                    onClick={() => onEdit(plan.id)}
+                  >
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
                         {plan.name}
@@ -128,25 +109,6 @@ const PlansList: React.FC<IPlanList> = ({
                     <TableCell className="text-muted-foreground">
                       {formatDate(plan.createdAt)}
                     </TableCell>
-
-                    <TableCell className="text-right">
-                      <RowActions
-                        srLabel={`Ações do plano ${plan.name}`}
-                        actions={[
-                          {
-                            label: 'Editar',
-                            icon: Edit2Icon,
-                            onSelect: () => onEdit(plan.id),
-                          },
-                          {
-                            label: 'Excluir',
-                            icon: Trash2,
-                            destructive: true,
-                            onSelect: () => handleDeleteClick(plan.id),
-                          },
-                        ]}
-                      />
-                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -154,15 +116,6 @@ const PlansList: React.FC<IPlanList> = ({
           </div>
         )}
       </div>
-
-      {selectedPlanId && (
-        <ConfirmDeleteDialog
-          item={selectedPlanId}
-          open={openDeleteDialog}
-          onOpenChange={setOpenDeleteDialog}
-          onConfirm={handleConfirmDelete}
-        />
-      )}
     </div>
   );
 };

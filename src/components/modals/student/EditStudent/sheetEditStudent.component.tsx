@@ -1,6 +1,6 @@
 'use client';
 
-import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
+import { FormModal } from '@/components/formModal/formModal.component';
 import React, { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
@@ -25,7 +25,6 @@ import { blobUrlToBase64 } from '@/common/utils/files';
 import { ISheetEditStudent } from './sheetEditStudent.types';
 
 export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
-  side,
   isOpen,
   setIsOpen,
   studentId,
@@ -109,10 +108,9 @@ export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
 
   return (
     <Form {...form}>
-      <FormDrawer
+      <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        side={side}
         title="Editar aluno"
         description="Altere os dados do aluno"
         onSubmit={form.handleSubmit(onSubmit)}
@@ -173,7 +171,7 @@ export const SheetEditStudent: React.FC<ISheetEditStudent> = ({
             />
           </div>
         </div>
-      </FormDrawer>
+      </FormModal>
     </Form>
   );
 };

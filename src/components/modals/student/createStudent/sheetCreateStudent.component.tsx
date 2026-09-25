@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { GRADUATION_LIST } from '@/common/constants/graduations';
 import { PLAN_BILLING_LABEL } from '@/common/constants/planBilling';
 import { GraduationBadge } from '@/components/graduationBadge/graduationBadge.component';
-import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
+import { FormModal } from '@/components/formModal/formModal.component';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
@@ -31,7 +31,6 @@ import { FormSelectComponent } from '@/components/forms/formSelectInput/formSele
 import { getInitials } from '@/utils/masksUtils';
 
 export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
-  side,
   isOpen,
   setIsOpen,
   refetch,
@@ -108,10 +107,9 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
 
   return (
     <Form {...form}>
-      <FormDrawer
+      <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        side={side}
         title="Criar novo aluno"
         description="Preencha os dados abaixo para matricular um aluno."
         onSubmit={form.handleSubmit(onSubmit)}
@@ -223,7 +221,7 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
             }))}
           />
         </section>
-      </FormDrawer>
+      </FormModal>
     </Form>
   );
 };

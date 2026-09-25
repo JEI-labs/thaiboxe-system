@@ -1,7 +1,7 @@
 // components/sheetCreatePlan.tsx
 'use client';
 
-import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
+import { FormModal } from '@/components/formModal/formModal.component';
 import React from 'react';
 import { Form } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
@@ -22,7 +22,6 @@ import { maskOnlyNumbersV2 } from '@/common/utils/mask';
 import { EPlanBilling } from '@prisma/client';
 
 export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
-  side,
   isOpen,
   setIsOpen,
   refetch,
@@ -62,10 +61,9 @@ export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
 
   return (
     <Form {...form}>
-      <FormDrawer
+      <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        side={side}
         title="Novo plano"
         description="Preencha os dados do plano"
         onSubmit={form.handleSubmit(onSubmit)}
@@ -126,7 +124,7 @@ export const SheetCreatePlan: React.FC<ICreateSheetPlan> = ({
           title="Plano padrão"
           bottomDescription="Vem escolhido sozinho ao matricular um aluno. Só um plano pode ser o padrão: marcar este tira o anterior."
         />
-      </FormDrawer>
+      </FormModal>
     </Form>
   );
 };

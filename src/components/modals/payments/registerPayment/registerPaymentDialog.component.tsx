@@ -162,7 +162,9 @@ export function RegisterPaymentDialog({
           />
         ) : (
           <div className="flex flex-col gap-4">
-            <div className="flex max-h-56 flex-col gap-2 overflow-y-auto">
+            {/* p-0.5 dá folga para o anel da opção escolhida: sem isso o
+                overflow corta a borda nas laterais. */}
+            <div className="flex max-h-56 flex-col gap-2 overflow-y-auto p-0.5">
               {pending.map((payment) => {
                 const dueDate = new Date(payment.dueDate);
                 const key = dueDate.toISOString();
@@ -175,7 +177,7 @@ export function RegisterPaymentDialog({
                     type="button"
                     onClick={() => setSelectedDueDate(key)}
                     className={cn(
-                      'flex items-center justify-between gap-3 rounded-xl p-3 text-left transition-colors',
+                      'focus-visible:ring-primary flex items-center justify-between gap-3 rounded-xl p-3 text-left transition-colors outline-none focus-visible:ring-2',
                       isSelected
                         ? 'bg-primary/10 ring-primary ring-2'
                         : 'bg-muted/60 hover:bg-muted',

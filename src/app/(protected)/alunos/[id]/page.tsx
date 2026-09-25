@@ -392,7 +392,6 @@ export default function StudentDetailPage({
       </Card>
 
       <SheetEditStudent
-        side="right"
         isOpen={editOpen}
         setIsOpen={setEditOpen}
         refetch={refetch}

@@ -1,5 +1,5 @@
 // components/modals/expenses/editExpenses.component.tsx
-import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
+import { FormModal } from '@/components/formModal/formModal.component';
 import React, { useEffect } from 'react';
 import { Form } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
@@ -27,7 +27,6 @@ import {
 import { IEditExpenses } from './editExpenses.types';
 
 export const SheetEditExpenseEntry: React.FC<IEditExpenses> = ({
-  side,
   isOpen,
   setIsOpen,
   entry,
@@ -87,10 +86,9 @@ export const SheetEditExpenseEntry: React.FC<IEditExpenses> = ({
 
   return (
     <Form {...form}>
-      <FormDrawer
+      <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        side={side}
         title="Editar despesa"
         description="Altere os dados da despesa"
         onSubmit={form.handleSubmit(onSubmit)}
@@ -190,7 +188,7 @@ export const SheetEditExpenseEntry: React.FC<IEditExpenses> = ({
           placeholder="Observações"
           maxLength={200}
         />
-      </FormDrawer>
+      </FormModal>
     </Form>
   );
 };

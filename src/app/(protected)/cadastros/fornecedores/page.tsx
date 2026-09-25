@@ -133,7 +133,6 @@ export default function SuppliersPage() {
             setEditId(id);
             setEditOpen(true);
           }}
-          onDelete={handleDelete}
         />
 
         <AppPagination
@@ -157,6 +156,7 @@ export default function SuppliersPage() {
             setIsOpen={setEditOpen}
             supplierId={editId}
             refetch={refetch}
+            onDelete={() => handleDelete(editId)}
           />
         )}
       </main>

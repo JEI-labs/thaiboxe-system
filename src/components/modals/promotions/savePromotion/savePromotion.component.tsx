@@ -5,7 +5,7 @@ import { EDiscountType } from '@prisma/client';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 
-import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
+import { FormModal } from '@/components/formModal/formModal.component';
 import { Form } from '@/components/ui/form';
 import { FormInputComponent } from '@/components/forms/formInput/formInput.component';
 import { FormSelectComponent } from '@/components/forms/formSelectInput/formSelectInput.component';
@@ -25,6 +25,8 @@ interface SavePromotionProps {
   setIsOpen: (_open: boolean) => void;
   /** Ausente = criação. */
   promotionId?: string | null;
+  /** Só na edição: exclusão mora no rodapé do próprio modal. */
+  onDelete?: () => void | Promise<void>;
   refetch?: () => void;
 }
 
@@ -44,6 +46,7 @@ export function SavePromotion({
   isOpen,
   setIsOpen,
   promotionId,
+  onDelete,
   refetch,
 }: SavePromotionProps) {
   const { toast } = useToast();
@@ -114,12 +117,13 @@ export function SavePromotion({
 
   return (
     <Form {...form}>
-      <FormDrawer
+      <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
         title={isEditing ? 'Editar promoção' : 'Nova promoção'}
         description="O desconto é aplicado ao registrar o pagamento de uma parcela."
         onSubmit={form.handleSubmit(onSubmit)}
+        onDelete={isEditing ? onDelete : undefined}
         submitLabel={isEditing ? 'Salvar alterações' : 'Criar promoção'}
         submitPendingLabel="Salvando..."
         isSubmitting={
@@ -196,7 +200,7 @@ export function SavePromotion({
           title="Promoção ativa"
           bottomDescription="Promoções inativas não aparecem no registro de pagamento."
         />
-      </FormDrawer>
+      </FormModal>
     </Form>
   );
 }

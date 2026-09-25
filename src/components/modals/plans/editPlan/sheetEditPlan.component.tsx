@@ -1,6 +1,6 @@
 'use client';
 
-import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
+import { FormModal } from '@/components/formModal/formModal.component';
 import React, { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -21,10 +21,10 @@ import { maskOnlyNumbersV2 } from '@/common/utils/mask';
 import { EPlanBilling } from '@prisma/client';
 
 export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
-  side,
   isOpen,
   setIsOpen,
   planId,
+  onDelete,
   refetch,
 }) => {
   const { toast } = useToast();
@@ -92,13 +92,13 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
 
   return (
     <Form {...form}>
-      <FormDrawer
+      <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        side={side}
         title="Editar plano"
         description="Altere os dados do plano"
         onSubmit={form.handleSubmit(onSubmit)}
+        onDelete={onDelete}
         submitLabel="Salvar alterações"
         submitPendingLabel="Salvando..."
         isSubmitting={updatePlan.isPending || form.formState.isSubmitting}
@@ -166,7 +166,7 @@ export const SheetEditPlan: React.FC<ISheetEditPlan> = ({
             />
           </div>
         </div>
-      </FormDrawer>
+      </FormModal>
     </Form>
   );
 };

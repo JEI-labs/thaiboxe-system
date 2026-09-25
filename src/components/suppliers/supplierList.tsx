@@ -2,8 +2,7 @@
 
 import { EmptyState } from '@/components/emptyState/emptyState.component';
 import { ListSkeleton } from '@/components/skeletons/listSkeleton.component';
-import React, { useState } from 'react';
-import { Edit2Icon, Trash2 } from 'lucide-react';
+import React from 'react';
 
 import {
   Table,
@@ -13,31 +12,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { RowActions } from '@/components/dataTable/rowActions.component';
 import { ISupplierList } from './supplierList.types';
-import ConfirmDeleteDialog from '../confirmDeleteDialog/confirmDeleteDialog.component';
 import { maskCellphone } from '@/utils/masksUtils';
 
 const SuppliersList: React.FC<ISupplierList> = ({
   suppliers,
   isLoading,
   onEdit,
-  onDelete,
 }) => {
-  const [open, setOpen] = useState(false);
-  const [selId, setSelId] = useState<string | null>(null);
-
-  const handleDeleteClick = (id: string) => {
-    setSelId(id);
-    setOpen(true);
-  };
-
-  const handleConfirm = async (id: string) => {
-    await onDelete(id);
-    setOpen(false);
-    setSelId(null);
-  };
-
   if (isLoading) {
     return <ListSkeleton columns={5} />;
   }
@@ -61,13 +43,16 @@ const SuppliersList: React.FC<ISupplierList> = ({
               <TableHead>Localização</TableHead>
               <TableHead>Telefone</TableHead>
               <TableHead>Endereço</TableHead>
-              <TableHead className="w-[70px] text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             {suppliers.map((sup) => (
-              <TableRow key={sup.id}>
+              <TableRow
+                key={sup.id}
+                className="cursor-pointer"
+                onClick={() => onEdit(sup.id)}
+              >
                 <TableCell className="font-medium">{sup.name}</TableCell>
 
                 <TableCell className="text-muted-foreground">
@@ -83,39 +68,11 @@ const SuppliersList: React.FC<ISupplierList> = ({
                 <TableCell className="text-muted-foreground">
                   {sup.street || '—'}
                 </TableCell>
-
-                <TableCell className="text-right">
-                  <RowActions
-                    srLabel={`Ações de ${sup.name}`}
-                    actions={[
-                      {
-                        label: 'Editar',
-                        icon: Edit2Icon,
-                        onSelect: () => onEdit(sup.id),
-                      },
-                      {
-                        label: 'Excluir',
-                        icon: Trash2,
-                        destructive: true,
-                        onSelect: () => handleDeleteClick(sup.id),
-                      },
-                    ]}
-                  />
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
-
-      {selId && (
-        <ConfirmDeleteDialog
-          item={selId}
-          open={open}
-          onOpenChange={setOpen}
-          onConfirm={handleConfirm}
-        />
-      )}
     </>
   );
 };

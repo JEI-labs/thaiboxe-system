@@ -177,7 +177,6 @@ export default function StudentsPage() {
 
         {showSheetEdit && (
           <SheetEditStudent
-            side="right"
             isOpen={showSheetEdit}
             setIsOpen={setShowSheetEdit}
             refetch={studentsApi.refetch}
@@ -187,7 +186,6 @@ export default function StudentsPage() {
 
         {showSheet && (
           <SheetCreateStudent
-            side="right"
             isOpen={showSheet}
             setIsOpen={setShowSheet}
             refetch={studentsApi.refetch}

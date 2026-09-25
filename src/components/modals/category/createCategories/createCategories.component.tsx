@@ -1,5 +1,5 @@
 // components/sheetCreateCategory.tsx
-import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
+import { FormModal } from '@/components/formModal/formModal.component';
 import React from 'react';
 import { Form } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
@@ -15,7 +15,6 @@ import {
 import { ICreateSheetCategory } from './createCategories.types';
 
 export const SheetCreateCategory: React.FC<ICreateSheetCategory> = ({
-  side,
   isOpen,
   setIsOpen,
   refetch,
@@ -48,10 +47,9 @@ export const SheetCreateCategory: React.FC<ICreateSheetCategory> = ({
 
   return (
     <Form {...form}>
-      <FormDrawer
+      <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        side={side}
         title="Nova categoria"
         description="Preencha os dados da categoria"
         onSubmit={form.handleSubmit(onSubmit)}
@@ -76,7 +74,7 @@ export const SheetCreateCategory: React.FC<ICreateSheetCategory> = ({
           placeholder="Descreva a categoria"
           maxLength={50}
         />
-      </FormDrawer>
+      </FormModal>
     </Form>
   );
 };

@@ -10,7 +10,6 @@ import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import CategoriesList from '@/components/categories/categoriesList.component';
 import { Button } from '@/components/ui/button';
 import { SheetCreateCategory } from '@/components/modals/category/createCategories/createCategories.component';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { api } from '@/trpc/react';
 import { ListToolbar } from '@/components/listToolbar/listToolbar.component';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
@@ -46,9 +45,6 @@ export default function CategoriesPage() {
   const [selectedStatuses, setSelectedStatuses] = useState<
     Array<ECategoryStatus>
   >([]);
-
-  const isMobile = useIsMobile();
-
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 500);
 
@@ -165,10 +161,6 @@ export default function CategoriesPage() {
             setEditId(id);
             setEditOpen(true);
           }}
-          onDelete={(id) => {
-            handleDelete(id);
-            refetch();
-          }}
         />
 
         {totalItems > 0 && (
@@ -186,17 +178,16 @@ export default function CategoriesPage() {
         {editOpen && (
           <SheetEditCategory
             isOpen={editOpen}
-            side={isMobile ? 'bottom' : 'right'}
             setIsOpen={setEditOpen}
             refetch={refetch}
             categoryId={editId ?? ''}
+            onDelete={() => handleDelete(editId ?? '')}
           />
         )}
 
         {createOpen && (
           <SheetCreateCategory
             isOpen={createOpen}
-            side={isMobile ? 'bottom' : 'right'}
             setIsOpen={setCreateOpen}
             refetch={refetch}
           />

@@ -15,5 +15,4 @@ export interface IPlanList {
   plans: Array<PlanItem>;
   isLoading: boolean;
   onEdit: (_id: string) => void;
-  onDelete: (_id: string) => void;
 }

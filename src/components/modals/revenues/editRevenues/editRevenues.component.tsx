@@ -1,4 +1,4 @@
-import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
+import { FormModal } from '@/components/formModal/formModal.component';
 import React, { useEffect } from 'react';
 import { Form } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
@@ -22,7 +22,6 @@ import { IEditRevenues } from './editRevenues.types';
 import { EFinanceEntryStatus, EPaymentMethod } from '@prisma/client';
 
 export const SheetEditFinanceEntry: React.FC<IEditRevenues> = ({
-  side,
   isOpen,
   setIsOpen,
   entry,
@@ -81,10 +80,9 @@ export const SheetEditFinanceEntry: React.FC<IEditRevenues> = ({
 
   return (
     <Form {...form}>
-      <FormDrawer
+      <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        side={side}
         title="Editar lançamento"
         description="Altere os dados do lançamento"
         onSubmit={form.handleSubmit(onSubmit)}
@@ -184,7 +182,7 @@ export const SheetEditFinanceEntry: React.FC<IEditRevenues> = ({
           placeholder="Observações"
           maxLength={200}
         />
-      </FormDrawer>
+      </FormModal>
     </Form>
   );
 };

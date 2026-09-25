@@ -1,4 +1,4 @@
-import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
+import { FormModal } from '@/components/formModal/formModal.component';
 import React from 'react';
 import { Form } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
@@ -21,7 +21,6 @@ import { ICreateRevenues } from './createRevenues.types';
 import { EFinanceEntryStatus, EPaymentMethod } from '@prisma/client';
 
 export const SheetCreateFinanceEntry: React.FC<ICreateRevenues> = ({
-  side,
   isOpen,
   setIsOpen,
   refetch,
@@ -66,10 +65,9 @@ export const SheetCreateFinanceEntry: React.FC<ICreateRevenues> = ({
 
   return (
     <Form {...form}>
-      <FormDrawer
+      <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        side={side}
         title="Novo lançamento"
         description="Preencha os dados do lançamento financeiro"
         onSubmit={form.handleSubmit(onSubmit)}
@@ -166,7 +164,7 @@ export const SheetCreateFinanceEntry: React.FC<ICreateRevenues> = ({
           placeholder="Observações"
           maxLength={200}
         />
-      </FormDrawer>
+      </FormModal>
     </Form>
   );
 };

@@ -8,7 +8,6 @@ import { useResetOnChange } from '@/hooks/useResetOnChange/useResetOnChange.hook
 import { useState } from 'react';
 import { BreadcrumbUpdater } from '@/contexts/breadcrumb';
 import { Button } from '@/components/ui/button';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { api } from '@/trpc/react';
 import { ListToolbar } from '@/components/listToolbar/listToolbar.component';
 import { AppPagination } from '@/components/appPagination/appPagination.component';
@@ -28,8 +27,6 @@ export default function PlansPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-
-  const isMobile = useIsMobile();
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 500);
 
@@ -107,10 +104,6 @@ export default function PlansPage() {
             setEditId(id);
             setEditOpen(true);
           }}
-          onDelete={(id) => {
-            handleDelete(id);
-            refetch();
-          }}
         />
 
         {totalItems > 0 && (
@@ -128,17 +121,16 @@ export default function PlansPage() {
         {editOpen && (
           <SheetEditPlan
             isOpen={editOpen}
-            side={isMobile ? 'bottom' : 'right'}
             setIsOpen={setEditOpen}
             refetch={refetch}
             planId={editId ?? ''}
+            onDelete={() => handleDelete(editId ?? '')}
           />
         )}
 
         {createOpen && (
           <SheetCreatePlan
             isOpen={createOpen}
-            side={isMobile ? 'bottom' : 'right'}
             setIsOpen={setCreateOpen}
             refetch={refetch}
           />

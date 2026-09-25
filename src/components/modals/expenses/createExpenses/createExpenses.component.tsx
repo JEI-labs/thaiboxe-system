@@ -1,5 +1,5 @@
 // components/modals/expenses/createExpenses.component.tsx
-import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
+import { FormModal } from '@/components/formModal/formModal.component';
 import React from 'react';
 import { Form } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
@@ -26,7 +26,6 @@ import {
 import { ICreateExpenses } from './createExpenses.types';
 
 export const SheetCreateExpenseEntry: React.FC<ICreateExpenses> = ({
-  side,
   isOpen,
   setIsOpen,
   refetch,
@@ -71,10 +70,9 @@ export const SheetCreateExpenseEntry: React.FC<ICreateExpenses> = ({
 
   return (
     <Form {...form}>
-      <FormDrawer
+      <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        side={side}
         title="Nova despesa"
         description="Preencha os dados da despesa"
         onSubmit={form.handleSubmit(onSubmit)}
@@ -172,7 +170,7 @@ export const SheetCreateExpenseEntry: React.FC<ICreateExpenses> = ({
           placeholder="Observações"
           maxLength={200}
         />
-      </FormDrawer>
+      </FormModal>
     </Form>
   );
 };

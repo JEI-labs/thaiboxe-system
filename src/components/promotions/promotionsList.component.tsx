@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Edit2Icon, Trash2 } from 'lucide-react';
+import React from 'react';
 import type { Promotion } from '@prisma/client';
 
 import { Badge } from '@/components/ui/badge';
@@ -13,16 +12,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { RowActions } from '@/components/dataTable/rowActions.component';
 import { EmptyState } from '@/components/emptyState/emptyState.component';
 import { ListSkeleton } from '@/components/skeletons/listSkeleton.component';
-import ConfirmDeleteDialog from '../confirmDeleteDialog/confirmDeleteDialog.component';
 
 interface PromotionsListProps {
   promotions: Array<Promotion>;
   isLoading: boolean;
   onEdit: (_id: string) => void;
-  onDelete: (_id: string) => Promise<void> | void;
 }
 
 const formatDate = (value: Date | string | null) =>
@@ -41,10 +37,7 @@ export function PromotionsList({
   promotions,
   isLoading,
   onEdit,
-  onDelete,
 }: PromotionsListProps) {
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-
   if (isLoading) {
     return <ListSkeleton columns={5} />;
   }
@@ -69,13 +62,16 @@ export function PromotionsList({
               <TableHead>Início</TableHead>
               <TableHead>Fim</TableHead>
               <TableHead>Situação</TableHead>
-              <TableHead className="w-[70px] text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
             {promotions.map((promotion) => (
-              <TableRow key={promotion.id}>
+              <TableRow
+                key={promotion.id}
+                className="cursor-pointer"
+                onClick={() => onEdit(promotion.id)}
+              >
                 <TableCell>
                   <p className="font-medium">{promotion.name}</p>
                   {promotion.description && (
@@ -101,42 +97,11 @@ export function PromotionsList({
                     {promotion.isActive ? 'Ativa' : 'Inativa'}
                   </Badge>
                 </TableCell>
-
-                <TableCell className="text-right">
-                  <RowActions
-                    srLabel={`Ações da promoção ${promotion.name}`}
-                    actions={[
-                      {
-                        label: 'Editar',
-                        icon: Edit2Icon,
-                        onSelect: () => onEdit(promotion.id),
-                      },
-                      {
-                        label: 'Excluir',
-                        icon: Trash2,
-                        destructive: true,
-                        onSelect: () => setDeleteId(promotion.id),
-                      },
-                    ]}
-                  />
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
-
-      {deleteId && (
-        <ConfirmDeleteDialog
-          item={deleteId}
-          open={Boolean(deleteId)}
-          onOpenChange={(open) => !open && setDeleteId(null)}
-          onConfirm={async (id) => {
-            await onDelete(id);
-            setDeleteId(null);
-          }}
-        />
-      )}
     </>
   );
 }

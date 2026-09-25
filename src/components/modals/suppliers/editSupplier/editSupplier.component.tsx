@@ -1,6 +1,6 @@
 'use client';
 
-import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
+import { FormModal } from '@/components/formModal/formModal.component';
 import React, { useEffect } from 'react';
 import { Form } from '@/components/ui/form';
 import { useForm, useWatch } from 'react-hook-form';
@@ -21,6 +21,7 @@ export const SheetEditSupplier: React.FC<IEditSheetSupplier> = ({
   isOpen,
   setIsOpen,
   supplierId,
+  onDelete,
   refetch,
 }) => {
   const { toast } = useToast();
@@ -92,13 +93,13 @@ export const SheetEditSupplier: React.FC<IEditSheetSupplier> = ({
 
   return (
     <Form {...form}>
-      <FormDrawer
+      <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        side="right"
         title="Editar fornecedor"
         description="Altere os dados do fornecedor"
         onSubmit={form.handleSubmit(onSubmit)}
+        onDelete={onDelete}
         submitLabel="Atualizar"
         submitPendingLabel="Atualizando..."
         isSubmitting={update.isPending || form.formState.isSubmitting}
@@ -147,7 +148,7 @@ export const SheetEditSupplier: React.FC<IEditSheetSupplier> = ({
           options={citiesOptions}
           disabled={!selectedState || loadingCities}
         />
-      </FormDrawer>
+      </FormModal>
     </Form>
   );
 };

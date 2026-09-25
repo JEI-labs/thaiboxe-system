@@ -1,6 +1,6 @@
 'use client';
 
-import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
+import { FormModal } from '@/components/formModal/formModal.component';
 import React, { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -17,10 +17,10 @@ import { ISheetEditCategory } from './editCategory.types';
 import { ECategoryStatus } from '@prisma/client';
 
 export const SheetEditCategory: React.FC<ISheetEditCategory> = ({
-  side,
   isOpen,
   setIsOpen,
   categoryId,
+  onDelete,
   refetch,
 }) => {
   const { toast } = useToast();
@@ -82,13 +82,13 @@ export const SheetEditCategory: React.FC<ISheetEditCategory> = ({
 
   return (
     <Form {...form}>
-      <FormDrawer
+      <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        side={side}
         title="Editar categoria"
         description="Altere os dados da categoria"
         onSubmit={form.handleSubmit(onSubmit)}
+        onDelete={onDelete}
         submitLabel="Salvar alterações"
         submitPendingLabel="Salvando..."
         isSubmitting={updateCategory.isPending || form.formState.isSubmitting}
@@ -127,7 +127,7 @@ export const SheetEditCategory: React.FC<ISheetEditCategory> = ({
             />
           </div>
         </div>
-      </FormDrawer>
+      </FormModal>
     </Form>
   );
 };

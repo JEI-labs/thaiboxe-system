@@ -1,6 +1,6 @@
 'use client';
 
-import { FormDrawer } from '@/components/formDrawer/formDrawer.component';
+import { FormModal } from '@/components/formModal/formModal.component';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Form } from '@/components/ui/form';
 import { useForm, useWatch } from 'react-hook-form';
@@ -133,10 +133,9 @@ export const SheetCreateSupplier: React.FC<ICreateSheetSupplier> = ({
 
   return (
     <Form {...form}>
-      <FormDrawer
+      <FormModal
         open={isOpen}
         onOpenChange={setIsOpen}
-        side="right"
         title="Novo fornecedor"
         description="Preencha os dados do fornecedor"
         onSubmit={form.handleSubmit(onSubmit)}
@@ -192,7 +191,7 @@ export const SheetCreateSupplier: React.FC<ICreateSheetSupplier> = ({
           options={citiesOptions}
           disabled={!selectedState || loadingCities}
         />
-      </FormDrawer>
+      </FormModal>
     </Form>
   );
 };
