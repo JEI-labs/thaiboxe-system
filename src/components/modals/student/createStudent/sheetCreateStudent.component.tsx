@@ -197,6 +197,8 @@ export const SheetCreateStudent: React.FC<SheetCreateStudentProps> = ({
             label="Graduação"
             tooltip="Kruang-Prajied do aluno. Pode ficar em branco até a primeira graduação."
             placeholder="Sem graduação"
+            /* aluno novo entra sem graduação, e dá para voltar a esse estado */
+            hasEmptyOption
             options={GRADUATION_LIST.map((item) => ({
               value: item.value,
               textValue: `${item.degree}º grau · ${item.label}`,
